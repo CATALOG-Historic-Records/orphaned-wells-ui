@@ -109,7 +109,7 @@ export default function DocumentContainer(props) {
     }
 
     const handleClickField = (key, normalized_vertices, isSubattribute, topLevelAttribute) => {
-        if(key === displayKey) {
+        if(key === displayKey || !key) {
             setDisplayPoints(null)
             setDisplayKey(null)
             setDisplayKeyIndex(null)

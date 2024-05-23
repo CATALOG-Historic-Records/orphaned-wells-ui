@@ -1,5 +1,5 @@
 import { refreshAuth, revokeToken } from "../services/app.service"
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export const formatDate = (timestamp) => {
   if (timestamp !== null) {
@@ -45,6 +45,24 @@ export const useKeyDown = (callback, keys) => {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [onKeyDown]);
+};
+
+export const useOutsideClick = (callback) => {
+  const ref = useRef();
+
+  useEffect(() => {
+    const handleClick = (event) => {
+      callback();
+    };
+
+    document.addEventListener('click', handleClick);
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
+
+  return ref;
 };
 
 export const logout = () => {

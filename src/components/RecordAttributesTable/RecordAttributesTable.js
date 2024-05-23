@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
 import { Box, TextField, Collapse, Typography, IconButton } from '@mui/material';
-import { formatConfidence } from '../../assets/helperFunctions';
+import { formatConfidence, useKeyDown, useOutsideClick } from '../../assets/helperFunctions';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import EditIcon from '@mui/icons-material/Edit';
@@ -36,6 +36,10 @@ const styles = {
 
 export default function AttributesTable(props) {
     const { attributes, handleClickField, handleChangeValue, fullscreen, displayKey, forceOpenSubtable, attributesList, displayKeyIndex, handleUpdateRecord } = props
+    const handleClickOutside = () => {
+        handleClickField()
+    }
+    let ref = useOutsideClick(handleClickOutside);
 
     return (
         <TableContainer id="table-container" sx={styles.fieldsTable}>
@@ -47,7 +51,7 @@ export default function AttributesTable(props) {
                         <TableCell sx={styles.headerRow}>Confidence</TableCell>
                     </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody ref={ref}>
                     {Object.entries(attributes).map(([k, v]) => (
                         <AttributeRow 
                             key={k}
@@ -75,6 +79,24 @@ function AttributeRow(props) {
     const [ openSubtable, setOpenSubtable ] = useState(false)
 
     useEffect(() => {
+        if (k !== displayKey) {
+            if (editMode) finishEditing()
+        }
+    },[displayKey])
+
+    const handleClickInside = (e) => {
+        e.stopPropagation()
+        handleClickField(k, v.normalized_vertices)
+    }
+
+    useKeyDown(() => {
+        if (k === displayKey) {
+            if (editMode) finishEditing()
+            else setEditMode(true)
+        }
+    }, ["Enter"])
+
+    useEffect(() => {
         if (forceOpenSubtable === k) setOpenSubtable(true)
     }, [forceOpenSubtable])
 
@@ -83,12 +105,7 @@ function AttributeRow(props) {
     }
 
     const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            setEditMode(false)
-            handleUpdateRecord()
-        } 
-        else if (e.key === "ArrowLeft") {
+        if (e.key === "ArrowLeft") {
             e.stopPropagation();
         }
         else if (e.key === "ArrowRight") {
@@ -96,9 +113,19 @@ function AttributeRow(props) {
         }
     }
 
+    const handleClickEditIcon = (e) => {
+        e.stopPropagation()
+        handleDoubleClick()
+    }
+
+    const finishEditing = () => {
+        handleUpdateRecord()
+        setEditMode(false)
+    }
+
     return (
     <>
-        <TableRow id={k} sx={k === displayKey ? {backgroundColor: "#EDEDED"} : {}} onClick={() => handleClickField(k, v.normalized_vertices)}>
+        <TableRow id={k} sx={k === displayKey ? {backgroundColor: "#EDEDED"} : {}} onClick={handleClickInside}>
             <TableCell sx={styles.fieldKey}>
                 
                 <span>
@@ -121,9 +148,10 @@ function AttributeRow(props) {
                 <TableCell></TableCell> 
                 
                 :
-                <TableCell onDoubleClick={handleDoubleClick} onKeyDown={handleKeyDown} onClick={(e) => e.stopPropagation()}>
+                <TableCell onKeyDown={handleKeyDown}>
                     {editMode ? 
                         <TextField 
+                            onClick={(e) => e.stopPropagation()}
                             autoFocus
                             name={k}
                             size="small"
@@ -135,7 +163,7 @@ function AttributeRow(props) {
                         <span>
                             {v.value}&nbsp;
                             {k === displayKey && 
-                                <IconButton sx={styles.rowIconButton} onClick={handleDoubleClick}>
+                                <IconButton sx={styles.rowIconButton} onClick={handleClickEditIcon}>
                                     <EditIcon sx={styles.rowIcon}/>
                                 </IconButton>
                             }
@@ -214,17 +242,30 @@ function SubattributeRow(props) {
     const { k, v, handleClickField, handleChangeValue, topLevelAttribute, fullscreen, displayKey, attributesList, displayKeyIndex, handleUpdateRecord } = props
     const [ editMode, setEditMode ] = useState(false)
 
+    useEffect(() => {
+        if (!(k === displayKey && topLevelAttribute === attributesList[displayKeyIndex].topLevelAttribute)) {
+            if (editMode) finishEditing()
+        }
+    },[displayKey, topLevelAttribute])
+
+    useKeyDown(() => {
+        if (k === displayKey && topLevelAttribute === attributesList[displayKeyIndex].topLevelAttribute) {
+            if (editMode) finishEditing()
+            else setEditMode(true)
+        }
+    }, ["Enter"])
+
+    const handleClickInside = (e) => {
+        e.stopPropagation()
+        handleClickField(k, v.normalized_vertices, true, topLevelAttribute)
+    }
+
     const handleDoubleClick = () => {
         setEditMode(true)
     }
 
     const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            setEditMode(false)
-            handleUpdateRecord()
-        } 
-        else if (e.key === "ArrowLeft") {
+        if (e.key === "ArrowLeft") {
             e.stopPropagation();
         }
         else if (e.key === "ArrowRight") {
@@ -236,12 +277,22 @@ function SubattributeRow(props) {
         handleChangeValue(event, true, topLevelAttribute)
     }
 
+    const handleClickEditIcon = (e) => {
+        e.stopPropagation()
+        handleDoubleClick()
+    }
+
+    const finishEditing = () => {
+        handleUpdateRecord()
+        setEditMode(false)
+    }
+
     return (
         <TableRow 
             key={k} 
             id={`${topLevelAttribute}::${k}`} 
             sx={(k === displayKey && topLevelAttribute === attributesList[displayKeyIndex].topLevelAttribute) ? {backgroundColor: "#EDEDED"} : {}}
-            onClick={() => handleClickField(k, v.normalized_vertices, true, topLevelAttribute)}
+            onClick={handleClickInside}
         >
             <TableCell sx={styles.fieldKey} >
             <span 
@@ -250,9 +301,10 @@ function SubattributeRow(props) {
                 {k}
             </span>
             </TableCell>
-            <TableCell onKeyDown={handleKeyDown} onClick={(e) => e.stopPropagation()}>
+            <TableCell onKeyDown={handleKeyDown} >
                 {editMode ? 
                     <TextField 
+                        onClick={(e) => e.stopPropagation()}
                         autoFocus
                         name={k}
                         size="small" 
@@ -261,10 +313,10 @@ function SubattributeRow(props) {
                         onFocus={(event) => event.target.select()}
                     />
                     :
-                    <span onDoubleClick={handleDoubleClick}>
+                    <span>
                     {v.value}&nbsp;
                         {(k === displayKey && topLevelAttribute === attributesList[displayKeyIndex].topLevelAttribute) && 
-                            <IconButton sx={styles.rowIconButton} onClick={handleDoubleClick}>
+                            <IconButton sx={styles.rowIconButton} onClick={handleClickEditIcon}>
                                 <EditIcon sx={styles.rowIcon}/>
                             </IconButton>
                         }
