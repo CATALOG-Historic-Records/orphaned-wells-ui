@@ -64,39 +64,33 @@ export default function DocumentContainer(props) {
             i+=1
             let tempKey = attributesList[tempIndex].key
             let tempVertices = attributesList[tempIndex].normalized_vertices
-            if(tempVertices !== null && tempVertices !== undefined) {
-                let isSubattribute = attributesList[tempIndex].isSubattribute
-                let topLevelAttribute = attributesList[tempIndex].topLevelAttribute
-                handleClickField(tempKey, tempVertices, isSubattribute, topLevelAttribute)
-                keepGoing = false 
-                let elementId
+            let isSubattribute = attributesList[tempIndex].isSubattribute
+            let topLevelAttribute = attributesList[tempIndex].topLevelAttribute
+            handleClickField(tempKey, tempVertices, isSubattribute, topLevelAttribute)
+            keepGoing = false 
+            let elementId
+            if (isSubattribute) {
+                setForceOpenSubtable(topLevelAttribute)
+                elementId = `${topLevelAttribute}::${tempKey}`
+            } 
+            else elementId = tempKey
+            let element = document.getElementById(elementId)
+            let waitTime = 0
+            let containerElement = document.getElementById("table-container")
+            if (element) {
                 if (isSubattribute) {
-                    setForceOpenSubtable(topLevelAttribute)
-                    elementId = `${topLevelAttribute}::${tempKey}`
-                } 
-                else elementId = tempKey
-                let element = document.getElementById(elementId)
-                let waitTime = 0
-                let containerElement = document.getElementById("table-container")
-                if (element) {
-                    if (isSubattribute) {
-                        setTimeout(function() {
-                            element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-                        }, waitTime)
-                    }
-                    else scrollIntoView(element, containerElement)
-                } else // element likely has not rendered yet. wait 250 milliseconds then try again
-                {
-                    waitTime = 250
                     setTimeout(function() {
-                        element = document.getElementById(elementId)
-                        if (element) element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+                        element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
                     }, waitTime)
                 }
-            }
-            else {
-                tempIndex+=1
-                if (tempIndex === attributesList.length) tempIndex = 0
+                else scrollIntoView(element, containerElement)
+            } else // element likely has not rendered yet. wait 250 milliseconds then try again
+            {
+                waitTime = 250
+                setTimeout(function() {
+                    element = document.getElementById(elementId)
+                    if (element) element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+                }, waitTime)
             }
         }
         
@@ -115,39 +109,33 @@ export default function DocumentContainer(props) {
             i+=1
             let tempKey = attributesList[tempIndex].key
             let tempVertices = attributesList[tempIndex].normalized_vertices
-            if(tempVertices !== null && tempVertices !== undefined) {
-                let isSubattribute = attributesList[tempIndex].isSubattribute
-                let topLevelAttribute = attributesList[tempIndex].topLevelAttribute
-                handleClickField(tempKey, tempVertices, isSubattribute, topLevelAttribute)
-                keepGoing = false 
-                let elementId
+            let isSubattribute = attributesList[tempIndex].isSubattribute
+            let topLevelAttribute = attributesList[tempIndex].topLevelAttribute
+            handleClickField(tempKey, tempVertices, isSubattribute, topLevelAttribute)
+            keepGoing = false 
+            let elementId
+            if (isSubattribute) {
+                setForceOpenSubtable(topLevelAttribute)
+                elementId = `${topLevelAttribute}::${tempKey}`
+            } 
+            else elementId = tempKey
+            let element = document.getElementById(elementId)
+            let waitTime = 0
+            let containerElement = document.getElementById("table-container")
+            if (element) {
                 if (isSubattribute) {
-                    setForceOpenSubtable(topLevelAttribute)
-                    elementId = `${topLevelAttribute}::${tempKey}`
-                } 
-                else elementId = tempKey
-                let element = document.getElementById(elementId)
-                let waitTime = 0
-                let containerElement = document.getElementById("table-container")
-                if (element) {
-                    if (isSubattribute) {
-                        setTimeout(function() {
-                            element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-                        }, waitTime)
-                    }
-                    else scrollIntoView(element, containerElement)
-                } else // element likely has not rendered yet. wait 250 milliseconds then try again
-                {
-                    waitTime = 250
                     setTimeout(function() {
-                        element = document.getElementById(elementId)
-                        if (element) element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+                        element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
                     }, waitTime)
                 }
-            }
-            else {
-                tempIndex-=1
-                if (tempIndex === 0) tempIndex = attributesList.length -1
+                else scrollIntoView(element, containerElement)
+            } else // element likely has not rendered yet. wait 250 milliseconds then try again
+            {
+                waitTime = 250
+                setTimeout(function() {
+                    element = document.getElementById(elementId)
+                    if (element) element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+                }, waitTime)
             }
         }
         
@@ -163,12 +151,8 @@ export default function DocumentContainer(props) {
             setDisplayKey(null)
             setDisplayKeyIndex(null)
         }
-        else if(normalized_vertices !== null && normalized_vertices !== undefined) {
-            let percentage_vertices = []
-            for (let each of normalized_vertices) {
-                percentage_vertices.push([each[0]*100, each[1]*100])
-            }
-            setDisplayPoints(percentage_vertices)
+        // else if(normalized_vertices !== null && normalized_vertices !== undefined) {
+        else {
             setDisplayKey(key)
 
             // set display key index
@@ -188,7 +172,16 @@ export default function DocumentContainer(props) {
                 }
                 
             }
-            scrollToAttribute("image-box", normalized_vertices[2][1])
+            if(normalized_vertices !== null && normalized_vertices !== undefined) {
+                let percentage_vertices = []
+                for (let each of normalized_vertices) {
+                    percentage_vertices.push([each[0]*100, each[1]*100])
+                }
+                setDisplayPoints(percentage_vertices)
+                scrollToAttribute("image-box", normalized_vertices[2][1])
+            } else {
+                setDisplayPoints(null)
+            }
         }
     }
 
