@@ -220,6 +220,15 @@ export default function Record() {
         navigate("/record/"+data._id, {replace: true})
     }
 
+    const handleUpdateReviewStatus = (new_status) => {
+        callAPI(
+            updateRecord,
+            [params.id, {data: {review_status: new_status}, type: "review_status"}],
+            (data) => window.location.reload(),
+            handleFailedUpdate
+        )
+    }
+
     return (
         <Box sx={styles.outerBox}>
             <Subheader
@@ -230,6 +239,7 @@ export default function Record() {
                 }}
                 previousPages={previousPages}
                 status={recordData.review_status}
+                // subtext={recordData.notes}
             />
             <Box sx={styles.innerBox}>
                 <DocumentContainer
@@ -244,7 +254,8 @@ export default function Record() {
                 onPreviousButtonClick={handleClickPrevious}
                 onNextButtonClick={handleClickNext}
                 onReviewButtonClick={handleClickMarkReviewed}
-                notes={recordData.notes}
+                recordData={recordData}
+                handleUpdateReviewStatus={handleUpdateReviewStatus}
             />
             <PopupModal
                 open={openDeleteModal}

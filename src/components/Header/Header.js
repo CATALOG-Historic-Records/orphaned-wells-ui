@@ -2,8 +2,6 @@ import './Header.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Menu, MenuItem, IconButton, Avatar, Tabs, Tab } from '@mui/material';
-import ListIcon from '@mui/icons-material/List';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { logout } from '../../assets/helperFunctions';
 
 export default function Header(props) {
@@ -31,8 +29,16 @@ export default function Header(props) {
     },
     tabPanel: {
       marginLeft: 10,
-      // backgroundColor: '#F1F3F3',
-      // color: '#727272'
+    },
+    logo: {
+      marginTop: 2.5,
+      marginLeft: "1em",
+      width: "2.5em",
+      height: "2.5em",
+      borderRadius: "50%",
+      display:"inline-block",
+      verticalAlign: "middle",
+      cursor: "pointer"
     },
   }
 
@@ -78,18 +84,7 @@ export default function Header(props) {
     return (
       <div id="Header">
          <div  className="titlebar" > 
-          {/* <div id="nawi_logo" style={{cursor:'pointer'}} onClick={handleNavigateHome}>
-            <img src={logo} alt="UOW logo"/>
-          </div> */}
-        <IconButton sx={styles.iconLeft} onClick={handleShowActions}><ListIcon/></IconButton>
-        <Menu
-          id="actions-list"
-          anchorEl={anchorEl}
-          open={actionsList}
-          onClose={() => setActionsList(false)}
-        >
-            <MenuItem onClick={handleNavigateHome}>Return to list page</MenuItem>
-        </Menu>
+          <img onClick={handleNavigateHome} style={styles.logo} src="./img/OGRRE_logo.svg"></img>
         <div id="titlebar-name" style={{cursor:'pointer'}} onClick={handleNavigateHome}>
           OGRRE
         </div>

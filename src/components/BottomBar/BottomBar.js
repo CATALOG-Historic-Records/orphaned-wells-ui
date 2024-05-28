@@ -15,7 +15,7 @@ import Notes from '../Notes/Notes';
 
 export default function Bottombar(props) {
     let params = useParams(); 
-    const { onPreviousButtonClick,  onNextButtonClick, onReviewButtonClick, notes } = props;
+    const { onPreviousButtonClick,  onNextButtonClick, onReviewButtonClick, recordData, handleUpdateReviewStatus } = props;
     const [ openNotesModal, setOpenNotesModal ] = useState(false)
     const styles = {
         button: {
@@ -55,7 +55,7 @@ export default function Bottombar(props) {
                             startIcon={<BorderColorOutlinedIcon/>}
                             onClick={() => setOpenNotesModal(true)}
                         >
-                            add notes
+                            notes
                         </Button>
                         <Button 
                             sx={styles.button} 
@@ -65,20 +65,33 @@ export default function Bottombar(props) {
                         >
                             next
                         </Button>
-                        <Button 
-                            sx={styles.button} 
-                            variant="contained" 
-                            endIcon={<CheckCircleOutlineIcon/>}
-                            onClick={onReviewButtonClick}
-                        > 
-                            Mark as reviewed & next 
-                        </Button>
+                        {
+                        recordData.review_status === "unreviewed" ? 
+                            <Button 
+                                sx={styles.button} 
+                                variant="contained" 
+                                endIcon={<CheckCircleOutlineIcon/>}
+                                onClick={onReviewButtonClick}
+                            > 
+                                Mark as reviewed & next 
+                            </Button> :
+                        recordData.review_status === "reviewed" &&
+                            <Button 
+                                sx={styles.button} 
+                                variant="contained" 
+                                // endIcon={<CheckCircleOutlineIcon/>}
+                                onClick={() => handleUpdateReviewStatus("unreviewed")}
+                            > 
+                                Mark as unreviewed 
+                            </Button>
+                        }
+                        
                     </Box>
                 </Grid>
             </Grid>
             <Notes
                 record_id={params.id}
-                notes={notes}
+                notes={recordData.notes}
                 open={openNotesModal}
                 onClose={() => setOpenNotesModal(false)}
             />
