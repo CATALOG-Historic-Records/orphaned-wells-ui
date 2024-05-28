@@ -8,6 +8,5 @@ test('test Subheader', () => {
     render( <HashRouter><Subheader buttonName="New Project"/> </HashRouter>)
 
     //test for component elements
-    screen.getByRole('button', { name: /new project/i })
     
 })

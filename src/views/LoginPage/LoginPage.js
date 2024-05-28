@@ -19,7 +19,6 @@ export default function LoginPage(props) {
 
     const googleLogin = useGoogleLogin({
         onSuccess: async ({ code }) => {
-            console.log("code " + code);
             authLogin(code)
             .then(response => {
                 response.json()

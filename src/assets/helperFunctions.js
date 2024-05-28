@@ -31,12 +31,33 @@ export const formatConfidence = (value) => {
   return `${percentageValue} %`
 }
 
-export const useKeyDown = (callback, keys) => {
+export const useKeyDown = (key, singleKeyCallback, shiftKeyCallback, controlKeyCallback, shiftAndControlKeyCallback) => {
+  /*
+    hook for adding a callback function on a key down
+    has options for:
+      1. singleKeyCallback: the key by itself
+      2. shiftKeyCallback: shift + the key
+      3. controlKeyCallback: ctrl/cmd + the key
+      4. shiftAndControlKeyCallback: shift + ctrl/cmd + the key
+  */
   const onKeyDown = (event) => {
-    const wasAnyKeyPressed = keys.some((key) => event.key === key);
-    if (wasAnyKeyPressed) {
+    // event.metaKey - pressed Command key on Macs
+    // event.ctrlKey - pressed Control key on Linux or Windows
+    const wasKeyPressed = event.key === key;
+    if (wasKeyPressed) {
       event.preventDefault();
-      callback();
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && shiftAndControlKeyCallback) {
+        shiftAndControlKeyCallback()
+      }
+      else if ((event.metaKey || event.ctrlKey) && controlKeyCallback) {
+        controlKeyCallback()
+      }
+      else if (event.shiftKey && shiftKeyCallback) {
+        shiftKeyCallback()
+      }
+      else if (singleKeyCallback) {
+        singleKeyCallback()
+      }
     }
   };
   useEffect(() => {

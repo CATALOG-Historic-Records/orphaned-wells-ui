@@ -16,7 +16,8 @@ interface User {
   email: string,
   name: string,
   picture: string,
-  hd: string
+  hd: string,
+  role: number
 }
 
 const theme = createTheme({
@@ -57,6 +58,7 @@ function App() {
     setAuthenticated(true)
     localStorage.setItem("user_email", user_data.email)
     localStorage.setItem("user_hd", user_data.hd)
+    localStorage.setItem("role", ""+user_data.role)
     if (user_data.name && user_data.name !== "") localStorage.setItem("user_name", user_data.name)
     if (user_data.picture) localStorage.setItem("user_picture", user_data.picture)
   }
@@ -76,7 +78,10 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
     <div className="App">
-          <Header authenticated={authenticated}/>
+          {!window.location.hash.includes("login") && 
+            <Header authenticated={authenticated}/>
+          }
+          
           <Routes> 
           <Route
               path="login"

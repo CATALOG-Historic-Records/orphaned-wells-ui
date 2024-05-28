@@ -89,12 +89,18 @@ function AttributeRow(props) {
         handleClickField(k, v.normalized_vertices)
     }
 
-    useKeyDown(() => {
+    useKeyDown("Enter", () => {
         if (k === displayKey) {
             if (editMode) finishEditing()
             else setEditMode(true)
         }
-    }, ["Enter"])
+    }, null, null, null)
+
+    useKeyDown("Escape", () => {
+        if (k === displayKey) {
+            if (editMode) finishEditing()
+        }
+    }, null, null, null)
 
     useEffect(() => {
         if (forceOpenSubtable === k) setOpenSubtable(true)
@@ -248,12 +254,18 @@ function SubattributeRow(props) {
         }
     },[displayKey, topLevelAttribute])
 
-    useKeyDown(() => {
+    useKeyDown("Enter", () => {
         if (k === displayKey && topLevelAttribute === attributesList[displayKeyIndex].topLevelAttribute) {
             if (editMode) finishEditing()
             else setEditMode(true)
         }
-    }, ["Enter"])
+    }, null, null, null)
+
+    useKeyDown("Escape", () => {
+        if (k === displayKey && topLevelAttribute === attributesList[displayKeyIndex].topLevelAttribute) {
+            if (editMode) finishEditing()
+        }
+    }, null, null, null)
 
     const handleClickInside = (e) => {
         e.stopPropagation()

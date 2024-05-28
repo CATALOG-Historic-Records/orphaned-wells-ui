@@ -1,13 +1,13 @@
 import { useState, useEffect, Fragment } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Button, Grid, IconButton, Box, Menu, MenuItem } from '@mui/material';
+import { Button, Grid, IconButton, Box, Menu, MenuItem, Chip } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import Work from '@mui/icons-material/Work';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 export default function Subheader(props) {
     let navigate = useNavigate();
-    const { currentPage, buttonName, subtext, handleClickButton, disableButton, previousPages, actions } = props;
+    const { currentPage, buttonName, status, subtext, handleClickButton, disableButton, previousPages, actions } = props;
     const [ showActions, setShowActions ] = useState(false)
     const [ anchorEl, setAnchorEl ] = useState(null);
     const styles = {
@@ -115,12 +115,21 @@ export default function Subheader(props) {
                 </Grid>
                 <Grid item xs={3}>
                     <Box sx={styles.newProjectColumn}>
-                        {buttonName && 
+                        {buttonName && localStorage.getItem("role") && localStorage.getItem("role") === "10" && 
                             <Button variant="contained" onClick={handleClickButton} disabled={disableButton}>
                                 {buttonName}
                             </Button>
                         }
-                        
+                        {!buttonName && status && 
+                            <Chip 
+                                sx={{
+                                    fontSize:"16px",
+                                    textTransform: "capitalize",
+                                    backgroundColor: status === "unreviewed" ? "default" : status === "reviewed" && "#C8E6C9"
+                                }}
+                                label={status} 
+                            />
+                        }
                     </Box>
                 </Grid>
             </Grid>

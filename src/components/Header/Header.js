@@ -45,7 +45,7 @@ export default function Header(props) {
     else if (window.location.hash.includes("users")) {
       setTabValue(2)
     } 
-    else setTabValue(null)
+    else setTabValue(0)
   }, [props])
 
   const handleNavigateHome = () => {
@@ -100,7 +100,10 @@ export default function Header(props) {
           >
             <Tab label="Projects" {...a11yProps(0)} />
             <Tab label="Records" {...a11yProps(1)} disabled/> 
-            <Tab label="Users" {...a11yProps(2)} />
+            {localStorage.getItem("role") && localStorage.getItem("role") === "10" && 
+              <Tab label="Users" {...a11yProps(2)} />
+            }
+            
           </Tabs>
         </div>
                       

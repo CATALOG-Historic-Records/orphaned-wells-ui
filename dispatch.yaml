@@ -1,0 +1,6 @@
+dispatch:
+  - url: "uow-carbon.org/*"
+    service: default
+
+  - url: "isgs.uow-carbon.org/*"
+    service: isgs-uow

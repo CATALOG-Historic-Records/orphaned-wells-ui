@@ -51,12 +51,6 @@ export default function DocumentContainer(props) {
         setDisplayKeyIndex(null)
     },[params.id])
 
-    
-
-    useKeyDown(() => {
-        tabCallback();
-    }, ["Tab"]);
-
     const tabCallback = () => {
         let tempIndex
         if (displayKeyIndex === null || displayKeyIndex === attributesList.length - 1) {
@@ -107,6 +101,61 @@ export default function DocumentContainer(props) {
         }
         
     }
+
+    const shiftTabCallback = () => {
+        let tempIndex
+        if (displayKeyIndex === null || displayKeyIndex === 0) {
+            tempIndex = attributesList.length - 1
+        } else {
+            tempIndex = displayKeyIndex -1
+        }
+        let keepGoing = true
+        let i = 0;
+        while (keepGoing && i < 200) {
+            i+=1
+            let tempKey = attributesList[tempIndex].key
+            let tempVertices = attributesList[tempIndex].normalized_vertices
+            if(tempVertices !== null && tempVertices !== undefined) {
+                let isSubattribute = attributesList[tempIndex].isSubattribute
+                let topLevelAttribute = attributesList[tempIndex].topLevelAttribute
+                handleClickField(tempKey, tempVertices, isSubattribute, topLevelAttribute)
+                keepGoing = false 
+                let elementId
+                if (isSubattribute) {
+                    setForceOpenSubtable(topLevelAttribute)
+                    elementId = `${topLevelAttribute}::${tempKey}`
+                } 
+                else elementId = tempKey
+                let element = document.getElementById(elementId)
+                let waitTime = 0
+                let containerElement = document.getElementById("table-container")
+                if (element) {
+                    if (isSubattribute) {
+                        setTimeout(function() {
+                            element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+                        }, waitTime)
+                    }
+                    else scrollIntoView(element, containerElement)
+                } else // element likely has not rendered yet. wait 250 milliseconds then try again
+                {
+                    waitTime = 250
+                    setTimeout(function() {
+                        element = document.getElementById(elementId)
+                        if (element) element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+                    }, waitTime)
+                }
+            }
+            else {
+                tempIndex-=1
+                if (tempIndex === 0) tempIndex = attributesList.length -1
+            }
+        }
+        
+    }
+
+    useKeyDown("Tab", tabCallback, shiftTabCallback, null, null);
+    useKeyDown("ArrowUp", shiftTabCallback, null, null, null);
+    useKeyDown("ArrowDown", tabCallback, null, null, null);
 
     const handleClickField = (key, normalized_vertices, isSubattribute, topLevelAttribute) => {
         if(key === displayKey || !key) {

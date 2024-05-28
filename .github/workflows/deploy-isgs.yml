@@ -7,7 +7,7 @@ on:
 jobs:
 
   isgs-production-deploy:
-    # if: github.repository == 'CATALOG-Historic-Records/orphaned-wells-ui'
+    if: github.repository == 'CATALOG-Historic-Records/orphaned-wells-ui'
     name: Deploy to Google App Engine
     runs-on: ubuntu-latest
     steps:
@@ -20,9 +20,17 @@ jobs:
         run: |
             npm clean-install
       
-      - name: Add .env file
+      - name: Add backend url to .env file
         run: |
-            echo REACT_APP_BACKEND_URL=\"${{ secrets.ISGS_BACKEND_URL }}\" >> .env
+            echo REACT_APP_BACKEND_URL=${{ secrets.ISGS_BACKEND_URL }} >> .env
+
+      - name: Add state to .env file
+        run: |
+            echo REACT_APP_STATE=illinois >> .env
+
+      - name: Add environment to .env file
+        run: |
+            echo REACT_APP_ENVIRONMENT=isgs >> .env
 
       - name: Build frontend
         env:

@@ -106,7 +106,7 @@ export const authLogin = (code) => {
 }
 
 export const checkAuth = (idtoken) => {
-    return fetch(BACKEND_URL+'/token', {
+    return fetch(BACKEND_URL+'/check_auth', {
         method: 'POST', 
         mode: 'cors',
         body: JSON.stringify(idtoken),

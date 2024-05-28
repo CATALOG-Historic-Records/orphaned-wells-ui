@@ -2,10 +2,9 @@ import {useEffect, useState, useRef } from 'react';
 import { Box, TextField, IconButton, Grid } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { processors } from '../../assets/processors';
+import { processor_data } from '../../assets/processors';
 import { addProject } from '../../services/app.service';
 import { callAPI } from '../../assets/helperFunctions';
-
 
 export default function NewProjectDialog(props) {
     const { open, onClose } = props;
@@ -15,6 +14,7 @@ export default function NewProjectDialog(props) {
     const [ disableCreateButton, setDisableCreateButton ] = useState(true)
     const dialogHeight = '85vh'
     const dialogWidth = '60vw'
+    const processors = processor_data[process.env.REACT_APP_STATE]
 
     const descriptionElementRef = useRef(null);
     useEffect(() => {
