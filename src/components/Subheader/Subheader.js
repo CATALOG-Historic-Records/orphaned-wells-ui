@@ -92,7 +92,7 @@ export default function Subheader(props) {
                     </div>
                     <div style={styles.pageName}>
                         {currentPage}&nbsp;
-                        {actions !== undefined && 
+                        {actions &&
                             <>
                             <IconButton onClick={handleShowActions}><MoreHorizIcon sx={styles.icon}/></IconButton>
                             <Menu

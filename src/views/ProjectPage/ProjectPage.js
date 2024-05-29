@@ -95,10 +95,14 @@ export default function Project() {
                 currentPage={projectData.name}
                 buttonName="Upload new record(s)"
                 handleClickButton={() => setShowDocumentModal(true)}
-                actions={
+                actions={(localStorage.getItem("role") && localStorage.getItem("role") === "10") ?
                     {
-                        "Update project": handleUpdateProject, 
+                        "Change project name": handleUpdateProject, 
                         "Delete project": () => setOpenDeleteModal(true),
+                    }
+                    :
+                    {
+                        "Change project name": handleUpdateProject, 
                     }
                 }
                 previousPages={{"Projects": () => navigate("/projects", {replace: true})}}
