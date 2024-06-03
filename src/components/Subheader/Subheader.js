@@ -125,7 +125,11 @@ export default function Subheader(props) {
                                 sx={{
                                     fontSize:"16px",
                                     textTransform: "capitalize",
-                                    backgroundColor: status === "unreviewed" ? "default" : status === "reviewed" && "#C8E6C9"
+                                    backgroundColor: 
+                                        status === "unreviewed" ? "default" :
+                                        status === "incomplete" ? "#FFECB3" :
+                                        status === "defective" ? "#FDCDD2" :
+                                        status === "reviewed" && "#C8E6C9"
                                 }}
                                 label={status} 
                             />

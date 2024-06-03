@@ -4,6 +4,8 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Butto
 import IosShareIcon from '@mui/icons-material/IosShare';
 import ErrorIcon from '@mui/icons-material/Error';
 import CachedIcon from '@mui/icons-material/Cached';
+import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import StickyNote2Icon from '@mui/icons-material/StickyNote2';
@@ -141,17 +143,23 @@ export default function RecordsTable(props) {
               {row.status}
             </TableCell>
             <TableCell align="right">
+            <IconButton >
               {
                 row.review_status === "unreviewed" ? 
-                <IconButton >
                   <ErrorIcon /> 
-                </IconButton> :
+                :
+                row.review_status === "incomplete" ? 
+                  <ErrorIcon sx={{color: "#E3B62E"}} /> 
+                :
+                row.review_status === "defective" ? 
+                  <WarningIcon sx={{color: "#9F0100"}} /> 
+                :
                 row.review_status === "reviewed" ? 
-                <IconButton>
                   <CheckCircleIcon sx={{color: "green"}}/> 
-                </IconButton> :
+                :
                 null
               }
+              </IconButton>
               {row.review_status}
             </TableCell>
         </TableRow>

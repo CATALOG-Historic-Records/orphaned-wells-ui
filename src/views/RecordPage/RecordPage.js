@@ -20,6 +20,7 @@ export default function Record() {
     const [ previousPages, setPreviousPages ] = useState({"Projects": () => navigate("/projects", {replace: true}),})
     const [ showErrorBar, setShowErrorBar ] = useState(false)
     const [ errorMsg, setErrorMsg ] = useState("")
+    const [ showResetPrompt, setShowResetPrompt ] = useState(false)
     let params = useParams(); 
     let navigate = useNavigate();
 
@@ -116,9 +117,18 @@ export default function Record() {
         callAPI(
             updateRecord,
             [params.id, {data: recordData, type: "attributes"}],
-            (data) => setWasEdited(false),
+            handleSuccessfulAttributeUpdate,
             handleFailedUpdate
         )
+    }
+
+    const handleSuccessfulAttributeUpdate = (data) => {
+        setWasEdited(false)
+        let tempRecordData = {...recordData}
+        for (let key of Object.keys(data)) {
+            tempRecordData[key] = data[key]
+        }
+        setRecordData(tempRecordData)
     }
 
     const handleFailedUpdate = (data, response_status) => {
@@ -220,10 +230,21 @@ export default function Record() {
         navigate("/record/"+data._id, {replace: true})
     }
 
+    const promptResetRecord = () => {
+        setShowResetPrompt(true)
+    }
+
     const handleUpdateReviewStatus = (new_status) => {
+        // setShowResetPrompt(false)
+        let data_update = { review_status: new_status }
+        if (new_status === "unreviewed")  {
+            let tempRecordData = {...recordData}
+            tempRecordData["review_status"] = "unreviewed"
+            data_update = tempRecordData
+        }
         callAPI(
             updateRecord,
-            [params.id, {data: {review_status: new_status}, type: "review_status"}],
+            [params.id, {data: data_update, type: "review_status"}],
             (data) => window.location.reload(),
             handleFailedUpdate
         )
@@ -262,6 +283,7 @@ export default function Record() {
                 onReviewButtonClick={handleClickMarkReviewed}
                 recordData={recordData}
                 handleUpdateReviewStatus={handleUpdateReviewStatus}
+                promptResetRecord={promptResetRecord}
             />
             <PopupModal
                 open={openDeleteModal}
@@ -282,6 +304,16 @@ export default function Record() {
                 handleEditText={handleChangeRecordName}
                 handleSave={handleUpdateRecordName}
                 buttonText='Update'
+                buttonColor='primary'
+                buttonVariant='contained'
+                width={400}
+            />
+            <PopupModal
+                open={showResetPrompt}
+                handleClose={() => setShowResetPrompt(false)}
+                text="Setting status to unreviewed will reset any changes made. Are you sure you want to continue?"
+                handleSave={() => handleUpdateReviewStatus("unreviewed")}
+                buttonText='Reset'
                 buttonColor='primary'
                 buttonVariant='contained'
                 width={400}
