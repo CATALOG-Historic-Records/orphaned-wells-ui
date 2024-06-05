@@ -30,10 +30,11 @@ const styles = {
 
 
 export default function DocumentContainer(props) {
-    const { image, attributes, handleChangeValue, attributesList, handleUpdateRecord } = props;
+    const { image, attributesList, fullAttributesList, handleChangeValue, handleUpdateRecord } = props;
     const [ displayPoints, setDisplayPoints ] = useState(null)
     const [ displayKey, setDisplayKey ] = useState(null)
     const [ displayKeyIndex, setDisplayKeyIndex ] = useState(null)
+    const [ displayKeySubattributeIndex, setDisplayKeySubattributeIndex ] = useState(null)
     const [ fullscreen, setFullscreen ] = useState(null)
     const [ gridWidths, setGridWidths ] = useState([5.9,0.2,5.9])
     const [ width, setWidth ] = useState("100%")
@@ -53,125 +54,162 @@ export default function DocumentContainer(props) {
 
     const tabCallback = () => {
         let tempIndex
-        if (displayKeyIndex === null || displayKeyIndex === attributesList.length - 1) {
+        let tempSubIndex
+        let isSubattribute
+        let tempKey
+        let tempVertices
+        if (displayKeyIndex === null) {
             tempIndex = 0
-        } else {
-            tempIndex = displayKeyIndex + 1
-        }
-        let keepGoing = true
-        let i = 0;
-        while (keepGoing && i < 200) {
-            i+=1
-            let tempKey = attributesList[tempIndex].key
-            let tempVertices = attributesList[tempIndex].normalized_vertices
-            let isSubattribute = attributesList[tempIndex].isSubattribute
-            let topLevelAttribute = attributesList[tempIndex].topLevelAttribute
-            handleClickField(tempKey, tempVertices, isSubattribute, topLevelAttribute)
-            keepGoing = false 
-            let elementId
-            if (isSubattribute) {
-                setForceOpenSubtable(topLevelAttribute)
-                elementId = `${topLevelAttribute}::${tempKey}`
-            } 
-            else elementId = tempKey
-            let element = document.getElementById(elementId)
-            let waitTime = 0
-            let containerElement = document.getElementById("table-container")
-            if (element) {
-                if (isSubattribute) {
-                    setTimeout(function() {
-                        element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-                    }, waitTime)
-                }
-                else scrollIntoView(element, containerElement)
-            } else // element likely has not rendered yet. wait 250 milliseconds then try again
-            {
-                waitTime = 250
-                setTimeout(function() {
-                    element = document.getElementById(elementId)
-                    if (element) element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-                }, waitTime)
+            tempSubIndex = null
+        } 
+        else if (attributesList[displayKeyIndex].subattributes) {
+            // check if subattribute idx has not been set -> set it
+            // check if subattribute idx has reached the max -> reset it, increment primary index (unless we reached the max there)
+            // otherwise set subattribute idx to 0
+            if (displayKeySubattributeIndex === null || displayKeySubattributeIndex === undefined) {
+                tempSubIndex = 0
+                tempIndex = displayKeyIndex
+            } else if(displayKeySubattributeIndex === attributesList[displayKeyIndex].subattributes.length - 1) {
+                tempSubIndex = null
+                if (displayKeyIndex === attributesList.length - 1) tempIndex = 0
+                else tempIndex = displayKeyIndex + 1
+            } else { 
+                tempSubIndex = displayKeySubattributeIndex + 1
+                tempIndex = displayKeyIndex
             }
         }
-        
+        else if (displayKeyIndex === attributesList.length - 1)  {
+            tempIndex = 0
+            tempSubIndex = null
+        }
+        else {
+            tempIndex = displayKeyIndex + 1
+            tempSubIndex = null
+        }
+
+        if (tempSubIndex !== null && tempSubIndex !== undefined) {
+            isSubattribute = true
+            tempKey = attributesList[tempIndex].subattributes[tempSubIndex].key
+            tempVertices = attributesList[tempIndex].subattributes[tempSubIndex].normalized_vertices
+        } else {
+            isSubattribute = false
+            tempKey = attributesList[tempIndex].key
+            tempVertices = attributesList[tempIndex].normalized_vertices
+        }
+        handleClickField(tempKey, tempVertices, tempIndex, isSubattribute, tempSubIndex)
+        let elementId
+
+        let topLevelAttribute = attributesList[tempIndex].key
+        if (isSubattribute) {
+            setForceOpenSubtable(tempIndex)
+            elementId = `${tempIndex}::${tempSubIndex}`
+        } 
+        else elementId = `${tempKey}::${tempIndex}`
+        let element = document.getElementById(elementId)
+        let waitTime = 0
+        let containerElement = document.getElementById("table-container")
+        if (element) {
+            if (isSubattribute) {
+                setTimeout(function() {
+                    element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+                }, waitTime)
+            }
+            else scrollIntoView(element, containerElement)
+        } else // element likely has not rendered yet. wait 250 milliseconds then try again
+        {
+            waitTime = 250
+            setTimeout(function() {
+                element = document.getElementById(elementId)
+                if (element) element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+            }, waitTime)
+        }
     }
 
     const shiftTabCallback = () => {
         let tempIndex
-        if (displayKeyIndex === null || displayKeyIndex === 0) {
-            tempIndex = attributesList.length - 1
-        } else {
-            tempIndex = displayKeyIndex -1
-        }
-        let keepGoing = true
-        let i = 0;
-        while (keepGoing && i < 200) {
-            i+=1
-            let tempKey = attributesList[tempIndex].key
-            let tempVertices = attributesList[tempIndex].normalized_vertices
-            let isSubattribute = attributesList[tempIndex].isSubattribute
-            let topLevelAttribute = attributesList[tempIndex].topLevelAttribute
-            handleClickField(tempKey, tempVertices, isSubattribute, topLevelAttribute)
-            keepGoing = false 
-            let elementId
-            if (isSubattribute) {
-                setForceOpenSubtable(topLevelAttribute)
-                elementId = `${topLevelAttribute}::${tempKey}`
-            } 
-            else elementId = tempKey
-            let element = document.getElementById(elementId)
-            let waitTime = 0
-            let containerElement = document.getElementById("table-container")
-            if (element) {
-                if (isSubattribute) {
-                    setTimeout(function() {
-                        element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-                    }, waitTime)
-                }
-                else scrollIntoView(element, containerElement)
-            } else // element likely has not rendered yet. wait 250 milliseconds then try again
-            {
-                waitTime = 250
-                setTimeout(function() {
-                    element = document.getElementById(elementId)
-                    if (element) element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-                }, waitTime)
+        let tempSubIndex
+        let isSubattribute
+        let tempKey
+        let tempVertices
+        if (displayKeyIndex === null) {
+            tempIndex = attributesList.length-1
+            tempSubIndex = null
+        } 
+        else if (attributesList[displayKeyIndex].subattributes) {
+            if (displayKeySubattributeIndex === null || displayKeySubattributeIndex === undefined) {
+                tempSubIndex = attributesList[displayKeyIndex].subattributes.length-1
+                tempIndex = displayKeyIndex
+            } else if(displayKeySubattributeIndex === 0) {
+                tempSubIndex = null
+                if (displayKeyIndex === 0) tempIndex = attributesList.length-1
+                else tempIndex = displayKeyIndex - 1
+            } else { 
+                tempSubIndex = displayKeySubattributeIndex - 1
+                tempIndex = displayKeyIndex
             }
         }
-        
+        else if (displayKeyIndex === 0)  {
+            tempIndex = tempIndex = attributesList.length-1
+            tempSubIndex = null
+        }
+        else {
+            tempIndex = displayKeyIndex - 1
+            tempSubIndex = null
+        }
+
+        if (tempSubIndex !== null && tempSubIndex !== undefined) {
+            isSubattribute = true
+            tempKey = attributesList[tempIndex].subattributes[tempSubIndex].key
+            tempVertices = attributesList[tempIndex].subattributes[tempSubIndex].normalized_vertices
+        } else {
+            isSubattribute = false
+            tempKey = attributesList[tempIndex].key
+            tempVertices = attributesList[tempIndex].normalized_vertices
+        }
+        handleClickField(tempKey, tempVertices, tempIndex, isSubattribute, tempSubIndex)
+        let elementId
+
+        let topLevelAttribute = attributesList[tempIndex].key
+        if (isSubattribute) {
+            setForceOpenSubtable(tempIndex)
+            elementId = `${tempIndex}::${tempSubIndex}`
+        } 
+        else elementId = `${tempKey}::${tempIndex}`
+        let element = document.getElementById(elementId)
+        let waitTime = 0
+        let containerElement = document.getElementById("table-container")
+        if (element) {
+            if (isSubattribute) {
+                setTimeout(function() {
+                    element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+                }, waitTime)
+            }
+            else scrollIntoView(element, containerElement)
+        } else // element likely has not rendered yet. wait 250 milliseconds then try again
+        {
+            waitTime = 250
+            setTimeout(function() {
+                element = document.getElementById(elementId)
+                if (element) element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+            }, waitTime)
+        }
     }
 
     useKeyDown("Tab", tabCallback, shiftTabCallback, null, null);
     useKeyDown("ArrowUp", shiftTabCallback, null, null, null);
     useKeyDown("ArrowDown", tabCallback, null, null, null);
 
-    const handleClickField = (key, normalized_vertices, isSubattribute, topLevelAttribute) => {
-        if(key === displayKey || !key) {
+    // const handleClickField = (key, normalized_vertices, isSubattribute, topLevelAttribute, subattributeIdx, newIdx) => {
+    const handleClickField = (key, normalized_vertices, primaryIndex, isSubattribute, subattributeIdx) => {
+        if (!key || (!isSubattribute && primaryIndex === displayKeyIndex) || (isSubattribute && primaryIndex === displayKeyIndex && subattributeIdx === displayKeySubattributeIndex)) {
             setDisplayPoints(null)
             setDisplayKey(null)
             setDisplayKeyIndex(null)
         }
-        // else if(normalized_vertices !== null && normalized_vertices !== undefined) {
         else {
             setDisplayKey(key)
-
-            // set display key index
-            let keepGoing = true
-            let i = -1
-            while (keepGoing && i < attributesList.length) {
-                i++
-                let tempAttr = attributesList[i]
-                if (key === tempAttr.key) {
-                    if (!isSubattribute) {
-                        setDisplayKeyIndex(i)
-                        keepGoing = false
-                    } else if(isSubattribute && topLevelAttribute === tempAttr.topLevelAttribute) {
-                        setDisplayKeyIndex(i)
-                        keepGoing = false
-                    }
-                }
-                
-            }
+            setDisplayKeyIndex(primaryIndex)
+            setDisplayKeySubattributeIndex(subattributeIdx)
             if(normalized_vertices !== null && normalized_vertices !== undefined) {
                 let percentage_vertices = []
                 for (let each of normalized_vertices) {
@@ -245,16 +283,15 @@ export default function DocumentContainer(props) {
                                     }
                                 </IconButton>
                             </Box>
-                            {attributes !== undefined && 
+                            {attributesList !== undefined && 
                                 <AttributesTable 
-                                    attributes={attributes}
+                                    attributesList={attributesList}
                                     handleClickField={handleClickField}
                                     handleChangeValue={handleChangeValue}
                                     fullscreen={fullscreen}
-                                    displayKey={displayKey}
                                     forceOpenSubtable={forceOpenSubtable}
-                                    attributesList={attributesList}
                                     displayKeyIndex={displayKeyIndex}
+                                    displayKeySubattributeIndex={displayKeySubattributeIndex}
                                     handleUpdateRecord={handleUpdateRecord}
                                 />
                             }

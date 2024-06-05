@@ -12,7 +12,7 @@ import ErrorBar from '../../components/ErrorBar/ErrorBar';
 
 export default function Record() {
     const [ recordData, setRecordData ] = useState({})
-    const [ attributesList, setAttributesList ] = useState([])
+    const [ fullAttributesList, setFullAttributesList ] = useState([])
     const [ wasEdited, setWasEdited ] = useState(false)
     const [ openDeleteModal, setOpenDeleteModal ] = useState(false)
     const [ openUpdateNameModal, setOpenUpdateNameModal ] = useState(false)
@@ -78,25 +78,23 @@ export default function Record() {
         tempPreviousPages[data.project_name] = () => navigate("/project/"+data.project_id, {replace: true})
         setPreviousPages(tempPreviousPages)
 
-        // convert attributes to list
-        let tempAttributesList = []
-        for (let attributeKey of Object.keys(data.attributes)) {
-            let attribute = data.attributes[attributeKey]
-            let attributeEntry = attribute
-            attributeEntry["key"] = attributeKey
-            tempAttributesList.push(attributeEntry)
+        let tempFullAttributesList = []
+        let topLevelIndex = 0
+        for (let attribute of data.attributesList) {
+            attribute["idx"] = topLevelIndex
+            tempFullAttributesList.push(attribute)
             if (attribute.subattributes) {
-                for (let sub_attributeKey of Object.keys(attribute.subattributes)) {
-                    let sub_attribute = attribute.subattributes[sub_attributeKey]
-                    let sub_attributeEntry = sub_attribute
-                    sub_attributeEntry["key"] = sub_attributeKey
-                    sub_attributeEntry["isSubattribute"] = true
-                    sub_attributeEntry["topLevelAttribute"] = attributeKey
-                    tempAttributesList.push(sub_attributeEntry)
+                let i = 0
+                for (let sub_attribute of attribute.subattributes) {
+                    sub_attribute["idx"] = topLevelIndex
+                    sub_attribute["sub_idx"] = i
+                    tempFullAttributesList.push(sub_attribute)
+                    i+=1
                 }
             }
+            topLevelIndex+=1
         }
-        setAttributesList(tempAttributesList)
+        setFullAttributesList(tempFullAttributesList)
     }
 
     const handleChangeRecordName = (event) => {
@@ -116,7 +114,7 @@ export default function Record() {
     const handleUpdateRecord = () => {
         callAPI(
             updateRecord,
-            [params.id, {data: recordData, type: "attributes"}],
+            [params.id, {data: recordData, type: "attributesList"}],
             handleSuccessfulAttributeUpdate,
             handleFailedUpdate
         )
@@ -144,32 +142,28 @@ export default function Record() {
         }
     }
 
-    const handleChangeValue = (event, isSubattribute, topLevelAttribute) => {
+    const handleChangeValue = (event, topLevelIndex, isSubattribute, subIndex) => {
         let tempRecordData = {...recordData}
-        let tempAttributes = {...tempRecordData.attributes}
+        let tempAttributesList = {...tempRecordData.attributesList}
         let tempAttribute
         let attribute
         if (isSubattribute) {
-            attribute = topLevelAttribute
-            let subattribute = event.target.name
             let value = event.target.value
-            tempAttribute = {...tempAttributes[attribute]}
-            let tempSubattributes = {...tempAttribute["subattributes"]}
-            let tempSubattribute = {...tempSubattributes[subattribute]}
+            tempAttribute = tempAttributesList[topLevelIndex]
+            let tempSubattributesList = [...tempAttribute["subattributes"]]
+            let tempSubattribute = tempSubattributesList[subIndex]
             tempSubattribute.value = value
             tempAttribute.edited = true
             tempSubattribute.edited = true
-            tempSubattributes[subattribute] = tempSubattribute
-            tempAttribute["subattributes"] = tempSubattributes
+            tempAttribute["subattributes"] = tempSubattributesList
         } else {
-            attribute = event.target.name
+            tempAttribute = tempAttributesList[topLevelIndex]
             let value = event.target.value
-            tempAttribute = {...tempAttributes[attribute]}
             tempAttribute.value = value
             tempAttribute.edited = true
         }
-        tempAttributes[attribute] = tempAttribute
-        tempRecordData.attributes = tempAttributes
+        tempAttributesList[attribute] = tempAttribute
+        tempRecordData.attributes = tempAttributesList
         setRecordData(tempRecordData)
         setWasEdited(true)
         
@@ -272,8 +266,10 @@ export default function Record() {
                 <DocumentContainer
                     image={recordData.img_url}
                     attributes={recordData.attributes}
+                    attributesList={recordData.attributesList}
                     handleChangeValue={handleChangeValue}
-                    attributesList={attributesList}
+                    // attributesList={attributesList}
+                    fullAttributesList={fullAttributesList}
                     handleUpdateRecord={handleUpdateRecord}
                 />
             </Box>

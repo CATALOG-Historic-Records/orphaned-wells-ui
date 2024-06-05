@@ -27,6 +27,7 @@ export const average = array => array.reduce((a, b) => a + b) / array.length;
 
 export const formatConfidence = (value) => {
   // let roundedValue = Math.round((value + Number.EPSILON) * 100)
+  if (value === null ) return ""
   let percentageValue = (value * 100).toLocaleString('en-US', {maximumFractionDigits:0})
   return `${percentageValue} %`
 }

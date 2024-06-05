@@ -63,8 +63,7 @@ export default function RecordsTable(props) {
   const calculateAverageConfidence = (attributes) => {
     let confidences = []
     try {
-      for (let key of Object.keys(attributes)) {
-        let attr = attributes[key]
+      for (let attr of attributes) {
         if (attr.confidence) confidences.push(attr.confidence)
       }
       return formatConfidence(average(confidences))
@@ -76,8 +75,7 @@ export default function RecordsTable(props) {
 
   const calculateLowestConfidence = (attributes) => {
     let lowestConfidence = 1
-    for (let key of Object.keys(attributes)) {
-      let attr = attributes[key]
+    for (let attr of attributes) {
       if (attr.confidence && attr.confidence < lowestConfidence) {
         lowestConfidence = attr.confidence
       }
@@ -88,8 +86,12 @@ export default function RecordsTable(props) {
 
   const getAPINumber = (record) => {
     try {
-      if (record.attributes.API_NUMBER) return record.attributes.API_NUMBER.value
-      else return ""
+      for (let attr of record.attributesList) {
+        if (attr.key === "API_NUMBER")  {
+          return attr.value
+        }
+      }
+      return ""
     } catch (e) {
       return ""
     }
@@ -119,8 +121,8 @@ export default function RecordsTable(props) {
             {/* <TableCell>{row.contributor.name}</TableCell> */}
             <TableCell>{formatDate(row.dateCreated)}</TableCell>
             <TableCell align="right">{row.status === "digitized" ? getAPINumber(row) : null}</TableCell>
-            <TableCell align="right">{row.status === "digitized" ? calculateAverageConfidence(row.attributes) : null}</TableCell>
-            <TableCell align="right">{row.status === "digitized" ? calculateLowestConfidence(row.attributes) : null}</TableCell>
+            <TableCell align="right">{row.status === "digitized" ? calculateAverageConfidence(row.attributesList) : null}</TableCell>
+            <TableCell align="right">{row.status === "digitized" ? calculateLowestConfidence(row.attributesList) : null}</TableCell>
             <TableCell align="right">
               <IconButton sx={{color: "#F2DB6F"}} onClick={(e) => handleClickNotes(e, row)}><StickyNote2Icon/></IconButton>
             </TableCell>
