@@ -8,8 +8,8 @@ import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import BorderColorIcon from '@mui/icons-material/BorderColor';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Notes from '../Notes/Notes';
 import SplitButton from '../SplitButton/SplitButton';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -58,7 +58,7 @@ export default function Bottombar(props) {
             {
                 text: "Mark as incomplete",
                 onClick: () => handleUpdateReviewStatus("incomplete"),
-                icon: <ErrorIcon sx={{color: "#9F0100"}}/>,
+                icon: <ErrorIcon sx={{color: "#E3B62E"}}/>,
             },
         ],
         reviewed: [
@@ -110,7 +110,7 @@ export default function Bottombar(props) {
                         <Button 
                             sx={styles.button} 
                             variant="outlined" 
-                            startIcon={<BorderColorOutlinedIcon/>}
+                            startIcon={<BorderColorIcon/>}
                             onClick={() => setOpenNotesModal(true)}
                         >
                             notes
@@ -127,7 +127,8 @@ export default function Bottombar(props) {
                             <Button 
                                 sx={styles.button} 
                                 variant="contained" 
-                                endIcon={<CheckCircleOutlineIcon/>}
+                                startIcon={<CheckCircleIcon sx={{color: "#43A047"}}/>}
+                                endIcon={<KeyboardArrowRightIcon/>}
                                 onClick={onReviewButtonClick}
                             > 
                                 Mark as reviewed & next 
