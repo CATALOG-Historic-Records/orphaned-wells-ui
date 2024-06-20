@@ -322,578 +322,578 @@ export const processor_data =
         {
             id: "10aa396edc8a5178",
             processor_id: "10aa396edc8a5178",
-            name: "IL_WellCompletion_V3_A",
+            name: "IL_Ver_A_Well_Completion",
             displayName: "Well Completion Version A",
             state: "IL",
             img: "./img/IL_Ver_A_Well_Completion_A.png",
             attributes: [
-                {
-                  "name": "Oil",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Gas",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Dry_Hole",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "SWD",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Water_Input",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Gas_Input",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Conv",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Str_Test",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Water_Supply",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Observation",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Well",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Operator",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Well_Name_and_No",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Permit_No",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Date_Issued",
-                  "data_type": "datetime",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Location",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "County",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Section",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Township",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Range",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Elevation_DF",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Elevation_KB",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Elevation_Ground",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Total_Depth",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "PBTD",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Date_Drilling_Began",
-                  "data_type": "datetime",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Date_Drilling_Complete",
-                  "data_type": "datetime",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Rotary_Tools_From",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Rotary_Tools_To",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Cable_Tools_From",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Cable_Tools_To",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Hole_Size",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Electric_Logs_Run_Yes",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Electric Logs Run",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Electric_Logs_Run_No",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Electric Logs Run",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Electric_Logs_Date",
-                  "data_type": "datetime",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "New_Well",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Report",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Deepened",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Report",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Dilled_Out_Plugged_Hole",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Type of Report",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Lease_Sign_Posted_Yes",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Lease Sign Posted",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Lease_Sign_Posted_No",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Lease Sign Posted",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Was_Well_Cored_Yes",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Was Well Cored",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Was_Well_Cored_No",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Was Well Cored",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Drill_Stem_Test_Run_Yes",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Drill Stem Test",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Drill_Stem_Test_Run_No",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Drill Stem Test",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Surface_Size",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Surface_Depth",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Surface_Sks_Cement",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Surface_Csg_Pulled",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Mine_or_Intermediate_Size",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Mine_or_Intermediate_Depth",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Mine_or_Intermediate_Sks_Cement",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Mine_or_Intermediate_Csg_Pulled",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Producing_Size",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Producing_Depth",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Producing_Sks_Cement",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Producing_Csg_Pulled",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Liner_Size",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Liner_Depth",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "no"
-                },
-                {
-                  "name": "Liner_Sks_Cement",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "no"
-                },
-                {
-                  "name": "Liner_Csg_Pulled",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "no"
-                },
-                {
-                  "name": "Name_of_Producing_or_Injection_Formation",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Date_of_First_Prod",
-                  "data_type": "datetime",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Date_of_Test",
-                  "data_type": "datetime",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Length_of_Test",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Daily_Production_Bbls_Oil",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Daily_Production_Bbls_Water",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Daily_Production_Bbls_Gas",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Intervals",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Perforated",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Completion Type",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Perforated_Text",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Shot",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Completion Type",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Shot_Text",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Acidized",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Completion Type",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Acidized_Text",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Fractures",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Completion Type",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Fractures_Text",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Other",
-                  "data_type": "checkbox",
-                  "occurrence": "optional_once",
-                  "grouping": "Completion Type",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Other_Text",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_multiple",
-                  "grouping": "",
-                  "enabled": "yes"
-                },
-                {
-                  "name": "Signature",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "no"
-                },
-                {
-                  "name": "Address",
-                  "data_type": "plain_text",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "no"
-                },
-                {
-                  "name": "Date_Signed",
-                  "data_type": "datetime",
-                  "occurrence": "optional_once",
-                  "grouping": "",
-                  "enabled": "yes"
-                }
+              {
+                "name": "Oil",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "Gas",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "Dry_Hole",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "SWD",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "Water_Input",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "Gas_Input",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "Conv",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "Str_Test",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "Water_Supply",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "Observation",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Well",
+                "enabled": "yes"
+              },
+              {
+                "name": "Operator",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Well_Name_and_No",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Permit_No",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Date_Issued",
+                "data_type": "datetime",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Location",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "County",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Section",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Township",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Range",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Elevation_DF",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Elevation_KB",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Elevation_Ground",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Total_Depth",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "PBTD",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Date_Drilling_Began",
+                "data_type": "datetime",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Date_Drilling_Complete",
+                "data_type": "datetime",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Rotary_Tools_From",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Rotary_Tools_To",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Cable_Tools_From",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Cable_Tools_To",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Hole_Size",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Electric_Logs_Run_Yes",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Electric Logs Run",
+                "enabled": "yes"
+              },
+              {
+                "name": "Electric_Logs_Run_No",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Electric Logs Run",
+                "enabled": "yes"
+              },
+              {
+                "name": "Electric_Logs_Date",
+                "data_type": "datetime",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "New_Well",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Report",
+                "enabled": "yes"
+              },
+              {
+                "name": "Deepened",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Report",
+                "enabled": "yes"
+              },
+              {
+                "name": "Dilled_Out_Plugged_Hole",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Type of Report",
+                "enabled": "yes"
+              },
+              {
+                "name": "Lease_Sign_Posted_Yes",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Lease Sign Posted",
+                "enabled": "yes"
+              },
+              {
+                "name": "Lease_Sign_Posted_No",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Lease Sign Posted",
+                "enabled": "yes"
+              },
+              {
+                "name": "Was_Well_Cored_Yes",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Was Well Cored",
+                "enabled": "yes"
+              },
+              {
+                "name": "Was_Well_Cored_No",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Was Well Cored",
+                "enabled": "yes"
+              },
+              {
+                "name": "Drill_Stem_Test_Run_Yes",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Drill Stem Test",
+                "enabled": "yes"
+              },
+              {
+                "name": "Drill_Stem_Test_Run_No",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Drill Stem Test",
+                "enabled": "yes"
+              },
+              {
+                "name": "Surface_Size",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Surface_Depth",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Surface_Sks_Cement",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Surface_Csg_Pulled",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Mine_or_Intermediate_Size",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Mine_or_Intermediate_Depth",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Mine_or_Intermediate_Sks_Cement",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Mine_or_Intermediate_Csg_Pulled",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Producing_Size",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Producing_Depth",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Producing_Sks_Cement",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Producing_Csg_Pulled",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Liner_Size",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Liner_Depth",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "no"
+              },
+              {
+                "name": "Liner_Sks_Cement",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "no"
+              },
+              {
+                "name": "Liner_Csg_Pulled",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "no"
+              },
+              {
+                "name": "Name_of_Producing_or_Injection_Formation",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Date_of_First_Prod",
+                "data_type": "datetime",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Date_of_Test",
+                "data_type": "datetime",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Length_of_Test",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Daily_Production_Bbls_Oil",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Daily_Production_Bbls_Water",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Daily_Production_Bbls_Gas",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Intervals",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Perforated",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Completion Type",
+                "enabled": "yes"
+              },
+              {
+                "name": "Perforated_Text",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Shot",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Completion Type",
+                "enabled": "yes"
+              },
+              {
+                "name": "Shot_Text",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Acidized",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Completion Type",
+                "enabled": "yes"
+              },
+              {
+                "name": "Acidized_Text",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Fractures",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Completion Type",
+                "enabled": "yes"
+              },
+              {
+                "name": "Fractures_Text",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Other",
+                "data_type": "checkbox",
+                "occurrence": "optional_once",
+                "grouping": "Completion Type",
+                "enabled": "yes"
+              },
+              {
+                "name": "Other_Text",
+                "data_type": "plain_text",
+                "occurrence": "optional_multiple",
+                "grouping": "",
+                "enabled": "yes"
+              },
+              {
+                "name": "Signature",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "no"
+              },
+              {
+                "name": "Address",
+                "data_type": "plain_text",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "no"
+              },
+              {
+                "name": "Date_Signed",
+                "data_type": "datetime",
+                "occurrence": "optional_once",
+                "grouping": "",
+                "enabled": "yes"
+              }
             ],
             documentType: "Well Completion Report Type A",
         },
         {
             id: "e60bb28febe63e5e",
             processor_id: "e60bb28febe63e5e",
-            name: "IL_WellCompletion_V1_CDE",
+            name: "IL_Ver_B_Well_Completion",
             displayName: "Well Completion Version B",
             state: "IL",
             img: "./img/IL_Ver_B_Well_Completion_C.png",
