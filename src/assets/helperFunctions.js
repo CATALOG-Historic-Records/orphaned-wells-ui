@@ -1,6 +1,19 @@
 import { refreshAuth, revokeToken } from "../services/app.service"
 import { useEffect, useState, useRef } from 'react';
 
+export const round = (num, scale) => {
+  if(!("" + num).includes("e")) {
+    return +(Math.round(num + "e+" + scale)  + "e-" + scale);
+  } else {
+    var arr = ("" + num).split("e");
+    var sig = ""
+    if(+arr[1] + scale > 0) {
+      sig = "+";
+    }
+    return +(Math.round(+arr[0] + "e" + sig + (+arr[1] + scale)) + "e-" + scale);
+  }
+}
+
 export const formatDate = (timestamp) => {
   if (timestamp !== null) {
     let date = new Date(timestamp*1000)
@@ -32,7 +45,7 @@ export const formatConfidence = (value) => {
   return `${percentageValue} %`
 }
 
-export const useKeyDown = (key, singleKeyCallback, shiftKeyCallback, controlKeyCallback, shiftAndControlKeyCallback) => {
+export const useKeyDown = (key, singleKeyCallback, shiftKeyCallback, controlKeyCallback, shiftAndControlKeyCallback, keepDefaultBehavior) => {
   /*
     hook for adding a callback function on a key down
     has options for:
@@ -46,7 +59,7 @@ export const useKeyDown = (key, singleKeyCallback, shiftKeyCallback, controlKeyC
     // event.ctrlKey - pressed Control key on Linux or Windows
     const wasKeyPressed = event.key === key;
     if (wasKeyPressed) {
-      event.preventDefault();
+      if(!keepDefaultBehavior) event.preventDefault();
       if ((event.metaKey || event.ctrlKey) && event.shiftKey && shiftAndControlKeyCallback) {
         shiftAndControlKeyCallback()
       }

@@ -19,13 +19,17 @@ export default function Project() {
     let navigate = useNavigate();
 
     useEffect(() => {
+        loadData()
+    }, [params.id])
+
+    const loadData = () => {
         callAPI(
             getProjectData,
             [params.id],
             handleSuccess,
             (e) => {console.error('error getting project data: ',e)}
         )
-    }, [params.id])
+    }
 
     const handleSuccess = (data) => {
         setRecords(data.records)
@@ -111,6 +115,7 @@ export default function Project() {
                 <RecordsTable
                     projectData={projectData}
                     records={records}
+                    setRecords={setRecords}
                 />
             </Box>
             { showDocumentModal && 

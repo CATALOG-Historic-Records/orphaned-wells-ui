@@ -1,6 +1,6 @@
 import {useEffect, useState, useRef } from 'react';
 import { Box, TextField, IconButton, Grid } from '@mui/material';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, Button, Tooltip} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { processor_data } from '../../assets/processors';
 import { addProject } from '../../services/app.service';
@@ -178,7 +178,9 @@ export default function NewProjectDialog(props) {
                                         {idx+1}. {processorData.displayName}
                                     </p>
                                     <Box sx={styles.processorImageBox} onClick={() => handleSelectProcessor(processorData.id, idx)}>
-                                        <img src={processorData.img} style={getImageStyle(processorData.id)}/>
+                                        <Tooltip title={processorData.documentType}>
+                                            <img src={processorData.img} style={getImageStyle(processorData.id)}/>
+                                        </Tooltip>
                                     </Box>
                                     
                                 </Grid>

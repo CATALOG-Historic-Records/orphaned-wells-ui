@@ -30,7 +30,7 @@ const styles = {
 
 
 export default function DocumentContainer(props) {
-    const { image, attributesList, fullAttributesList, handleChangeValue, handleUpdateRecord } = props;
+    const { image, attributesList, handleChangeValue, handleUpdateRecord } = props;
     const [ displayPoints, setDisplayPoints ] = useState(null)
     const [ displayKey, setDisplayKey ] = useState(null)
     const [ displayKeyIndex, setDisplayKeyIndex ] = useState(null)

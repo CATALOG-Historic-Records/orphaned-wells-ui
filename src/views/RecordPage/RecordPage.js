@@ -265,7 +265,6 @@ export default function Record() {
             <Box sx={styles.innerBox}>
                 <DocumentContainer
                     image={recordData.img_url}
-                    attributes={recordData.attributes}
                     attributesList={recordData.attributesList}
                     handleChangeValue={handleChangeValue}
                     // attributesList={attributesList}

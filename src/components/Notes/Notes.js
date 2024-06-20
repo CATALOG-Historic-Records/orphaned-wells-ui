@@ -19,7 +19,7 @@ export default function Notes(props) {
         callAPI(
             updateRecord,
             [record_id, {data: {"notes": recordNotes}, type: "notes"}],
-            onClose(),
+            () => onClose(record_id, recordNotes),
             handleFailedUpdate
         )
     }

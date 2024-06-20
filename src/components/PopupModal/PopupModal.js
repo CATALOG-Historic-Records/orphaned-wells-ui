@@ -64,7 +64,7 @@ export default function PopupModal(props) {
     return (
         <Modal
             open={open}
-            onClose={handleClose}
+            onClose={() => handleClose()}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
@@ -74,7 +74,7 @@ export default function PopupModal(props) {
             <Grid container sx={styles.modalStyle} spacing={1}>
             <IconButton
                 aria-label="close"
-                onClick={handleClose}
+                onClick={() => handleClose()}
                 sx={{
                     position: 'absolute',
                     right: 0,
@@ -90,7 +90,7 @@ export default function PopupModal(props) {
                     variant="standard"
                     id="margin-none"
                     label={textLabel}
-                    value={text}
+                    value={text || ""}
                     onChange={handleEditText}
                     fullWidth
                     onKeyDown={handleKeyDown}
@@ -108,7 +108,7 @@ export default function PopupModal(props) {
             <Grid container sx={styles.modalStyle} spacing={1}>
             <IconButton
                 aria-label="close"
-                onClick={handleClose}
+                onClick={() => handleClose()}
                 sx={{
                     position: 'absolute',
                     right: 0,
@@ -130,7 +130,7 @@ export default function PopupModal(props) {
                                 variant="standard"
                                 id="margin-none"
                                 label={textLabel}
-                                value={inputText}
+                                value={inputText || ""}
                                 onChange={handleEditText}
                                 multiline={multiline}
                                 rows={inputrows || 1}

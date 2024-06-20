@@ -20,7 +20,7 @@ const TABLE_ATTRIBUTES = {
 
 export default function RecordsTable(props) {
   let navigate = useNavigate()
-  const { projectData, records } = props;
+  const { projectData, records, setRecords } = props;
   const [ openColumnSelect, setOpenColumnSelect ] = useState(false)
   const [ attributes, setAttributes ] = useState([])
   const [ showNotes, setShowNotes ] = useState(false)
@@ -104,10 +104,21 @@ export default function RecordsTable(props) {
     setNotes(row.notes)
   }
 
-  const handleCloseNotesModal = () => {
+  const handleCloseNotesModal = (record_id, newNotes) => {
     setShowNotes(false)
     setNotesRecordId(null)
     setNotes(null)
+    if (record_id) {
+      const rowIdx = records.findIndex(r => r._id == record_id);
+      if (rowIdx > -1) {
+        let tempRecords = [...records]
+        let tempRecord = {...tempRecords[rowIdx]}
+        tempRecord.notes=newNotes
+        tempRecords[rowIdx] = tempRecord
+        setRecords(tempRecords)
+      }
+
+    }
   }
 
   const tableRow = (row, idx) => {
@@ -124,7 +135,7 @@ export default function RecordsTable(props) {
             <TableCell align="right">{row.status === "digitized" ? calculateAverageConfidence(row.attributesList) : null}</TableCell>
             <TableCell align="right">{row.status === "digitized" ? calculateLowestConfidence(row.attributesList) : null}</TableCell>
             <TableCell align="right">
-              <IconButton sx={{color: "#F2DB6F"}} onClick={(e) => handleClickNotes(e, row)}><StickyNote2Icon/></IconButton>
+              <IconButton sx={(row.notes === "" || !row.notes) ? {} : {color: "#F2DB6F"}} onClick={(e) => handleClickNotes(e, row)}><StickyNote2Icon/></IconButton>
             </TableCell>
             <TableCell align="right">
               {
