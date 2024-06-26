@@ -13,7 +13,7 @@ const DRAG_HANDLES = [
 ]
 
 export const ImageCropper = (props) => {
-    const { image, displayPoints, disabled, fullscreen } = props
+    const { image, displayPoints, disabled, fullscreen, imageIdx, highlightedImageIdxIndex } = props
     const [crop, setCrop] = useState()
     const [zoom, setZoom] = useState(1)
     const [ imageDimensions, setImageDimensions ] = useState([])
@@ -39,7 +39,7 @@ export const ImageCropper = (props) => {
     }, [fullscreen])
 
     useEffect(() => {
-        if (displayPoints) {
+        if (displayPoints && highlightedImageIdxIndex === imageIdx) {
             let crop_x = displayPoints[0][0] - 0.5
             let crop_y = displayPoints[0][1] - 0.5
             let crop_width = displayPoints[1][0] - displayPoints[0][0] + 1
@@ -60,7 +60,7 @@ export const ImageCropper = (props) => {
             setCrop(null)
         }
         
-    }, [displayPoints])
+    }, [displayPoints, highlightedImageIdxIndex])
 
     useEffect(() => {
         var img = new Image();

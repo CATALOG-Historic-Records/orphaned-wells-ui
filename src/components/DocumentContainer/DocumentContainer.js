@@ -30,7 +30,8 @@ const styles = {
 
 
 export default function DocumentContainer(props) {
-    const { image, attributesList, handleChangeValue, handleUpdateRecord } = props;
+    const { imageFiles, attributesList, handleChangeValue, handleUpdateRecord } = props;
+    const [ imgIndex, setImgIndex ] = useState(0)
     const [ displayPoints, setDisplayPoints ] = useState(null)
     const [ displayKey, setDisplayKey ] = useState(null)
     const [ displayKeyIndex, setDisplayKeyIndex ] = useState(null)
@@ -40,11 +41,43 @@ export default function DocumentContainer(props) {
     const [ width, setWidth ] = useState("100%")
     const [ height, setHeight ] = useState("auto")
     const [ forceOpenSubtable, setForceOpenSubtable ] = useState(null)
+    const [ imageHeight, setImageHeight ] = useState(0)
     const imageDivStyle={
         width: width,
         height: height,
     }
     let params = useParams(); 
+
+    useEffect(() => {
+        if (displayKeyIndex && displayKeySubattributeIndex) {
+            // console.log(attributesList[displayKeyIndex].subattributes[displayKeySubattributeIndex])
+            let newImgIdx = attributesList[displayKeyIndex].subattributes[displayKeySubattributeIndex].page
+            if (newImgIdx !== undefined && newImgIdx !== null) setImgIndex(newImgIdx)
+        } 
+        else if (displayKeyIndex) {
+            // console.log(attributesList[displayKeyIndex])
+            let newImgIdx = attributesList[displayKeyIndex].page
+            if (newImgIdx !== undefined && newImgIdx !== null) setImgIndex(newImgIdx)
+        }
+        else {
+            setImgIndex(0)
+        }
+        
+    },[displayKeyIndex, displayKeySubattributeIndex])
+
+    useEffect(() => {
+        if (imageFiles && imageFiles.length > 0) {
+            let img = new Image();
+
+            img.onload = function(){
+                let height = img.height;
+                // let width = img.width;
+                setImageHeight(height)
+            }
+
+            img.src = imageFiles[0];
+        }
+    })
 
     useEffect(() => {
         setDisplayPoints(null)
@@ -215,22 +248,40 @@ export default function DocumentContainer(props) {
                 for (let each of normalized_vertices) {
                     percentage_vertices.push([each[0]*100, each[1]*100])
                 }
+                // get page
+                let page = 0
+                try {
+                    let attr = attributesList[primaryIndex]
+                    if (isSubattribute) attr=attr.subattributes[subattributeIdx]
+                    if (attr.page !== undefined) page = attr.page
+                } catch (e) {
+                    console.log("error getting page")
+                    console.log(e)
+                }
+                // percentage from the top we should scroll down
+                // the y vertex of the element is relative to its page, so divide this by the amount of pages
+                // we then add the page number, but again divide by the amount of pages because this is a percentage
+                let scrollTop = (normalized_vertices[2][1] / imageFiles.length)
+                scrollTop += (page / imageFiles.length)
                 setDisplayPoints(percentage_vertices)
-                scrollToAttribute("image-box", normalized_vertices[2][1])
+                scrollToAttribute("image-box", "image-div", scrollTop)
             } else {
                 setDisplayPoints(null)
             }
         }
     }
 
-    const scrollToAttribute = (id, top) => {
-        let imageContainerId = id
+    const scrollToAttribute = (boxId, heightId, top) => {
+        let imageContainerId = boxId
         let imageContainerElement = document.getElementById(imageContainerId)
-        let scrollAmount = top * imageContainerElement.clientHeight
+        let imageElement = document.getElementById(heightId)
+        let scrollAmount = top * imageElement.clientHeight * imageFiles.length
+        // we're scrolling this amount from the top, so subtract 100 to ensure highlighted box isnt cut off
+        scrollAmount -=100
         if (imageContainerElement) {
             imageContainerElement.scrollTo({
-                top: scrollAmount,
-                behavior: "smooth",
+                    top: scrollAmount,
+                    behavior: "smooth",
                 });
         }
     }
@@ -311,15 +362,20 @@ export default function DocumentContainer(props) {
                             </Box>
                             <Box id="image-box" sx={styles.imageBox}>
                                 
-                                {image !== undefined &&
-                                <div style={imageDivStyle}>
-                                    <ImageCropper 
-                                        image={image}
-                                        displayPoints={displayPoints}
-                                        disabled
-                                        fullscreen={fullscreen}
-                                    />
-                                </div>
+                                {imageFiles &&
+                                imageFiles.map((imageFile, idx) => (
+                                    <div key={imageFile} style={imageDivStyle} id="image-div">
+                                        <ImageCropper 
+                                            image={imageFile}
+                                            imageIdx={idx}
+                                            highlightedImageIdxIndex={imgIndex}
+                                            displayPoints={displayPoints}
+                                            disabled
+                                            fullscreen={fullscreen}
+                                        />
+                                    </div>
+                                ))
+                                
                                 }
                             </Box>
                         </Box>
