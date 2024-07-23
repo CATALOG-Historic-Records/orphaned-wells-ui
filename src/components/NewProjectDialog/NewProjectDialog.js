@@ -48,6 +48,10 @@ export default function NewProjectDialog(props) {
         processorGridItem: {
             paddingX: 1
         },
+        processorTextBox: {
+            display: "flex",
+            justifyContent: "center",
+        },
         processorImageBox: {
             display: "flex",
             justifyContent: "center",
@@ -174,7 +178,7 @@ export default function NewProjectDialog(props) {
                         <Grid container>
                             {processors.map((processorData, idx) => (
                                 <Grid key={idx} item xs={4} sx={styles.processorGridItem}>
-                                    <p>
+                                    <p style={styles.processorTextBox}>
                                         {idx+1}. {processorData.displayName}
                                     </p>
                                     <Box sx={styles.processorImageBox} onClick={() => handleSelectProcessor(processorData.id, idx)}>

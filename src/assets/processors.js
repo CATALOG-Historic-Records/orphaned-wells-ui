@@ -184,141 +184,141 @@ export const processor_data =
     ],
 
     illinois: [
-        {
-            id: "fa0d15e4e6966543",
-            processor_id: "fa0d15e4e6966543",
-            name: "IllinoisWellCompletion",
-            displayName: "Illinois Well Completion",
-            state: "IL",
-            img: "./img/CO-well-completion-report.png",
-            attributes: [
-                {name: "ACIDIZED", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "ACIDIZED_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "CABLE_TOOLS_FROM", data_type: "plain_text", occurrence: "optional_once"},
-                // {name: "CABLE_TOOLS_TO", data_type: "plain_text", occurrence: "optional_once"},
-                // {name: "Class_II_Injection_Well", data_type: "checkbox", occurrence: "optional_once"},
-                {
-                    name: "Completion_for_Production", 
-                    data_type: "list", 
-                    occurrence: "optional_multiple",
-                    subattributes: [
-                        // {name: "Acidized_Fractures_Other", data_type: "plain_text", occurrence: "optional_multiple"},
-                        {name: "Formation_Name", data_type: "plain_text", occurrence: "optional_multiple"},
-                        // {name: "Lithology", data_type: "plain_text", occurrence: "optional_multiple"},
-                        // {name: "Open_Hole_Interval", data_type: "plain_text", occurrence: "optional_multiple"},
-                        {name: "Perforation_Interval", data_type: "plain_text", occurrence: "optional_multiple"},
-                        // {name: "Shots", data_type: "plain_text", occurrence: "optional_multiple"},
-                    ]
-                },
-                // {name: "Conversion", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "COUNTY", data_type: "plain_text", occurrence: "required_once"},
-                {name: "DAILY_PRODUCTION_BBLS_GAS_MCF", data_type: "number", occurrence: "optional_once"},
-                {name: "DAILY_PRODUCTION_BBLS_OIL", data_type: "number", occurrence: "optional_once"},
-                {name: "DAILY_PRODUCTION_BBLS_WATER", data_type: "number", occurrence: "optional_once"},
-                {name: "DATE_DRILLING_BEGAN", data_type: "datetime", occurrence: "optional_once"},
-                {name: "DATE_DRILLING_COMPLETED", data_type: "datetime", occurrence: "optional_once"},
-                // {name: "Date_First_Injection", data_type: "datetime", occurrence: "optional_once"},
-                {name: "DATE_ISSUED", data_type: "datetime", occurrence: "required_once"},
-                {name: "DATE_OF_FIRST_PROD", data_type: "datetime", occurrence: "optional_once"},
-                {name: "DATE_OF_TEST", data_type: "datetime", occurrence: "optional_once"},
-                {name: "DATE_SIGNED", data_type: "datetime", occurrence: "optional_once"},
-                // {name: "DEEPENED", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "Drill_and_Abandon", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "DRILL_STEM_TEST_RUN_NO", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "DRILL_STEM_TEST_RUN_YES", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "Drill_Stem_Zone_Tested", data_type: "plain_text", occurrence: "optional_multiple"},
-                // {name: "DRILLED_OUT_PLUGGED_HOLE", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "Dry_Hole", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "ELECTRIC_OR_OTHER_LOGS_RUN_DATE", data_type: "datetime", occurrence: "optional_once"},
-                // {name: "ELECTRIC_OR_OTHER_LOGS_RUN_NO", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "ELECTRIC_OR_OTHER_LOGS_RUN_YES", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "ELEVATION_DF", data_type: "number", occurrence: "optional_once"},
-                {name: "ELEVATION_KB", data_type: "number", occurrence: "optional_once"},
-                // {name: "FRACTURED", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "FRACTURED_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
-                // {name: "Gas", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "GAS_INPUT", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "Gas_Storage", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "GROUND", data_type: "number", occurrence: "optional_once"},
-                {name: "HOLE_SIZE", data_type: "number", occurrence: "optional_once"},
-                {name: "INTERVALS", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "LEASE_SIGN_POSTED_NO", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "LEASE_SIGN_POSTED_YES", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "LENGTH_OF_TEST", data_type: "plain_text", occurrence: "optional_once"},
-                // {name: "LINER_CSG_PULLED", data_type: "number", occurrence: "optional_once"},
-                // {name: "LINER_DEPTH", data_type: "number", occurrence: "optional_once"},
-                // {name: "Liner_Hole_Size", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "LINER_SIZE", data_type: "number", occurrence: "optional_once"},
-                // {name: "LINER_SKS_CEMENT", data_type: "number", occurrence: "optional_once"},
-                // {name: "Liner_Top_Determined_By", data_type: "plain_text", occurrence: "optional_multiple"},
-                // {name: "Liner_Top_of_Cement", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "LOCATION", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "MINE_INTERMEDIATE_CSG_PULLED", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "MINE_INTERMEDIATE_DEPTH", data_type: "number", occurrence: "optional_once"},
-                {name: "Mine_Intermediate_Hole_Size", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "MINE_INTERMEDIATE_SIZE", data_type: "number", occurrence: "optional_once"},
-                {name: "MINE_INTERMEDIATE_SKS_CEMENT", data_type: "number", occurrence: "optional_once"},
-                {name: "Mine_Intermediate_Top_Determined_By", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "Mine_Intermediate_Top_Of_Cement", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "NAME_OF_PRODUCING_INJECTION_FORMATION", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "NEW_WELL", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "OBSERVATION", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "OIL", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "OPERATOR", data_type: "plain_text", occurrence: "required_once"},
-                // {name: "OTHER", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "OTHER_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
-                // {name: "Packer_Brand_and_Type", data_type: "plain_text", occurrence: "optional_multiple"},
-                // {name: "Packer_Setting_Depth", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "PBTD", data_type: "number", occurrence: "optional_once"},
-                {name: "PERFORATED", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "PERFORATED_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "PERMIT_NO", data_type: "number", occurrence: "required_once"},
-                // {name: "Premittee_Number", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "PRODUCING_CSG_PULLED", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "PRODUCING_DEPTH", data_type: "number", occurrence: "optional_once"},
-                {name: "PRODUCING_SIZE", data_type: "number", occurrence: "optional_once"},
-                {name: "PRODUCING_SKS_CEMENT", data_type: "number", occurrence: "optional_once"},
-                // {name: "Production_Formation", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "Production_Hole_Size", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "Production_Top_Determined_By", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "Production_Top_of_Cement", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "RANGE", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "Reference_Number", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "ROTARY_TOOLS_FROM", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "ROTARY_TOOLS_TO", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "SECTION", data_type: "number", occurrence: "optional_once"},
-                // {name: "Service_Well", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "Service_Well_Text", data_type: "plain_text", occurrence: "optional_once"},
-                // {name: "SHOT", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "SHOT_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
-                // {name: "Source_Injected_Fluid", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "SURFACE_CSG_PULLED", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "SURFACE_DEPTH", data_type: "number", occurrence: "optional_once"},
-                // {name: "Surface_Formation", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "Surface_Hole_Size", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "SURFACE_SIZE", data_type: "number", occurrence: "optional_once"},
-                {name: "SURFACE_SKS_CEMENT", data_type: "number", occurrence: "optional_once"},
-                {name: "Surface_Top_Determined_By", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "Surface_Top_of_Cement", data_type: "plain_text", occurrence: "optional_once"},
-                // {name: "SWD", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "TOTAL_DEPTH", data_type: "number", occurrence: "optional_once"},
-                {name: "TOWNSHIP", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "Tubing_Size", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "Tubing_Type", data_type: "plain_text", occurrence: "optional_once"},
-                // {name: "Type_Injected_Fluid_Other", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "Type_Injected_Fluid_Other_Text", data_type: "plain_text", occurrence: "optional_multiple"},
-                // {name: "Type_Injected_Fluid_Saltwater", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "Type_of_Log", data_type: "plain_text", occurrence: "optional_multiple"},
-                {name: "WAS_WELL_CORED_NO", data_type: "checkbox", occurrence: "optional_once"},
-                {name: "WAS_WELL_CORED_YES", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "WATER_INPUT", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "WATER_SUPPLY", data_type: "checkbox", occurrence: "optional_once"},
-                // {name: "Well_Interval_Cored", data_type: "plain_text", occurrence: "optional_once"},
-                {name: "WELL_NAME_AND_NO", data_type: "plain_text", occurrence: "required_once"}
-                // {name: "Workover", data_type: "checkbox", occurrence: "optional_once"}
-            ],
-            documentType: "Well Completion Report generic",
-        },
+        // {
+        //     id: "fa0d15e4e6966543",
+        //     processor_id: "fa0d15e4e6966543",
+        //     name: "IllinoisWellCompletion",
+        //     displayName: "Illinois Well Completion",
+        //     state: "IL",
+        //     img: "./img/CO-well-completion-report.png",
+        //     attributes: [
+        //         {name: "ACIDIZED", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "ACIDIZED_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "CABLE_TOOLS_FROM", data_type: "plain_text", occurrence: "optional_once"},
+        //         // {name: "CABLE_TOOLS_TO", data_type: "plain_text", occurrence: "optional_once"},
+        //         // {name: "Class_II_Injection_Well", data_type: "checkbox", occurrence: "optional_once"},
+        //         {
+        //             name: "Completion_for_Production", 
+        //             data_type: "list", 
+        //             occurrence: "optional_multiple",
+        //             subattributes: [
+        //                 // {name: "Acidized_Fractures_Other", data_type: "plain_text", occurrence: "optional_multiple"},
+        //                 {name: "Formation_Name", data_type: "plain_text", occurrence: "optional_multiple"},
+        //                 // {name: "Lithology", data_type: "plain_text", occurrence: "optional_multiple"},
+        //                 // {name: "Open_Hole_Interval", data_type: "plain_text", occurrence: "optional_multiple"},
+        //                 {name: "Perforation_Interval", data_type: "plain_text", occurrence: "optional_multiple"},
+        //                 // {name: "Shots", data_type: "plain_text", occurrence: "optional_multiple"},
+        //             ]
+        //         },
+        //         // {name: "Conversion", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "COUNTY", data_type: "plain_text", occurrence: "required_once"},
+        //         {name: "DAILY_PRODUCTION_BBLS_GAS_MCF", data_type: "number", occurrence: "optional_once"},
+        //         {name: "DAILY_PRODUCTION_BBLS_OIL", data_type: "number", occurrence: "optional_once"},
+        //         {name: "DAILY_PRODUCTION_BBLS_WATER", data_type: "number", occurrence: "optional_once"},
+        //         {name: "DATE_DRILLING_BEGAN", data_type: "datetime", occurrence: "optional_once"},
+        //         {name: "DATE_DRILLING_COMPLETED", data_type: "datetime", occurrence: "optional_once"},
+        //         // {name: "Date_First_Injection", data_type: "datetime", occurrence: "optional_once"},
+        //         {name: "DATE_ISSUED", data_type: "datetime", occurrence: "required_once"},
+        //         {name: "DATE_OF_FIRST_PROD", data_type: "datetime", occurrence: "optional_once"},
+        //         {name: "DATE_OF_TEST", data_type: "datetime", occurrence: "optional_once"},
+        //         {name: "DATE_SIGNED", data_type: "datetime", occurrence: "optional_once"},
+        //         // {name: "DEEPENED", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "Drill_and_Abandon", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "DRILL_STEM_TEST_RUN_NO", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "DRILL_STEM_TEST_RUN_YES", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "Drill_Stem_Zone_Tested", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         // {name: "DRILLED_OUT_PLUGGED_HOLE", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "Dry_Hole", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "ELECTRIC_OR_OTHER_LOGS_RUN_DATE", data_type: "datetime", occurrence: "optional_once"},
+        //         // {name: "ELECTRIC_OR_OTHER_LOGS_RUN_NO", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "ELECTRIC_OR_OTHER_LOGS_RUN_YES", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "ELEVATION_DF", data_type: "number", occurrence: "optional_once"},
+        //         {name: "ELEVATION_KB", data_type: "number", occurrence: "optional_once"},
+        //         // {name: "FRACTURED", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "FRACTURED_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
+        //         // {name: "Gas", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "GAS_INPUT", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "Gas_Storage", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "GROUND", data_type: "number", occurrence: "optional_once"},
+        //         {name: "HOLE_SIZE", data_type: "number", occurrence: "optional_once"},
+        //         {name: "INTERVALS", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "LEASE_SIGN_POSTED_NO", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "LEASE_SIGN_POSTED_YES", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "LENGTH_OF_TEST", data_type: "plain_text", occurrence: "optional_once"},
+        //         // {name: "LINER_CSG_PULLED", data_type: "number", occurrence: "optional_once"},
+        //         // {name: "LINER_DEPTH", data_type: "number", occurrence: "optional_once"},
+        //         // {name: "Liner_Hole_Size", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "LINER_SIZE", data_type: "number", occurrence: "optional_once"},
+        //         // {name: "LINER_SKS_CEMENT", data_type: "number", occurrence: "optional_once"},
+        //         // {name: "Liner_Top_Determined_By", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         // {name: "Liner_Top_of_Cement", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "LOCATION", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "MINE_INTERMEDIATE_CSG_PULLED", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "MINE_INTERMEDIATE_DEPTH", data_type: "number", occurrence: "optional_once"},
+        //         {name: "Mine_Intermediate_Hole_Size", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "MINE_INTERMEDIATE_SIZE", data_type: "number", occurrence: "optional_once"},
+        //         {name: "MINE_INTERMEDIATE_SKS_CEMENT", data_type: "number", occurrence: "optional_once"},
+        //         {name: "Mine_Intermediate_Top_Determined_By", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "Mine_Intermediate_Top_Of_Cement", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "NAME_OF_PRODUCING_INJECTION_FORMATION", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "NEW_WELL", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "OBSERVATION", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "OIL", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "OPERATOR", data_type: "plain_text", occurrence: "required_once"},
+        //         // {name: "OTHER", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "OTHER_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
+        //         // {name: "Packer_Brand_and_Type", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         // {name: "Packer_Setting_Depth", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "PBTD", data_type: "number", occurrence: "optional_once"},
+        //         {name: "PERFORATED", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "PERFORATED_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "PERMIT_NO", data_type: "number", occurrence: "required_once"},
+        //         // {name: "Premittee_Number", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "PRODUCING_CSG_PULLED", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "PRODUCING_DEPTH", data_type: "number", occurrence: "optional_once"},
+        //         {name: "PRODUCING_SIZE", data_type: "number", occurrence: "optional_once"},
+        //         {name: "PRODUCING_SKS_CEMENT", data_type: "number", occurrence: "optional_once"},
+        //         // {name: "Production_Formation", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "Production_Hole_Size", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "Production_Top_Determined_By", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "Production_Top_of_Cement", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "RANGE", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "Reference_Number", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "ROTARY_TOOLS_FROM", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "ROTARY_TOOLS_TO", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "SECTION", data_type: "number", occurrence: "optional_once"},
+        //         // {name: "Service_Well", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "Service_Well_Text", data_type: "plain_text", occurrence: "optional_once"},
+        //         // {name: "SHOT", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "SHOT_LIST_AMOUNT_USED", data_type: "plain_text", occurrence: "optional_once"},
+        //         // {name: "Source_Injected_Fluid", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "SURFACE_CSG_PULLED", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "SURFACE_DEPTH", data_type: "number", occurrence: "optional_once"},
+        //         // {name: "Surface_Formation", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "Surface_Hole_Size", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "SURFACE_SIZE", data_type: "number", occurrence: "optional_once"},
+        //         {name: "SURFACE_SKS_CEMENT", data_type: "number", occurrence: "optional_once"},
+        //         {name: "Surface_Top_Determined_By", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "Surface_Top_of_Cement", data_type: "plain_text", occurrence: "optional_once"},
+        //         // {name: "SWD", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "TOTAL_DEPTH", data_type: "number", occurrence: "optional_once"},
+        //         {name: "TOWNSHIP", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "Tubing_Size", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "Tubing_Type", data_type: "plain_text", occurrence: "optional_once"},
+        //         // {name: "Type_Injected_Fluid_Other", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "Type_Injected_Fluid_Other_Text", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         // {name: "Type_Injected_Fluid_Saltwater", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "Type_of_Log", data_type: "plain_text", occurrence: "optional_multiple"},
+        //         {name: "WAS_WELL_CORED_NO", data_type: "checkbox", occurrence: "optional_once"},
+        //         {name: "WAS_WELL_CORED_YES", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "WATER_INPUT", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "WATER_SUPPLY", data_type: "checkbox", occurrence: "optional_once"},
+        //         // {name: "Well_Interval_Cored", data_type: "plain_text", occurrence: "optional_once"},
+        //         {name: "WELL_NAME_AND_NO", data_type: "plain_text", occurrence: "required_once"}
+        //         // {name: "Workover", data_type: "checkbox", occurrence: "optional_once"}
+        //     ],
+        //     documentType: "Well Completion Report generic",
+        // },
         {
             id: "10aa396edc8a5178",
             processor_id: "10aa396edc8a5178",
@@ -1466,42 +1466,42 @@ export const processor_data =
                 "enabled": "yes"
               },
               {
-                "name": "Completion_For_Production::Formation_Name",
+                "name": "Formation_Name",
                 "data_type": "plain_text",
                 "occurrence": "optional_multiple",
                 "grouping": "",
                 "enabled": "yes"
               },
               {
-                "name": "Completion_For_Production::Lithology",
+                "name": "Lithology",
                 "data_type": "plain_text",
                 "occurrence": "optional_multiple",
                 "grouping": "",
                 "enabled": "yes"
               },
               {
-                "name": "Completion_For_Production::Perforation_Interval",
+                "name": "Perforation_Interval",
                 "data_type": "plain_text",
                 "occurrence": "optional_multiple",
                 "grouping": "",
                 "enabled": "yes"
               },
               {
-                "name": "Completion_For_Production::Shots",
+                "name": "Shots",
                 "data_type": "plain_text",
                 "occurrence": "optional_multiple",
                 "grouping": "",
                 "enabled": "yes"
               },
               {
-                "name": "Completion_For_Production::Open_Hole_Interval",
+                "name": "Open_Hole_Interval",
                 "data_type": "plain_text",
                 "occurrence": "optional_multiple",
                 "grouping": "",
                 "enabled": "no"
               },
               {
-                "name": "Completion_For_Production::Acidized_Fractures_Other",
+                "name": "Acidized_Fractures_Other",
                 "data_type": "plain_text",
                 "occurrence": "optional_multiple",
                 "grouping": "",
@@ -1670,7 +1670,420 @@ export const processor_data =
               }
             ],
             documentType: "Well Completion Report Types B, C, D, E",
-        }
+        },
+        {
+          id: "50fd0b3ab811a3d1",
+          processor_id: "50fd0b3ab811a3d1",
+          name: "IL_WellCompletion_F",
+          displayName: "Well Completion Version F",
+          state: "IL",
+          img: "./img/IL_WellCompletion_F.png",
+          attributes: [
+            {
+              "name": "Company",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Pool",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "County",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "State",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Sec",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Twp",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Rge",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Location",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Well_No",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Farm_Name",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Rotary_Commenced",
+              "data_type": "datetime",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Rotary_Completion",
+              "data_type": "datetime",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Rotary_Contractor",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Rotary_Price",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Cable_Tool_Comm",
+              "data_type": "datetime",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Cable_Tool_Completion",
+              "data_type": "datetime",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Cable_Contractor",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Cable_Price",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Rotary_T_D",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Cable_T_D",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "P_B_Depth",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Elev_RKB",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Elev_Grd",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Elev_Orbit",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Casing_And_Tubing_Record",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Size_And_WT",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Amt_And_Set",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Set_At_KB",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Set_At_OVS",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Hole_Size",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Cement",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Cement_SK",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Cement_TOC",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Casing_Equipment",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Float_EQ",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Cent_And_Scrat",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "SP_Tools",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Acid_Record",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Gal",
+              "data_type": "plain_text",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Type",
+              "data_type": "plain_text",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Date",
+              "data_type": "datetime",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Shot_Record",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Shots",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Depth",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Datum",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Tops",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Formation",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Top",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Datum",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Depth",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Drilling_And_Workover_Data",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Date",
+              "data_type": "datetime",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Note",
+              "data_type": "plain_text",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Log_Record",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Type",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Date",
+              "data_type": "datetime",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            }
+          ],
+          documentType: "Well Completion Report Type F",
+      },
+        {
+          id: "dacfda98cad81d02",
+          processor_id: "dacfda98cad81d02",
+          name: "IL_WellCompletion_G",
+          displayName: "Well Completion Version G",
+          state: "IL",
+          img: "./img/IL_WellCompletion_G.png",
+          attributes: [],
+          documentType: "Well Completion Report Type G",
+      },
     ],
 }
 
