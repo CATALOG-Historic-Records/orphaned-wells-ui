@@ -2081,7 +2081,316 @@ export const processor_data =
           displayName: "Well Completion Version G",
           state: "IL",
           img: "./img/IL_WellCompletion_G.png",
-          attributes: [],
+          attributes: [
+            {
+              "name": "Permit_No",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "County",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Owner_Or_Operator",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Farm",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Well_No",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "NS_Distance",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "NS_Line",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "EW_Distance",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "EW_Line",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "First_Quarter",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Second_Quarter",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Third_Quarter",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Sec",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "T",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "R",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Type_Of_Well",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Elevation",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Date_Drilling_Began",
+              "data_type": "datetime",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Date_Completed",
+              "data_type": "datetime",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Total_Depth_Drilled",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "PB_To",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Electric_Log_Run",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Rotary_Tools_From",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Rotary_Tools_To",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Cable_Tools_From",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Cable_Tools_To",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Initial_Production_Before",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Initial_Production_After",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Gun_Perforating_Windows",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "No_Shots",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "From",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "To",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Casing_Record",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Size",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Depth",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Sacks_Cement",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Acid_Or_Shooting_Record_Or_Fracture_Treatment",
+              "data_type": "parent",
+              "occurrence": "optional_multiple",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Date",
+              "data_type": "datetime",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "From",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "To",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Amount_Used",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "no"
+            },
+            {
+              "name": "Date",
+              "data_type": "datetime",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Signed",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            },
+            {
+              "name": "Title",
+              "data_type": "plain_text",
+              "occurrence": "optional_once",
+              "grouping": "",
+              "enabled": "yes"
+            }
+          ],
           documentType: "Well Completion Report Type G",
       },
     ],
