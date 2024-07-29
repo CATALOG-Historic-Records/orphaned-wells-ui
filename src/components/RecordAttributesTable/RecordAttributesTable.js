@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
-import { Box, TextField, Collapse, Typography, IconButton } from '@mui/material';
+import { Box, TextField, Collapse, Typography, IconButton, Badge } from '@mui/material';
 import { formatConfidence, useKeyDown, useOutsideClick, round } from '../../assets/helperFunctions';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -31,8 +31,19 @@ const styles = {
     },
     rowIcon: {
         fontSize: "16px"
+    },
+    flaggedConfidence: {
+        padding:0,
+        margin:0,
+        color: "#9E0101",
+    },
+    unflaggedConfidence: {
+        padding:0,
+        margin:0,
     }
 }
+
+const LOW_CONFIDENCE = 0.01
 
 export default function AttributesTable(props) {
     const { 
@@ -233,7 +244,58 @@ function AttributeRow(props) {
                 </TableCell>
             }
             
-            <TableCell>{formatConfidence(v.confidence)}</TableCell>
+            <TableCell align="right">
+                {/* 
+                    case 1: attribute has been edited: show 'edited'
+                    case 2: attribute has not been found (no confidence): show 'not found'
+                    case 3: attribute was found and not edited
+                        a: attribute has no value: show confidence in red
+                        b: attribute has low confidence: show confidence in red
+                        c: else: show confidence in black
+                */}
+                {
+                    v.edited ? 
+                    <p style={{padding:0, margin:0}}>
+                        <Badge 
+                            color="blue" 
+                            variant="dot"
+                            sx={{
+                            "& .MuiBadge-badge": {
+                                color: "#2196F3",
+                                backgroundColor: "#2196F3"
+                            }
+                            }}
+                            
+                        /> 
+                        &nbsp; Edited
+                    </p> :
+                     (v.confidence === null) ? 
+                     <p style={{padding:0, margin:0}}>
+                        <Badge 
+                            color="blue" 
+                            variant="dot"
+                            sx={{
+                            "& .MuiBadge-badge": {
+                                color: "#9E0101",
+                                backgroundColor: "#9E0101"
+                            }
+                            }}
+                            
+                        /> 
+                        &nbsp; Not found
+                    </p>
+                      :
+                      <p 
+                        style={
+                            (v.value === "" || v.confidence < LOW_CONFIDENCE) ? 
+                            styles.flaggedConfidence :
+                            styles.unflaggedConfidence
+                        }
+                    >
+                        {formatConfidence(v.confidence)}
+                    </p>
+                }
+            </TableCell>
         </TableRow>
         {
             v.subattributes &&
