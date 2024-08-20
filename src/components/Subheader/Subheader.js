@@ -29,11 +29,11 @@ export default function Subheader(props) {
             margin: 0,
             padding: 0,
         },
-        directoryDispaly: {
+        directoryDisplay: {
             display: "flex",
             justifyContent: "flex-start",
             marginLeft: 40,
-            overflow: "scroll",
+            overflow: "auto",
             width: "80vw"
         },
         pageName: {
@@ -75,7 +75,7 @@ export default function Subheader(props) {
         <Box sx={styles.box}>
             <Grid container sx={styles.gridContainer}>
                 <Grid item xs={9} >
-                    <div style={styles.directoryDispaly}>
+                    <div style={styles.directoryDisplay}>
                         <IconButton sx={styles.iconButton} onClick={() => handleNavigate("/")}><HomeIcon sx={styles.icon}/></IconButton> 
                         /
                         {
