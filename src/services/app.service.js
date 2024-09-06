@@ -7,9 +7,16 @@ export const getProjects = () => {
     });
 }; 
 
-export const getProjectData = (project_id) => {
-    return fetch(BACKEND_URL+'/get_project/'+project_id, {
+export const getProjectData = (project_id, page, records_per_page, sort, filter) => {
+    let route = BACKEND_URL+'/get_project/'+project_id+'?page='+page+'&records_per_page='+records_per_page
+    let data = {
+        sort: sort,
+        filter: filter
+    }
+    return fetch(route, {
+        method: 'POST',
         mode: 'cors',
+        body: JSON.stringify(data),
         headers: {"Authorization": "Bearer "+ localStorage.getItem("id_token")}
     });
 }; 

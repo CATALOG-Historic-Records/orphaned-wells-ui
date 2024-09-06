@@ -38,7 +38,7 @@ const mockProjects = [
 
 test('test records table', () => {
 
-    render( <HashRouter> <RecordsTable projectData={mockProjects[0]} records={[]}/> </HashRouter> )
+    render( <HashRouter> <RecordsTable projectData={mockProjects[0]} records={[]} recordCount={10} page={0} appliedFilters={[]}/> </HashRouter> )
 
     //test for component elements
     screen.getByRole('table', {  name: /records table/i});

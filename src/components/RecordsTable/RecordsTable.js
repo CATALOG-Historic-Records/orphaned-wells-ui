@@ -1,31 +1,57 @@
 import { useEffect, Fragment, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Box, Paper, IconButton } from '@mui/material'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, TablePagination, Icon } from '@mui/material'
+import { Button, Box, Paper, IconButton, Grid } from '@mui/material'
+import { useTheme } from '@mui/material/styles';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import ErrorIcon from '@mui/icons-material/Error';
 import CachedIcon from '@mui/icons-material/Cached';
-import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import StickyNote2Icon from '@mui/icons-material/StickyNote2';
+import FirstPageIcon from '@mui/icons-material/FirstPage';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import LastPageIcon from '@mui/icons-material/LastPage';
 import ColumnSelectDialog from '../../components/ColumnSelectDialog/ColumnSelectDialog';
 import { formatDate, average, formatConfidence } from '../../assets/helperFunctions';
 import Notes from '../Notes/Notes';
+import TableFilters from '../TableFilters/TableFilters';
 
 const TABLE_ATTRIBUTES = {
   displayNames: ["Record Name", "Date Uploaded", "API Number", "Mean Confidence", "Lowest Confidence", "Notes", "Digitization Status", "Review Status"],
-  keyNames: ["name", "contributor", "dateCreated", "API_NUMBER", "confidence_median", "confidence_lowest", "status", "review_status"],
+  keyNames: ["name", "dateCreated", "API_NUMBER", "confidence_median", "confidence_lowest", "notes", "status", "review_status"],
 }
+
+const SORTABLE_COLUMNS = ["name", "dateCreated", "status", "review_status"]
 
 export default function RecordsTable(props) {
   let navigate = useNavigate()
-  const { projectData, records, setRecords } = props;
+  const { 
+    projectData, 
+    records, 
+    setRecords, 
+    pageSize,
+    currentPage,
+    sortBy,
+    sortAscending,
+    recordCount,
+    setPageSize,
+    setCurrentPage,
+    appliedFilters,
+    setAppliedFilters,
+    setSortBy,
+    setSortAscending
+  } = props;
   const [ openColumnSelect, setOpenColumnSelect ] = useState(false)
   const [ attributes, setAttributes ] = useState([])
   const [ showNotes, setShowNotes ] = useState(false)
   const [ notesRecordId, setNotesRecordId ] = useState(null)
   const [ notes, setNotes ] = useState(null)
+  // const [ appliedFilters, setAppliedFilters ] = useState([])
 
   useEffect(() => {
       if (projectData) {
@@ -46,10 +72,17 @@ export default function RecordsTable(props) {
       },
     },
     topSection: {
-      display: 'flex', 
-      justifyContent: 'flex-end', 
       marginTop: 2, 
-      marginRight: 2
+      marginRight: 2,
+      paddingX: 3,
+    },
+    topSectionLeft: {
+      display: "flex",
+      justifyContent: "flex-start",
+    },
+    topSectionRight: {
+      display: "flex",
+      justifyContent: "flex-end",
     },
     headerCell: {
       fontWeight: "bold"
@@ -121,6 +154,46 @@ export default function RecordsTable(props) {
     }
   }
 
+  const handleApplyFilters = (appliedFilters) => {
+    setAppliedFilters(appliedFilters)
+
+    // save filters in localstorage
+    let currentAppliedFilters = localStorage.getItem("appliedFilters")
+    if (currentAppliedFilters === null) currentAppliedFilters={}
+    else currentAppliedFilters = JSON.parse(currentAppliedFilters)
+    currentAppliedFilters[projectData.id_] = appliedFilters
+    console.log("setting applied filters to ")
+    console.log(currentAppliedFilters)
+    localStorage.setItem("appliedFilters", JSON.stringify(currentAppliedFilters))
+  }
+
+
+  const handleChangePage = (newPage) => {
+    setCurrentPage(newPage)
+  }
+
+  const handleChangeRowsPerPage = (event) => {
+    let newSize = parseInt(event.target.value)
+    setPageSize(newSize)
+  }
+
+  const handleSort = (key) => {
+    if (SORTABLE_COLUMNS.includes(key)) {
+      if (sortBy === key) setSortAscending(sortAscending * -1)
+        else {
+          setSortBy(key)
+          setSortAscending(1)
+        }
+    }
+    
+  }
+
+  const getParagraphStyle = (key) => {
+    let paragraphStyle = {margin: 0}
+    if (SORTABLE_COLUMNS.includes(key)) paragraphStyle['cursor'] = 'pointer'
+    return paragraphStyle
+  }
+
   const tableRow = (row, idx) => {
       return (
         <TableRow
@@ -130,7 +203,7 @@ export default function RecordsTable(props) {
             <TableCell align="right">{row.recordIndex}.</TableCell>
             <TableCell>{row.name}</TableCell>
             {/* <TableCell>{row.contributor.name}</TableCell> */}
-            <TableCell>{formatDate(row.dateCreated)}</TableCell>
+            <TableCell align="right">{formatDate(row.dateCreated)}</TableCell>
             <TableCell align="right">{row.status === "digitized" ? getAPINumber(row) : null}</TableCell>
             <TableCell align="right">{row.status === "digitized" ? calculateAverageConfidence(row.attributesList) : null}</TableCell>
             <TableCell align="right">{row.status === "digitized" ? calculateLowestConfidence(row.attributesList) : null}</TableCell>
@@ -182,12 +255,20 @@ export default function RecordsTable(props) {
   return (
     <TableContainer component={Paper}>
       <Box sx={styles.topSection}>
-        {/* <Button variant="contained" onClick={handleDownloadCSV} startIcon={<DownloadIcon/>}> */}
-        {projectData && 
-          <Button variant="contained" onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon/>}>
-            Export Project
-        </Button>
-        }
+        <Grid container>
+          <Grid item sx={styles.topSectionLeft} xs={6}>
+            <TableFilters applyFilters={handleApplyFilters} appliedFilters={appliedFilters}/>
+          </Grid>
+          <Grid item sx={styles.topSectionRight} xs={6}>
+            {projectData && 
+              <Button variant="contained" onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon/>}>
+                Export Project
+              </Button>
+            }
+          </Grid>
+        </Grid>
+        
+        
         
       </Box>
       <Table sx={{ minWidth: 650, marginTop: 1 }} aria-label="records table" size="small">
@@ -196,7 +277,22 @@ export default function RecordsTable(props) {
             <TableCell></TableCell>
             {
                 TABLE_ATTRIBUTES.displayNames.map((attribute, idx) => (
-                    <TableCell sx={styles.headerCell} key={idx} align={idx > 1 ? "right" : "left"}>{attribute}</TableCell>
+                    <TableCell sx={styles.headerCell} key={idx} align={idx > 0 ? "right" : "left"}>
+                      <p style={getParagraphStyle(TABLE_ATTRIBUTES.keyNames[idx])} onClick={() => handleSort(TABLE_ATTRIBUTES.keyNames[idx])}>
+                        
+                        {TABLE_ATTRIBUTES.keyNames[idx] === sortBy &&
+                          <IconButton onClick={() => setSortAscending(sortAscending * -1)}>
+                            {
+                              sortAscending === 1 ? 
+                                <KeyboardArrowUpIcon /> :
+                              sortAscending === -1 &&
+                                <KeyboardArrowDownIcon />
+                            }
+                          </IconButton>
+                        }
+                        {attribute}
+                      </p>
+                    </TableCell>
                 ))
             }
           </TableRow>
@@ -209,6 +305,29 @@ export default function RecordsTable(props) {
             
           ))}
         </TableBody>
+
+        <TableFooter>
+          <TableRow>
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 50, 100, { label: 'All', value: -1 }]}
+              colSpan={3}
+              count={recordCount}
+              rowsPerPage={pageSize}
+              page={currentPage}
+              slotProps={{
+                select: {
+                  inputProps: {
+                    'aria-label': 'rows per page',
+                  },
+                  native: true,
+                },
+              }}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              ActionsComponent={TablePaginationActions}
+            />
+          </TableRow>
+        </TableFooter>
       </Table>
           { projectData && 
             <ColumnSelectDialog
@@ -227,5 +346,59 @@ export default function RecordsTable(props) {
         onClose={handleCloseNotesModal}
       />
     </TableContainer>
+  );
+}
+
+function TablePaginationActions(props) {
+  const theme = useTheme();
+  const { count, page, rowsPerPage, onPageChange } = props;
+
+  const handleFirstPageButtonClick = (event) => {
+    onPageChange(0);
+  };
+
+  const handleBackButtonClick = (event) => {
+    onPageChange(page - 1);
+  };
+
+  const handleNextButtonClick = (event) => {
+    onPageChange(page + 1);
+  };
+
+  const handleLastPageButtonClick = (event) => {
+    onPageChange(Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
+
+  return (
+    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
+      </IconButton>
+      <IconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        aria-label="previous page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
+      </IconButton>
+    </Box>
   );
 }

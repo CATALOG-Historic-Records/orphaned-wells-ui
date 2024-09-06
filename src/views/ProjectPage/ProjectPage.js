@@ -7,25 +7,44 @@ import Subheader from '../../components/Subheader/Subheader';
 import UploadDocumentsModal from '../../components/UploadDocumentsModal/UploadDocumentsModal';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import { callAPI } from '../../assets/helperFunctions';
+import { convertFiltersToMongoFormat } from '../../assets/helperFunctions';
 
 export default function Project() {
+    let params = useParams(); 
+    let navigate = useNavigate();
     const [ records, setRecords ] = useState([])
-    const [ projectData, setProjectData ] = useState({attributes: []})
+    const [ projectData, setProjectData ] = useState({attributes: [], id_: params.id})
     const [ showDocumentModal, setShowDocumentModal ] = useState(false)
     const [ openDeleteModal, setOpenDeleteModal ] = useState(false)
     const [ openUpdateNameModal, setOpenUpdateNameModal ] = useState(false)
     const [ projectName, setProjectName ] = useState("")
-    let params = useParams(); 
-    let navigate = useNavigate();
+    const [ recordCount, setRecordCount ] = useState(0)
+    const [ currentPage, setCurrentPage ] = useState(0)
+    const [ pageSize, setPageSize ] = useState(100)
+    const [ sortBy, setSortBy ] = useState('dateCreated')
+    const [ sortAscending, setSortAscending ] = useState(1)
+    const [ filterBy, setFilterBy ] = useState(
+        localStorage.getItem("appliedFilters") ? 
+        (
+            JSON.parse(localStorage.getItem("appliedFilters"))[params.id] || []
+        ) : 
+        []
+    )
 
     useEffect(() => {
         loadData()
-    }, [params.id])
+    }, [params.id, pageSize, currentPage, sortBy, sortAscending, filterBy])
+
+    useEffect(() => {
+        setCurrentPage(0)
+    }, [sortBy, sortAscending, filterBy])
 
     const loadData = () => {
+        let sort = [sortBy, sortAscending]
+        let args = [params.id, currentPage, pageSize, sort, convertFiltersToMongoFormat(filterBy)]
         callAPI(
             getProjectData,
-            [params.id],
+            args,
             handleSuccess,
             (e) => {console.error('error getting project data: ',e)}
         )
@@ -35,6 +54,7 @@ export default function Project() {
         setRecords(data.records)
         setProjectData(data.project_data)
         setProjectName(data.project_data.name)
+        setRecordCount(data.record_count)
     }
 
     const styles = {
@@ -116,6 +136,17 @@ export default function Project() {
                     projectData={projectData}
                     records={records}
                     setRecords={setRecords}
+                    pageSize={pageSize}
+                    currentPage={currentPage}
+                    sortBy={sortBy}
+                    sortAscending={sortAscending}
+                    recordCount={recordCount}
+                    setPageSize={setPageSize}
+                    setCurrentPage={setCurrentPage}
+                    appliedFilters={filterBy}
+                    setAppliedFilters={setFilterBy}
+                    setSortBy={setSortBy}
+                    setSortAscending={setSortAscending}
                 />
             </Box>
             { showDocumentModal && 

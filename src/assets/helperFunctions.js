@@ -107,6 +107,48 @@ export const logout = () => {
   window.location.replace("/")
 }
 
+export const convertFiltersToMongoFormat = (filters) => {
+  let filterBy = {}
+  for (let filter of filters) {
+      let nextFilter;
+      if (filter.type === 'checkbox') {
+          let allOptionsTrue = true
+          nextFilter = { "$in": []}
+          for (let each of filter.options) {
+              if (each.checked) nextFilter["$in"].push(each.name)
+              else allOptionsTrue = false
+          }
+          if (allOptionsTrue) { // if all options are checked, no need to add the filter
+              nextFilter = {}
+          }
+      }
+      else if (filter.type === 'date') {
+          let date_value = filter.value
+          let date_start = Math.floor(new Date(date_value).getTime() / 1000)
+          let date_end = date_start+(24*3600)
+          if (filter.operator === 'is') {
+              nextFilter = { "$gte": date_start, "$lt": date_end}
+          } else if (filter.operator === 'before') {
+              nextFilter = { "$lt": date_start}
+          } else if (filter.operator === 'after') {
+              nextFilter = { "$gt": date_end}
+          }
+          
+      }
+      else if (filter.type === 'string') {
+          if (filter.operator === 'equals') nextFilter = filter.value
+          else if (filter.operator === 'contains') nextFilter = {"$regex": filter.value}
+      }
+
+      if (Object.keys(filterBy).includes(filter.key)) { // merge them
+          filterBy[filter.key] = {...filterBy[filter.key], ...nextFilter}
+      } else { // add key
+          filterBy[filter.key] = nextFilter;
+      }
+  }
+  return filterBy
+}
+
 /*
   Function for making API calls. reduces redundancy of handling unauthorizations everywhere
   parameters:
