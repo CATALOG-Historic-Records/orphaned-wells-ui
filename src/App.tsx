@@ -11,14 +11,7 @@ import { callAPI } from './assets/helperFunctions';
 import { checkAuth } from './services/app.service';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import './App.css';
-
-interface User {
-  email: string,
-  name: string,
-  picture: string,
-  hd: string,
-  role: number
-}
+import { User } from './types';
 
 const theme = createTheme({
   palette: {
@@ -31,14 +24,11 @@ const theme = createTheme({
 
 function App() {
   const [ authenticated, setAuthenticated ] = React.useState(false)
-  // const [ userCredentials, setUserCredentials ] = React.useState({})
   let navigate = useNavigate()
 
   React.useEffect(() => {
     let id_token = localStorage.getItem("id_token")
-    // localStorage.clear()
     if (id_token !== null) {
-      // setUserCredentials({id_token: id_token})
       checkAuthentication(id_token)
     } else {
       navigate("/login")
@@ -79,7 +69,7 @@ function App() {
     <ThemeProvider theme={theme}>
     <div className="App">
           {!window.location.hash.includes("login") && 
-            <Header authenticated={authenticated}/>
+            <Header/>
           }
           
           <Routes> 
