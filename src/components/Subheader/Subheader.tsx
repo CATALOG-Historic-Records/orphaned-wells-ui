@@ -4,10 +4,11 @@ import { Button, Grid, IconButton, Box, Menu, MenuItem, Chip } from '@mui/materi
 import HomeIcon from '@mui/icons-material/Home';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { SubheaderProps } from '../../types';
+import LockIcon from '@mui/icons-material/Lock';
 
 const Subheader = (props: SubheaderProps) => {
     const navigate = useNavigate();
-    const { currentPage, buttonName, status, subtext, handleClickButton, disableButton, previousPages, actions } = props;
+    const { currentPage, buttonName, status, subtext, handleClickButton, disableButton, previousPages, actions, locked } = props;
     const [showActions, setShowActions] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const styles = {
@@ -94,7 +95,7 @@ const Subheader = (props: SubheaderProps) => {
                         {currentPage}&nbsp;
                         {actions &&
                             <>
-                                <IconButton onClick={handleShowActions}><MoreHorizIcon sx={styles.icon} /></IconButton>
+                                <IconButton onClick={handleShowActions} disabled={locked}><MoreHorizIcon sx={styles.icon} /></IconButton>
                                 <Menu
                                     id="actions"
                                     anchorEl={anchorEl}
@@ -120,7 +121,17 @@ const Subheader = (props: SubheaderProps) => {
                                 {buttonName}
                             </Button>
                         }
-                        {!buttonName && status &&
+                        {locked ? 
+                        <Chip
+                            sx={{
+                                fontSize: "16px",
+                                backgroundColor: "default"
+                            }}
+                            label={"LOCKED"}
+                            icon={<LockIcon/>}
+                        />
+                        : 
+                        !buttonName && status &&
                             <Chip
                                 sx={{
                                     fontSize: "16px",

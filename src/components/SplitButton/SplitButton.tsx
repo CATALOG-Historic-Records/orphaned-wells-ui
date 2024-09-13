@@ -11,9 +11,10 @@ interface Option {
 
 interface SplitButtonProps {
     options: Option[];
+    disabled?: boolean;
 }
 
-const SplitButton = ({ options }: SplitButtonProps) => {
+const SplitButton = ({ options, disabled }: SplitButtonProps) => {
     const [open, setOpen] = React.useState(false);
     const anchorRef = React.useRef<HTMLDivElement>(null);
     const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -43,6 +44,7 @@ const SplitButton = ({ options }: SplitButtonProps) => {
             <ButtonGroup
                 variant="outlined"
                 ref={anchorRef}
+                disabled={disabled}
             >
                 <Button startIcon={options[selectedIndex].icon} onClick={handleClick}>{options[selectedIndex].text}</Button>
                 <Button

@@ -61,6 +61,7 @@ const AttributesTable = (props: AttributesTableProps) => {
         displayKeyIndex,
         displayKeySubattributeIndex,
         handleUpdateRecord,
+        locked
     } = props;
 
     const handleClickOutside = () => {
@@ -92,6 +93,7 @@ const AttributesTable = (props: AttributesTableProps) => {
                             displayKeyIndex={displayKeyIndex}
                             displayKeySubattributeIndex={displayKeySubattributeIndex}
                             handleUpdateRecord={handleUpdateRecord}
+                            locked={locked}
                         />
                     ))}
                 </TableBody>
@@ -119,7 +121,8 @@ const AttributeRow = (props: AttributeRowProps) => {
         forceOpenSubtable,
         displayKeyIndex, 
         displayKeySubattributeIndex, 
-        handleUpdateRecord 
+        handleUpdateRecord,
+        locked
     } = props;
     
     const [ editMode, setEditMode ] = useState(false);
@@ -142,7 +145,7 @@ const AttributeRow = (props: AttributeRowProps) => {
     useKeyDown("Enter", () => {
         if (isSelected) {
             if (editMode) finishEditing();
-            else setEditMode(true);
+            else makeEditable();
         }
     }, undefined, undefined, undefined, true);
 
@@ -157,7 +160,7 @@ const AttributeRow = (props: AttributeRowProps) => {
     }, [forceOpenSubtable]);
 
     const handleDoubleClick = () => {
-        setEditMode(true);
+        makeEditable()
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTableCellElement>) => {
@@ -172,6 +175,11 @@ const AttributeRow = (props: AttributeRowProps) => {
     const handleClickEditIcon = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
         handleDoubleClick();
+    }
+
+    const makeEditable = () => {
+        if (locked) return
+        setEditMode(true);
     }
 
     const finishEditing = () => {
@@ -216,7 +224,7 @@ const AttributeRow = (props: AttributeRowProps) => {
                         :
                         <span>
                             {v.value}&nbsp;
-                            {isSelected && 
+                            {isSelected && !locked &&
                                 <IconButton sx={styles.rowIconButton} onClick={handleClickEditIcon}>
                                     <EditIcon sx={styles.rowIcon}/>
                                 </IconButton>
@@ -278,6 +286,7 @@ const AttributeRow = (props: AttributeRowProps) => {
                 handleUpdateRecord={handleUpdateRecord}
                 displayKeySubattributeIndex={displayKeySubattributeIndex}
                 topLevelIdx={idx}
+                locked={locked}
             />
         }
     </>
@@ -300,7 +309,8 @@ const SubattributesTable = (props: SubattributesTableProps) => {
         fullscreen,
         displayKeyIndex,
         displayKeySubattributeIndex,
-        handleUpdateRecord
+        handleUpdateRecord,
+        locked
     } = props;
 
     return (
@@ -333,6 +343,7 @@ const SubattributesTable = (props: SubattributesTableProps) => {
                             displayKeySubattributeIndex={displayKeySubattributeIndex}
                             idx={idx}
                             topLevelIdx={topLevelIdx}
+                            locked={locked}
                         />
                     ))}
                     </TableBody>
@@ -362,7 +373,8 @@ const SubattributeRow = (props: SubattributeRowProps) => {
         displayKeyIndex,
         displayKeySubattributeIndex,
         handleUpdateRecord,
-        idx
+        idx,
+        locked
     } = props;
 
     const [ editMode, setEditMode ] = useState(false);
@@ -380,7 +392,7 @@ const SubattributeRow = (props: SubattributeRowProps) => {
     useKeyDown("Enter", () => {
         if (isSelected) {
             if (editMode) finishEditing();
-            else setEditMode(true);
+            else makeEditable();
         }
     }, undefined, undefined, undefined, true);
 
@@ -396,7 +408,7 @@ const SubattributeRow = (props: SubattributeRowProps) => {
     }
 
     const handleDoubleClick = () => {
-        setEditMode(true);
+        makeEditable()
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTableCellElement>) => {
@@ -409,6 +421,7 @@ const SubattributeRow = (props: SubattributeRowProps) => {
     }
 
     const handleUpdateValue = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (locked) return
         handleChangeValue(event, topLevelIdx, true, idx);
     }
 
@@ -417,10 +430,17 @@ const SubattributeRow = (props: SubattributeRowProps) => {
         handleDoubleClick();
     }
 
+    const makeEditable = () => {
+        if (locked) return
+        setEditMode(true);
+    }
+
     const finishEditing = () => {
         handleUpdateRecord();
         setEditMode(false);
     }
+
+    
 
     return (
         <TableRow 
@@ -448,7 +468,7 @@ const SubattributeRow = (props: SubattributeRowProps) => {
                     :
                     <span>
                         {v.value}&nbsp;
-                        {isSelected && 
+                        {isSelected && !locked &&
                             <IconButton sx={styles.rowIconButton} onClick={handleClickEditIcon}>
                                 <EditIcon sx={styles.rowIcon}/>
                             </IconButton>

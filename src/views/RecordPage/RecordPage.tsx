@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecordData, updateRecord, deleteRecord, getNextRecord, getPreviousRecord } from '../../services/app.service';
+import { getRecordData, updateRecord, deleteRecord } from '../../services/app.service';
 import { callAPI, useKeyDown } from '../../assets/helperFunctions';
 import Subheader from '../../components/Subheader/Subheader';
 import Bottombar from '../../components/BottomBar/BottomBar';
@@ -23,6 +23,7 @@ const Record = () => {
     const [showErrorBar, setShowErrorBar] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
     const [showResetPrompt, setShowResetPrompt] = useState(false);
+    const [locked, setLocked] = useState(false)
     const params = useParams<{ id: string }>();
     const navigate = useNavigate();
 
@@ -61,23 +62,30 @@ const Record = () => {
 
     const handleFailedFetchRecord = (data: any, response_status?: number) => {
         if (response_status === 303) {
-            if (data.direction === "previous") {
-                handleClickPrevious(data.recordData, true);
-            } else {
-                handleClickNext(data.recordData, true);
-            }
+            handleSuccessfulFetchRecord(data, true)
         } else {
             console.error('error getting record data: ', data);
         }
     }
 
-    const handleSuccessfulFetchRecord = (data: RecordData) => {
-        setRecordData(data);
-        setRecordName(data.name);
+    const handleSuccessfulFetchRecord = (data: any, lock_record?: boolean) => {
+        let newRecordData = data.recordData;
+        if (lock_record) {
+            setShowErrorBar(true)
+            setErrorMsg("This record is currently being reviewed by a team member.")
+            setLocked(true)
+        }
+        else {
+            setShowErrorBar(false)
+            setErrorMsg("")
+            setLocked(false)
+        }
+        setRecordData(newRecordData);
+        setRecordName(newRecordData.name);
         let tempPreviousPages: PreviousPages = {
             "Projects": () => navigate("/projects", { replace: true }),
         };
-        tempPreviousPages[data.project_name] = () => navigate("/project/" + data.project_id, { replace: true });
+        tempPreviousPages[newRecordData.project_name] = () => navigate("/project/" + newRecordData.project_id, { replace: true });
         setPreviousPages(tempPreviousPages);
     }
 
@@ -86,6 +94,7 @@ const Record = () => {
     }
 
     const handleUpdateRecordName = () => {
+        if (locked) return
         setOpenUpdateNameModal(false);
         callAPI(
             updateRecord,
@@ -96,6 +105,7 @@ const Record = () => {
     }
 
     const handleUpdateRecord = () => {
+        if (locked) return
         callAPI(
             updateRecord,
             [params.id, { data: recordData, type: "attributesList" }],
@@ -104,7 +114,7 @@ const Record = () => {
         );
     }
 
-    const handleSuccessfulAttributeUpdate = (data: RecordData) => {
+    const handleSuccessfulAttributeUpdate = (data: any) => {
         let tempRecordData = { ...recordData } as RecordData;
         tempRecordData["attributesList"] = data["attributesList"]
         setRecordData(tempRecordData);
@@ -123,6 +133,7 @@ const Record = () => {
     }
 
     const handleChangeValue: handleChangeValueSignature = (event, topLevelIndex, isSubattribute, subIndex) => {
+        if (locked) return
         let tempRecordData = { ...recordData };
         let tempAttributesList = [...tempRecordData.attributesList];
         let tempAttribute: any;
@@ -160,42 +171,31 @@ const Record = () => {
         navigate("/project/" + recordData.project_id, { replace: true });
     }
 
-    const handleClickNext = (incomingData?: any, useIncomingData?: boolean) => {
-        let body = { data: recordData, reviewed: false };
-        if (useIncomingData) body.data = incomingData;
-        callAPI(
-            getNextRecord,
-            [body],
-            handleSuccessNavigateRecord,
-            handleFailedFetchRecord
-        );
+    const handleClickNext = () => {
+        navigateToRecord({recordData: {_id: recordData.next_id}})
     }
 
-    const handleClickPrevious = (incomingData?: any, useIncomingData?: boolean) => {
-        let body = useIncomingData ? incomingData : recordData;
-        callAPI(
-            getPreviousRecord,
-            [body],
-            handleSuccessNavigateRecord,
-            handleFailedFetchRecord
-        );
+    const handleClickPrevious = () => {
+        navigateToRecord({recordData: {_id: recordData.previous_id}})
     }
 
     const handleClickMarkReviewed = () => {
-        let body = { data: recordData, reviewed: true, review_status: "reviewed" };
-        callAPI(
-            getNextRecord,
-            [body],
-            handleSuccessNavigateRecord,
-            (e) => console.error("unable to go to mark record reviewed: " + e)
-        );
+        if (locked) return
+        handleUpdateReviewStatus("reviewed")
+        navigateToRecord({recordData: {_id: recordData.next_id}})
     }
 
     useKeyDown("ArrowLeft", undefined, undefined, handleClickPrevious, undefined);
     useKeyDown("ArrowRight", undefined, undefined, handleClickNext, handleClickMarkReviewed);
 
-    const handleSuccessNavigateRecord = (data: any) => {
-        navigate("/record/" + data._id, { replace: true });
+    const navigateToRecord = (data: any) => {
+        let record_data = data.recordData;
+        if (record_data?._id) {
+            let newUrl = "/#/record/" + record_data._id;
+            window.location.href = newUrl;
+        } else {
+            console.error("error redirecting")
+        }
     }
 
     const promptResetRecord = () => {
@@ -233,6 +233,7 @@ const Record = () => {
                 }
                 previousPages={previousPages}
                 status={recordData.review_status}
+                locked={locked}
             />
             <Box sx={styles.innerBox}>
                 <DocumentContainer
@@ -240,6 +241,7 @@ const Record = () => {
                     attributesList={recordData.attributesList}
                     handleChangeValue={handleChangeValue}
                     handleUpdateRecord={handleUpdateRecord}
+                    locked={locked}
                 />
             </Box>
             <Bottombar
@@ -249,6 +251,7 @@ const Record = () => {
                 recordData={recordData}
                 handleUpdateReviewStatus={handleUpdateReviewStatus}
                 promptResetRecord={promptResetRecord}
+                locked={locked}
             />
             <PopupModal
                 open={openDeleteModal}
@@ -287,6 +290,8 @@ const Record = () => {
                 <ErrorBar
                     errorMessage={errorMsg}
                     setOpen={setShowErrorBar}
+                    duration={1200000}
+                    margin
                 />
             }
         </Box>

@@ -49,6 +49,7 @@ function App() {
     localStorage.setItem("user_email", user_data.email)
     localStorage.setItem("user_hd", user_data.hd)
     localStorage.setItem("role", ""+user_data.role)
+    localStorage.setItem("user_info", JSON.stringify(user_data))
     if (user_data.name && user_data.name !== "") localStorage.setItem("user_name", user_data.name)
     if (user_data.picture) localStorage.setItem("user_picture", user_data.picture)
   }

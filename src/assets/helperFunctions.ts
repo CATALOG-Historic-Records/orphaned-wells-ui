@@ -149,7 +149,7 @@ export const callAPI = (
   apiFunc: (...args: any[]) => Promise<Response>, 
   apiParams: any[], 
   onSuccess: (data: any) => void, 
-  onError: (error: any) => void
+  onError: (error: any, status?: number) => void
 ): void => {
   apiFunc(...apiParams)
   .then(response => {
@@ -158,7 +158,7 @@ export const callAPI = (
           if (response.status === 200) {
               onSuccess(data);
           } else if (response.status === 303 || response.status === 403) {
-              onError(data);
+              onError(data, response.status);
           } else if (response.status === 401) {
               refreshAuth()
               .then(response => {
@@ -174,6 +174,8 @@ export const callAPI = (
                         .then((data) => {
                             if (response.status === 200) {
                                 onSuccess(data);
+                            } else if (response.status === 303 || response.status === 403) {
+                              onError(data, response.status);
                             } else {
                               logout();
                             }

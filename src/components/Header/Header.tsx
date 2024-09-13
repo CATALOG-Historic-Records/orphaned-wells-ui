@@ -3,9 +3,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Menu, MenuItem, IconButton, Avatar, Tabs, Tab } from '@mui/material';
 import { logout } from '../../assets/helperFunctions';
+import { useUserContext } from '../../usercontext';
+
 
 const Header = (props: any) => {
   const navigate = useNavigate();
+  const { user, username, userPhoto, userRole} = useUserContext();
   const [anchorAr, setAnchorAr] = useState<null | HTMLElement>(null);
   const [profileActions, setProfileActions] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -86,7 +89,7 @@ const Header = (props: any) => {
           >
             <Tab label="Projects" {...a11yProps(0)} />
             <Tab label="Records" {...a11yProps(1)} disabled />
-            {localStorage.getItem("role") && localStorage.getItem("role") === "10" &&
+            {userRole && userRole === "10" &&
               <Tab label="Users" {...a11yProps(2)} />
             }
           </Tabs>
@@ -94,7 +97,7 @@ const Header = (props: any) => {
 
         <div className="right">
           <IconButton sx={styles.icon} onClick={handleShowProfileActions}>
-            <Avatar sx={styles.avatar} alt={localStorage.getItem("user_name") || ''} src={localStorage.getItem("user_picture") || ''} />
+            <Avatar sx={styles.avatar} alt={username || ''} src={userPhoto || ''} />
           </IconButton>
           <Menu
             id="actions-list"

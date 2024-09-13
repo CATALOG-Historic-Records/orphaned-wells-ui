@@ -29,7 +29,7 @@ const styles = {
     },
 }
 
-const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, handleUpdateRecord }: DocumentContainerProps) => {
+const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, handleUpdateRecord, locked }: DocumentContainerProps) => {
     const [imgIndex, setImgIndex] = useState(0);
     const [displayPoints, setDisplayPoints] = useState<number[][] | null>(null);
     const [displayKeyIndex, setDisplayKeyIndex] = useState(-1);
@@ -321,6 +321,7 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
                                     displayKeyIndex={displayKeyIndex}
                                     displayKeySubattributeIndex={displayKeySubattributeIndex}
                                     handleUpdateRecord={handleUpdateRecord}
+                                    locked={locked}
                                 />
                             }
                         </Box>

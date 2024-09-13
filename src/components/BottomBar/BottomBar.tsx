@@ -18,7 +18,15 @@ import { BottombarProps } from '../../types';
 
 const Bottombar = (props: BottombarProps) => {
   let params = useParams(); 
-  const { recordData, onPreviousButtonClick, onNextButtonClick, onReviewButtonClick, handleUpdateReviewStatus, promptResetRecord } = props;
+  const { 
+    recordData, 
+    onPreviousButtonClick, 
+    onNextButtonClick, 
+    onReviewButtonClick, 
+    handleUpdateReviewStatus, 
+    promptResetRecord,
+    locked
+  } = props;
   const [openNotesModal, setOpenNotesModal] = useState(false);
   
   const splitButtonOptions: Record<string, Array<{ text: string; onClick: () => void; icon: JSX.Element; selected?: boolean }>> = {
@@ -120,11 +128,22 @@ const Bottombar = (props: BottombarProps) => {
               {recordData.review_status && 
                 <SplitButton
                   options={splitButtonOptions[recordData.review_status]}
+                  disabled={locked}
                 />
               }
               
               {
-                (recordData.review_status === "unreviewed" || recordData.review_status === "incomplete") ? 
+                (recordData.review_status === "reviewed" || recordData.review_status === "defective" || locked) ?
+                <Button 
+                  sx={styles.button} 
+                  variant="contained" 
+                  endIcon={<KeyboardArrowRightIcon />}
+                  onClick={onNextButtonClick}
+                >
+                  next
+                </Button>
+                :
+                (recordData.review_status === "unreviewed" || recordData.review_status === "incomplete") && 
                   <Button 
                     sx={styles.button} 
                     variant="contained" 
@@ -133,16 +152,6 @@ const Bottombar = (props: BottombarProps) => {
                     onClick={onReviewButtonClick}
                   > 
                     Mark as reviewed & next 
-                  </Button>
-                  :
-                (recordData.review_status === "reviewed" || recordData.review_status === "defective") &&
-                  <Button 
-                    sx={styles.button} 
-                    variant="contained" 
-                    endIcon={<KeyboardArrowRightIcon />}
-                    onClick={onNextButtonClick}
-                  >
-                    next
                   </Button>
               }
             </Box>
