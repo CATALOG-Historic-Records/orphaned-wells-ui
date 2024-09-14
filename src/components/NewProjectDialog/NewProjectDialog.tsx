@@ -49,7 +49,8 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
             marginBottom: 2
         },
         processorGridItem: {
-            paddingX: 1
+            paddingX: 1,
+            paddingBottom: 5
         },
         processorTextBox: {
             display: "flex",

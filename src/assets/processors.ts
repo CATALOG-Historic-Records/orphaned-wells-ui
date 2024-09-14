@@ -2659,6 +2659,553 @@ export const processor_data: { [key: string]: Processor[] } =
           ,
           documentType: "Drilling Report Type A",
     },
+    {
+      id: "dea734185d2763e7",
+      processor_id: "dea734185d2763e7",
+      name: "IL_InspectorCasingCement_B",
+      displayName: "Inspectors Casing and Cement Version B",
+      state: "IL",
+      img: "./img/IL_InspectorCasingCement_B.png",
+      attributes:[
+        {
+          "name": "New_Well",
+          "data_type": "checkbox",
+          "occurrence": "optional_once",
+          "grouping": "Type Of Well",
+          "enabled": "no",
+          "page_order_sort": 1
+        },
+        {
+          "name": "Conversion",
+          "data_type": "checkbox",
+          "occurrence": "optional_once",
+          "grouping": "Type Of Well",
+          "enabled": "no",
+          "page_order_sort": 2
+        },
+        {
+          "name": "DOPH",
+          "data_type": "checkbox",
+          "occurrence": "optional_once",
+          "grouping": "Type Of Well",
+          "enabled": "no",
+          "page_order_sort": 3
+        },
+        {
+          "name": "Deepening",
+          "data_type": "checkbox",
+          "occurrence": "optional_once",
+          "grouping": "Type Of Well",
+          "enabled": "no",
+          "page_order_sort": 4
+        },
+        {
+          "name": "Plugback",
+          "data_type": "checkbox",
+          "occurrence": "optional_once",
+          "grouping": "Type Of Well",
+          "enabled": "no",
+          "page_order_sort": 5
+        },
+        {
+          "name": "Operator",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 6
+        },
+        {
+          "name": "Permittee_No",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 7
+        },
+        {
+          "name": "Well_Name",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 8
+        },
+        {
+          "name": "Permit_No",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 9
+        },
+        {
+          "name": "Location",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 10
+        },
+        {
+          "name": "Reference_No",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 11
+        },
+        {
+          "name": "County",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 12
+        },
+        {
+          "name": "Section",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 13
+        },
+        {
+          "name": "Township",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 14
+        },
+        {
+          "name": "Range",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 15
+        },
+        {
+          "name": "Drilling_Contractor_Name",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 16
+        },
+        {
+          "name": "Drilling_Contractor_City_State",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 17
+        },
+        {
+          "name": "Cementing_Company_Name",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 18
+        },
+        {
+          "name": "Cementing_Company_City_State",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 19
+        },
+        {
+          "name": "Surface_Size",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 20
+        },
+        {
+          "name": "Surface_Setting_Depth",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 21
+        },
+        {
+          "name": "Surface_Hole_Size",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 22
+        },
+        {
+          "name": "Surface_Sacks_Cement",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 23
+        },
+        {
+          "name": "Surface_Top_Of_Cement",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 24
+        },
+        {
+          "name": "Surface_Top_Determined_By",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 25
+        },
+        {
+          "name": "Mine_String_Size",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 26
+        },
+        {
+          "name": "Mine_String_Setting_Depth",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 27
+        },
+        {
+          "name": "Mine_String_Hole_Size",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 28
+        },
+        {
+          "name": "Mine_String_Sacks_Cement",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 29
+        },
+        {
+          "name": "Mine_String_Top_Of_Cement",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 30
+        },
+        {
+          "name": "Mine_String_Top_Determined_By",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 31
+        },
+        {
+          "name": "Intermediate_Liner_Size",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 32
+        },
+        {
+          "name": "Intermediate_Liner_Setting_Depth",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 33
+        },
+        {
+          "name": "Intermediate_Liner_Hole_Size",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 34
+        },
+        {
+          "name": "Intermediate_Liner_Sacks_Cement",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 35
+        },
+        {
+          "name": "Intermediate_Liner_Top_Of_Cement",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 36
+        },
+        {
+          "name": "Intermediate_Liner_Top_Determined_By",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 37
+        },
+        {
+          "name": "Production_Size",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 38
+        },
+        {
+          "name": "Production_Setting_Depth",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 39
+        },
+        {
+          "name": "Production_Hole_Size",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 40
+        },
+        {
+          "name": "Production_Sacks_Cement",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 41
+        },
+        {
+          "name": "Production_Top_Of_Cement",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 42
+        },
+        {
+          "name": "Production_Top_Determined_By",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 43
+        },
+        {
+          "name": "Size_Of_Mine_String",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 44
+        },
+        {
+          "name": "Hole_Size",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 46
+        },
+        {
+          "name": "Catcher_To_Surface",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 47
+        },
+        {
+          "name": "Seat_To_Mine_Floor",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 48
+        },
+        {
+          "name": "Total_Depth_Of_Well",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 49
+        },
+        {
+          "name": "Plugback_From",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 50
+        },
+        {
+          "name": "Plugback_To",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 51
+        },
+        {
+          "name": "Details_Of_Plugback",
+          "data_type": "plain_text",
+          "occurrence": "optional_multiple",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 52
+        },
+        {
+          "name": "Backside_Of_Casing_From",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 53
+        },
+        {
+          "name": "Backside_Of_Casing_To",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 54
+        },
+        {
+          "name": "Number_Of_Shots",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 55
+        },
+        {
+          "name": "Number_Of_Shots_From",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 56
+        },
+        {
+          "name": "Number_Of_Shots_To",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 57
+        },
+        {
+          "name": "Number_Of_Sacks_Squeeze_Job",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 58
+        },
+        {
+          "name": "Comments_By_Inspector",
+          "data_type": "plain_text",
+          "occurrence": "optional_multiple",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 59
+        },
+        {
+          "name": "Operator_Signature",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 60
+        },
+        {
+          "name": "Operator_Signature_Date",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 61
+        },
+        {
+          "name": "Well_Inspector",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 62
+        },
+        {
+          "name": "Well_Inspector_Date",
+          "data_type": "datetime",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 63
+        },
+        {
+          "name": "Cementing_Co_Signature",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 64
+        },
+        {
+          "name": "Cementing_Co_Signature_Date",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 65
+        },
+        {
+          "name": "Date_Of_Inspection",
+          "data_type": "datetime",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 66
+        },
+        {
+          "name": "Manager_Authorization",
+          "data_type": "plain_text",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "no",
+          "page_order_sort": 67
+        },
+        {
+          "name": "Manager_Authorization_Date",
+          "data_type": "datetime",
+          "occurrence": "optional_once",
+          "grouping": "",
+          "enabled": "yes",
+          "page_order_sort": 68
+        }
+      ],
+      documentType: "Inspectors Casing and Cement Report Type B”",
+    },
     ],
 }
 
