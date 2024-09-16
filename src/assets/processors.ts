@@ -3204,7 +3204,7 @@ export const processor_data: { [key: string]: Processor[] } =
           "page_order_sort": 68
         }
       ],
-      documentType: "Inspectors Casing and Cement Report Type B”",
+      documentType: "Inspectors Casing and Cement Report Type B",
     },
     ],
 }
