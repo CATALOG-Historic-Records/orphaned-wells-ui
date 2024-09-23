@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Box, TextField, IconButton, Grid, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { processor_data } from '../../assets/processors';
-import { addProject } from '../../services/app.service';
+import { addProject, getProcessors } from '../../services/app.service';
 import { callAPI } from '../../assets/helperFunctions';
 import { Processor } from '../../types';
 
@@ -14,11 +13,12 @@ interface NewProjectDialogProps {
 const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
     const [projectName, setProjectName] = useState("");
     const [projectDescription, setProjectDescription] = useState("");
+    const [processors, setProcessors] = useState<Processor[]>([])
     const [selectedProcessor, setSelectedProcessor] = useState<{ processorId: string | null; idx?: number }>({ processorId: null });
     const [disableCreateButton, setDisableCreateButton] = useState(true);
     const dialogHeight = '85vh';
     const dialogWidth = '60vw';
-    const processors: Processor[] = processor_data[process.env.REACT_APP_STATE || "illinois"];
+    const state = process.env.REACT_APP_STATE || "illinois";
 
     const descriptionElementRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
@@ -37,6 +37,21 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
             setDisableCreateButton(true);
         }
     }, [projectName, selectedProcessor]);
+
+    useEffect(() => {
+        if (open) {
+            let state_code;
+            if (state === "illinois") state_code = "IL"
+            else if (state === "colorado") state_code = "CO"
+            else state_code = "IL"
+            callAPI(
+                getProcessors,
+                [state_code],
+                handleSuccessGetProcessors,
+                (e: Error) => console.error('error on getting processors ', e)
+            );
+        }
+    }, [open]);
 
     const styles = {
         dialogPaper: {
@@ -66,6 +81,10 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
         }
     };
 
+    const handleSuccessGetProcessors = (processor_data: Processor[]) => {
+        setProcessors(processor_data)
+    }
+
     const handleClose = () => {
         onClose();
     };
@@ -91,7 +110,6 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
             description: projectDescription,
             state: processors[selectedProcessor.idx!].state,
             history: [],
-            attributes: processors[selectedProcessor.idx!].attributes,
             documentType: processors[selectedProcessor.idx!].documentType,
             processorId: processors[selectedProcessor.idx!].id,
         };
