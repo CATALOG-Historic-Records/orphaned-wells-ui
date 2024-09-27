@@ -97,7 +97,8 @@ const Header = (props: any) => {
 
         <div className="right">
           <IconButton sx={styles.icon} onClick={handleShowProfileActions}>
-            <Avatar sx={styles.avatar} alt={username || ''} src={userPhoto || ''} />
+            <Avatar sx={styles.avatar} alt={username} src={userPhoto}/>
+            
           </IconButton>
           <Menu
             id="actions-list"

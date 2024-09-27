@@ -1,34 +1,19 @@
 name: App Tests
-
 on:
     push:
-        branches: [main]
-    pull_request:
-        branches: [main]
-
 defaults:
   run:
-    # -l: use login shell (required when using Conda)
     shell: bash -l {0}
-
-env:
-  PYTEST_ADDOPTS: --color=yes
-
 jobs:
-  component-tests:
-    name: Component testing (${{ matrix.os }})
-
+  frontend-tests:
+    name: Frontend testing (${{ matrix.os }})
     runs-on: ${{ matrix.os-version }}
-
     strategy:
       fail-fast: false
       matrix:
         os:
-          - linux
           - win64
         include:
-          - os: linux
-            os-version: ubuntu-latest
           - os: win64
             os-version: windows-latest
 
@@ -38,9 +23,45 @@ jobs:
       - name: Install JS dependencies
         run: |
           npm clean-install
-          
-    #   - name: run frontend
-    #     run: npm start & sleep 30
 
       - name: run component tests
         run: npm test
+
+      - name: Add backend url to .env file
+        run: |
+            echo REACT_APP_BACKEND_URL=${{ secrets.DEV_BACKEND_URL }} >> .env
+
+      - name: Add state to .env file
+        run: |
+            echo REACT_APP_STATE=illinois >> .env
+
+      - name: Add Google client id to .env file
+        run: |
+            echo REACT_APP_GOOGLE_CLIENTID=${{ secrets.GOOGLE_CLIENTID }} >> .env
+
+      - name: Add Google client secret to .env file
+        run: |
+            echo REACT_APP_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env
+
+      - name: Add Google refresh token to .env file
+        run: |
+            echo GOOGLE_REFRESH_TOKEN=${{ secrets.GOOGLE_REFRESH_TOKEN }} >> .env
+
+      - name: run frontend
+        run: npm start & sleep 30
+
+      - name: print
+        run: |
+            cat .env
+
+      - name: run E2E tests
+        run: npx cypress run
+
+      - name: Upload artifact for screenshots & videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+            name: cypress_results-${{ matrix.os }}
+            path: |
+              cypress/screenshots/
+              cypress/videos/

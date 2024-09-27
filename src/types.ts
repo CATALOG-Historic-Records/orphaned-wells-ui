@@ -18,9 +18,11 @@ export interface RecordData {
 }
 
 export interface ProjectData {
-    id_: string;
+    _id: string;
     attributes: any[];
     name: string;
+    processor_id: string;
+    processorId: string;
     settings?: any;
     description?: string;
     documentType?: string;
@@ -33,6 +35,7 @@ export interface ProjectData {
 }
 
 export interface Attribute {
+    name: string;
     key: string;
     value: string;
     confidence: number | null;
@@ -47,7 +50,7 @@ export interface Processor {
     img: string;
     documentType: string;
     state: string;
-    attributes: any;
+    attributes: Attribute[];
     processor_id: string;
     name: string;
 }
@@ -99,6 +102,7 @@ export interface RecordsTableProps {
     setAppliedFilters: (filters: any) => void;
     setSortBy: (sortBy: string) => void;
     setSortAscending: (ascending: number) => void;
+    handleUpdateProject: (update: any) => void;
 }
 
 export interface PopupModalProps {
@@ -170,12 +174,8 @@ export interface DocumentContainerProps {
 export interface ColumnSelectDialogProps {
     open: boolean;
     onClose: () => void;
-    columns: string[];
-    project_id: string;
-    project_name: string;
-    project_settings?: {
-        exportColumns?: string[];
-    };
+    projectData: ProjectData;
+    handleUpdateProject: (update: any) => void;
 }
 
 export interface CheckboxesGroupProps {

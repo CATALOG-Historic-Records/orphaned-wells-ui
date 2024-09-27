@@ -89,7 +89,15 @@ const PopupModal = (props: PopupModalProps) => {
                 </Grid>
                 <Grid item xs={8}></Grid>
                 <Grid item xs={4}>
-                    <Button onClick={handleSave} variant={buttonVariant} color={buttonColor} disabled={disableSubmit}>{buttonText}</Button>
+                    <Button 
+                        onClick={handleSave} 
+                        variant={buttonVariant} 
+                        color={buttonColor} 
+                        disabled={disableSubmit}
+                        className="popup-primary-button"
+                    >
+                        {buttonText}
+                    </Button>
                 </Grid>
             </Grid>
             :
@@ -116,7 +124,16 @@ const PopupModal = (props: PopupModalProps) => {
                     </Grid>
                     <Grid item xs={1}></Grid>
                     <Grid item xs={4.5}>
-                        <Button fullWidth onClick={handleSave} variant={buttonVariant} color={buttonColor} endIcon={iconOne && iconOne}>{buttonText}</Button>
+                        <Button 
+                            fullWidth 
+                            onClick={handleSave} 
+                            variant={buttonVariant} 
+                            color={buttonColor} 
+                            endIcon={iconOne && iconOne}
+                            className="popup-primary-button"
+                        >
+                            {buttonText}
+                        </Button>
                     </Grid>
                     <Grid item xs={1}></Grid>
                 </> 
@@ -124,7 +141,16 @@ const PopupModal = (props: PopupModalProps) => {
                 <>
                     <Grid item xs={3}></Grid>
                     <Grid item xs={6}>
-                        <Button fullWidth onClick={handleSave} variant={buttonVariant} color={buttonColor} endIcon={iconOne && iconOne}>{buttonText}</Button>
+                        <Button 
+                            fullWidth 
+                            onClick={handleSave} 
+                            variant={buttonVariant} 
+                            color={buttonColor} 
+                            endIcon={iconOne && iconOne}
+                            className="popup-primary-button"
+                        >
+                            {buttonText}
+                        </Button>
                     </Grid>
                     <Grid item xs={3}></Grid>
                 </>}

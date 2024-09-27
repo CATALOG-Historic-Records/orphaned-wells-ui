@@ -220,12 +220,13 @@ const AttributeRow = (props: AttributeRowProps) => {
                             defaultValue={v.value} 
                             onChange={(e) => handleChangeValue(e, idx)} 
                             onFocus={(event) => event.target.select()}
+                            id='edit-field-text-box'
                         />
                         :
                         <span>
                             {v.value}&nbsp;
                             {isSelected && !locked &&
-                                <IconButton sx={styles.rowIconButton} onClick={handleClickEditIcon}>
+                                <IconButton id='edit-field-icon' sx={styles.rowIconButton} onClick={handleClickEditIcon}>
                                     <EditIcon sx={styles.rowIcon}/>
                                 </IconButton>
                             }
@@ -233,7 +234,7 @@ const AttributeRow = (props: AttributeRowProps) => {
                     }
                 </TableCell>
             }
-            <TableCell align="right">
+            <TableCell align="right" id={v.key+'_confidence'}>
                 {
                     v.edited ? 
                     <p style={{padding:0, margin:0}}>

@@ -14,7 +14,7 @@ const Project = () => {
     const params = useParams<{ id: string }>(); 
     const navigate = useNavigate();
     const [records, setRecords] = useState<any[]>([]);
-    const [projectData, setProjectData] = useState<ProjectData>({ attributes: [], id_: params.id || "", name: "", settings: {} });
+    const [projectData, setProjectData] = useState<ProjectData>({ } as ProjectData);
     const [showDocumentModal, setShowDocumentModal] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [openUpdateNameModal, setOpenUpdateNameModal] = useState(false);
@@ -35,6 +35,7 @@ const Project = () => {
     useEffect(() => {
         setCurrentPage(0);
     }, [sortBy, sortAscending, filterBy]);
+
 
     const loadData = () => {
         const sort: [string, number] = [sortBy, sortAscending];
@@ -70,7 +71,7 @@ const Project = () => {
         formData.append('file', file, file.name);
         callAPI(
             uploadDocument,
-            [formData, projectData.id_],
+            [formData, projectData._id],
             handleSuccessfulDocumentUpload,
             (e: Error) => { console.error('error on file upload: ', e); }
         );
@@ -82,7 +83,7 @@ const Project = () => {
         }, 500);
     };
 
-    const handleUpdateProject = () => {
+    const handleClickChangeName = () => {
         setOpenUpdateNameModal(true);
     };
 
@@ -90,7 +91,7 @@ const Project = () => {
         setOpenDeleteModal(false);
         callAPI(
             deleteProject,
-            [projectData.id_],
+            [projectData._id],
             (data: any) => navigate("/projects", { replace: true }),
             (e: Error) => { console.error('error on deleting project: ', e); }
         );
@@ -110,6 +111,15 @@ const Project = () => {
         );
     };
 
+    const handleUpdateProject = (update: any) => {
+        callAPI(
+            updateProject,
+            [params.id, update],
+            (data: ProjectData) => setProjectData(data),
+            (e: Error) => console.error('error on updating project name: ', e)
+        );
+    };
+
     return (
         <Box sx={styles.outerBox}>
             <Subheader
@@ -118,12 +128,12 @@ const Project = () => {
                 handleClickButton={() => setShowDocumentModal(true)}
                 actions={(localStorage.getItem("role") && localStorage.getItem("role") === "10") ?
                     {
-                        "Change project name": handleUpdateProject, 
+                        "Change project name": handleClickChangeName, 
                         "Delete project": () => setOpenDeleteModal(true),
                     }
                     :
                     {
-                        "Change project name": handleUpdateProject, 
+                        "Change project name": handleClickChangeName, 
                     }
                 }
                 previousPages={{ "Projects": () => navigate("/projects", { replace: true }) }}
@@ -144,6 +154,7 @@ const Project = () => {
                     setAppliedFilters={setFilterBy}
                     setSortBy={setSortBy}
                     setSortAscending={setSortAscending}
+                    handleUpdateProject={handleUpdateProject}
                 />
             </Box>
             {showDocumentModal && 

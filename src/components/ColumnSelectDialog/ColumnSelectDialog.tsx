@@ -2,25 +2,30 @@ import { useEffect, useState } from 'react';
 import { Box, FormLabel, FormControl, IconButton, FormGroup, FormControlLabel, RadioGroup, Grid } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, Button, Checkbox, Radio } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { callAPIWithBlobResponse } from '../../assets/helperFunctions';
-import { downloadRecords } from '../../services/app.service';
-import { ColumnSelectDialogProps, CheckboxesGroupProps } from '../../types';
+import { callAPIWithBlobResponse, callAPI } from '../../assets/helperFunctions';
+import { downloadRecords, getProcessorData } from '../../services/app.service';
+import { ColumnSelectDialogProps, CheckboxesGroupProps, Processor } from '../../types';
 
 const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
-    const { open, onClose, columns, project_id, project_name, project_settings } = props;
+    const { open, onClose, projectData, handleUpdateProject } = props;
 
-    const [selectedColumns, setSelectedColumns] = useState<string[]>([...columns]);
+    const [columns, setColumns] = useState<string[]>([]);
+    const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
     const [exportType, setExportType] = useState("csv");
     const dialogHeight = '85vh';
     const dialogWidth = '60vw';
 
     useEffect(() => {
-        if (project_settings && project_settings.exportColumns) {
-            setSelectedColumns([...project_settings.exportColumns]);
-        } else {
-            setSelectedColumns([...columns]);
+        if (open) {
+            callAPI(
+                getProcessorData,
+                [projectData.processorId],
+                setDefaultColumns,
+                (e: Error) => console.error("unable to get processor data: " + e)
+            );
         }
-    }, [columns]);
+        
+    }, [open]);
 
     const styles = {
         dialogPaper: {
@@ -45,6 +50,20 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         }
     };
 
+    const setDefaultColumns = (data: Processor) => {
+        let temp_columns: string[] = []
+        let attributes = data.attributes;
+        for (let attr of attributes) {
+            temp_columns.push(attr.name)
+        }
+        setColumns(temp_columns)
+        if (projectData.settings && projectData.settings.exportColumns) {
+            setSelectedColumns([...projectData.settings.exportColumns]);
+        } else {
+            setSelectedColumns([...temp_columns]);
+        }
+    }
+
     const handleClose = () => {
         onClose();
     };
@@ -56,7 +75,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         };
         callAPIWithBlobResponse(
             downloadRecords,
-            [project_id, body],
+            [projectData._id, body],
             handleSuccessfulExport,
             (e: Error) => console.error("unable to download csv: " + e)
         );
@@ -67,10 +86,20 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         const href = window.URL.createObjectURL(data);
         const link = document.createElement('a');
         link.href = href;
-        link.setAttribute('download', `${project_name}_records.${exportType}`);
+        link.setAttribute('download', `${projectData.name}_records.${exportType}`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
+        // update project settings to include selected columns
+        let settings;
+        if (projectData.settings)  {
+            settings = projectData.settings
+            settings["exportColumns"] = selectedColumns
+        } else {
+            settings = {exportColumns: selectedColumns}
+        }
+        handleUpdateProject({"settings": settings})
     };
 
     return (
@@ -119,8 +148,9 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
                         bottom: 10,
                     }}
                     onClick={handleExport}
+                    id='download-button'
                 >
-                    Export
+                    Download
                 </Button>
             </DialogContent>
         </Dialog>

@@ -14,7 +14,7 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
     const [projectName, setProjectName] = useState("");
     const [projectDescription, setProjectDescription] = useState("");
     const [processors, setProcessors] = useState<Processor[]>([])
-    const [selectedProcessor, setSelectedProcessor] = useState<{ processorId: string | null; idx?: number }>({ processorId: null });
+    const [selectedProcessor, setSelectedProcessor] = useState<Processor>({} as Processor);
     const [disableCreateButton, setDisableCreateButton] = useState(true);
     const dialogHeight = '85vh';
     const dialogWidth = '60vw';
@@ -31,9 +31,9 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
     }, [open]);
 
     useEffect(() => {
-        if (projectName !== "" && selectedProcessor.processorId !== null && disableCreateButton) {
+        if (projectName !== "" && selectedProcessor.id && disableCreateButton) {
             setDisableCreateButton(false);
-        } else if ((projectName === "" || selectedProcessor.processorId === null) && !disableCreateButton) {
+        } else if ((projectName === "" || !selectedProcessor.id) && !disableCreateButton) {
             setDisableCreateButton(true);
         }
     }, [projectName, selectedProcessor]);
@@ -89,16 +89,16 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
         onClose();
     };
 
-    const handleSelectProcessor = (processorId: string, idx: number) => {
-        if (selectedProcessor.processorId === processorId) setSelectedProcessor({ processorId: null });
+    const handleSelectProcessor = (processorData: Processor) => {
+        if (selectedProcessor.id === processorData.id) setSelectedProcessor({ } as Processor);
         else {
-            setSelectedProcessor({ processorId: processorId, idx: idx });
+            setSelectedProcessor(processorData);
         }
     };
 
     const getImageStyle = (processorId: string): React.CSSProperties => {
         let styling: React.CSSProperties = { ...styles.processorImage };
-        if (selectedProcessor.processorId === processorId) {
+        if (selectedProcessor.id === processorId) {
             styling["border"] = "1px solid #2196F3";
         }
         return styling;
@@ -108,10 +108,10 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
         let body = {
             name: projectName,
             description: projectDescription,
-            state: processors[selectedProcessor.idx!].state,
+            state: selectedProcessor.state,
             history: [],
-            documentType: processors[selectedProcessor.idx!].documentType,
-            processorId: processors[selectedProcessor.idx!].id,
+            documentType: selectedProcessor.documentType,
+            processorId: selectedProcessor.id,
         };
         callAPI(
             addProject,
@@ -167,6 +167,7 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
                                 value={projectName}
                                 onChange={(event) => setProjectName(event.target.value)}
                                 sx={styles.projectName}
+                                id="project-name-textbox"
                             />
                             <TextField
                                 fullWidth
@@ -198,9 +199,9 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
                                         <p style={styles.processorTextBox}>
                                             {idx + 1}. {processorData.displayName}
                                         </p>
-                                        <Box sx={styles.processorImageBox} onClick={() => handleSelectProcessor(processorData.id, idx)}>
+                                        <Box sx={styles.processorImageBox} onClick={() => handleSelectProcessor(processorData)}>
                                             <Tooltip title={processorData.documentType}>
-                                                <img src={processorData.img} style={getImageStyle(processorData.id)} />
+                                                <img id={`processor_${idx}`} src={processorData.img} style={getImageStyle(processorData.id)} />
                                             </Tooltip>
                                         </Box>
                                     </Grid>

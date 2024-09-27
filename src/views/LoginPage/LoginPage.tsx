@@ -104,7 +104,7 @@ const LoginPage = (props: LoginPageProps) => {
                             Undocumented Orphan Wells UI
                         </Typography>
                         <Typography sx={styles.modalBody} component="span">
-                            <Button sx={styles.button} onClick={googleLogin} variant="contained" startIcon={<GoogleIcon />}>
+                            <Button id='login-button' sx={styles.button} onClick={googleLogin} variant="contained" startIcon={<GoogleIcon />}>
                                 Login with Google
                             </Button>
                         </Typography>

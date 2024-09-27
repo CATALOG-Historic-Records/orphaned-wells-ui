@@ -8,6 +8,7 @@ interface ProjectsListTableProps {
 }
 
 const ProjectsListTable = ({ projects }: ProjectsListTableProps) => {
+  console.log(projects)
   const navigate = useNavigate();
   const styles = {
     headerRow: {
@@ -40,7 +41,9 @@ const ProjectsListTable = ({ projects }: ProjectsListTableProps) => {
             <TableRow
               key={row.name + " " + idx}
               sx={styles.projectRow}
-              onClick={() => handleClickProject(row.id_)}
+              onClick={() => handleClickProject(row._id)}
+              id={row.name.replaceAll(" ", "")+"_project_row"}
+              className="project_row"
             >
               <TableCell component="th" scope="row">
                 {row.name}

@@ -3,9 +3,9 @@ import { useLocation } from 'react-router-dom';
 
 interface UserContextObject {
   user: any;
-  username: string | null;
-  userPhoto: string | null;
-  userRole: string | null;
+  username?: string;
+  userPhoto?: string;
+  userRole?: string;
 }
 
 const UserContext = createContext({} as UserContextObject);
@@ -17,15 +17,15 @@ export const useUserContext = () => {
 export const UserContextProvider = ({ children }: any) => {
   const location = useLocation();
   const [user, setUser] = useState<any>(null);
-  const [username, setUsername] = useState<string | null>(null);
-  const [userPhoto, setUserPhoto] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | undefined>(undefined);
+  const [userPhoto, setUserPhoto] = useState<string | undefined>(undefined);
+  const [userRole, setUserRole] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-      setUser(JSON.parse(localStorage.getItem('user_info') || '{}'))
-      setUsername(localStorage.getItem('user_name'));
-      setUserPhoto(localStorage.getItem('user_picture'));
-      setUserRole(localStorage.getItem('role'));
+    setUser(JSON.parse(localStorage.getItem('user_info') || '{}'))
+    setUsername(localStorage.getItem('user_name') || undefined);
+    setUserPhoto(localStorage.getItem('user_picture') || undefined);
+    setUserRole(localStorage.getItem('role') || undefined);
   },[location]);
 
 

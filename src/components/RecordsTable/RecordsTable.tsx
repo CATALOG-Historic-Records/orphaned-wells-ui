@@ -46,24 +46,14 @@ const RecordsTable = (props: RecordsTableProps) => {
     appliedFilters,
     setAppliedFilters,
     setSortBy,
-    setSortAscending
+    setSortAscending,
+    handleUpdateProject
   } = props;
 
   const [ openColumnSelect, setOpenColumnSelect ] = useState(false);
-  const [ attributes, setAttributes ] = useState<string[]>([]);
   const [ showNotes, setShowNotes ] = useState(false);
   const [ notesRecordId, setNotesRecordId ] = useState<string | null | undefined>(null);
   const [ notes, setNotes ] = useState<string | null | undefined>(null);
-
-  useEffect(() => {
-      if (projectData) {
-        let tempColumns: string[] = [];
-        for (let each of projectData.attributes || []) {
-          tempColumns.push(each.name);
-        }
-        setAttributes(tempColumns);
-      }
-  }, [projectData]);
 
   const styles = {
     projectRow: {
@@ -158,7 +148,7 @@ const RecordsTable = (props: RecordsTableProps) => {
     let currentAppliedFilters = localStorage.getItem("appliedFilters");
     if (currentAppliedFilters === null) newAppliedFilters = {};
     else newAppliedFilters = JSON.parse(currentAppliedFilters);
-    newAppliedFilters[projectData.id_ || ""] = appliedFilters;
+    newAppliedFilters[projectData._id || ""] = appliedFilters;
     localStorage.setItem("appliedFilters", JSON.stringify(newAppliedFilters));
   }
 
@@ -193,6 +183,7 @@ const RecordsTable = (props: RecordsTableProps) => {
         sx={styles.projectRow}
         onClick={() => handleClickRecord(row._id)}
         key={row._id}
+        id={row.name+"_record_row"}
       >
         <TableCell align="right">{row.recordIndex}.</TableCell>
         <TableCell>{row.name}</TableCell>
@@ -322,10 +313,8 @@ const RecordsTable = (props: RecordsTableProps) => {
         <ColumnSelectDialog
           open={openColumnSelect}
           onClose={() => setOpenColumnSelect(false)}
-          columns={attributes}
-          project_id={projectData.id_ || ""}
-          project_name={projectData.name || ""}
-          project_settings={projectData.settings}
+          projectData={projectData}
+          handleUpdateProject={handleUpdateProject}
         />
       }
       <Notes

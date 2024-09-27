@@ -1,40 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import RecordsTable from "../components/RecordsTable/RecordsTable"
 import { HashRouter } from "react-router-dom";
-
-const mockProjects = [
-    {
-        "id_": "65a1682caf3fee6e0acd211f",
-        "name": "Test Project",
-        "description": "This is a Colorado project",
-        "state": "CO",
-        "creator": {
-            "name": "test"
-        },
-        "history": [
-            ""
-        ],
-        "attributes": [
-            "attribute 1"
-        ]
-    },
-    {
-        "id_": "65a168bcaf3fee6e0acd2120",
-        "name": "Test Project 2",
-        "description": "This is a California project",
-        "state": "CA",
-        "creator": {
-            "name": "test"
-        },
-        "history": [
-            ""
-        ],
-        "attributes": [
-            "attribute 1",
-            "attribute 2"
-        ]
-    }
-]
+import mockProjects from './mockProjects.json'
 
 const mockFunction = (): void => {}
 
@@ -57,6 +24,7 @@ test('test records table', (): void => {
                 setCurrentPage={mockFunction}
                 setAppliedFilters={mockFunction}
                 setSortAscending={mockFunction}
+                handleUpdateProject={mockFunction}
             /> 
         </HashRouter> )
 
