@@ -8,7 +8,6 @@ interface ProjectsListTableProps {
 }
 
 const ProjectsListTable = ({ projects }: ProjectsListTableProps) => {
-  console.log(projects)
   const navigate = useNavigate();
   const styles = {
     headerRow: {
