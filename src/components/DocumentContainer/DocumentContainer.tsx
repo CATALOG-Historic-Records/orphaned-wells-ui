@@ -4,7 +4,7 @@ import { Grid, Box, IconButton } from '@mui/material';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { ImageCropper } from '../ImageCropper/ImageCropper';
-import { useKeyDown } from '../../assets/helperFunctions';
+import { useKeyDown } from '../../assets/util';
 import AttributesTable from '../RecordAttributesTable/RecordAttributesTable';
 import { DocumentContainerProps } from '../../types';
 
@@ -305,7 +305,7 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
                     <Grid item xs={gridWidths[2]}>
                         <Box sx={styles.gridContainer}>
                             <Box sx={styles.containerActions}>
-                                <IconButton onClick={() => handleSetFullscreen("table")}>
+                                <IconButton id='fullscreen-table-button' onClick={() => handleSetFullscreen("table")}>
                                     { 
                                         fullscreen === "table" ? <FullscreenExitIcon/> : <FullscreenIcon/> 
                                     }
@@ -332,7 +332,7 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
                     <Grid item xs={gridWidths[0]}>
                         <Box sx={styles.gridContainer}>
                             <Box sx={styles.containerActions}>
-                                <IconButton onClick={() => handleSetFullscreen("image")}>
+                                <IconButton id='fullscreen-image-button' onClick={() => handleSetFullscreen("image")}>
                                     { 
                                         fullscreen === "image" ? <FullscreenExitIcon/> : <FullscreenIcon/> 
                                     }

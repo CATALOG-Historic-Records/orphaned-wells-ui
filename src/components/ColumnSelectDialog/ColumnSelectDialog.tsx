@@ -2,24 +2,26 @@ import { useEffect, useState } from 'react';
 import { Box, FormLabel, FormControl, IconButton, FormGroup, FormControlLabel, RadioGroup, Grid } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, Button, Checkbox, Radio } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { callAPIWithBlobResponse, callAPI } from '../../assets/helperFunctions';
-import { downloadRecords, getProcessorData } from '../../services/app.service';
-import { ColumnSelectDialogProps, CheckboxesGroupProps, Processor } from '../../types';
+import { callAPIWithBlobResponse, callAPI } from '../../assets/util';
+import { downloadRecords, getColumnData } from '../../services/app.service';
+import { ColumnSelectDialogProps, CheckboxesGroupProps, Processor, RecordGroup } from '../../types';
 
 const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
-    const { open, onClose, projectData, handleUpdateProject } = props;
+    const { open, onClose, location, handleUpdate, _id } = props;
 
     const [columns, setColumns] = useState<string[]>([]);
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
     const [exportType, setExportType] = useState("csv");
+    const [objSettings, setObjSettings] = useState<any>()
+    const [name, setName] = useState("")
     const dialogHeight = '85vh';
     const dialogWidth = '60vw';
 
     useEffect(() => {
         if (open) {
             callAPI(
-                getProcessorData,
-                [projectData.processorId],
+                getColumnData,
+                [location, _id],
                 setDefaultColumns,
                 (e: Error) => console.error("unable to get processor data: " + e)
             );
@@ -50,18 +52,16 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         }
     };
 
-    const setDefaultColumns = (data: Processor) => {
-        let temp_columns: string[] = []
-        let attributes = data.attributes;
-        for (let attr of attributes) {
-            temp_columns.push(attr.name)
-        }
+    const setDefaultColumns = (data: {columns: string[], obj: any}) => {
+        let temp_columns = data.columns;
         setColumns(temp_columns)
-        if (projectData.settings && projectData.settings.exportColumns) {
-            setSelectedColumns([...projectData.settings.exportColumns]);
+        if (data.obj.settings && data.obj.settings.exportColumns) {
+            setSelectedColumns([...data.obj.settings.exportColumns]);
         } else {
             setSelectedColumns([...temp_columns]);
         }
+        setObjSettings(data.obj.settings)
+        setName(data.obj.name)
     }
 
     const handleClose = () => {
@@ -70,12 +70,11 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
 
     const handleExport = () => {
         const body = {
-            exportType: exportType,
             columns: selectedColumns
         };
         callAPIWithBlobResponse(
             downloadRecords,
-            [projectData._id, body],
+            [location, _id, exportType, body],
             handleSuccessfulExport,
             (e: Error) => console.error("unable to download csv: " + e)
         );
@@ -86,20 +85,20 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         const href = window.URL.createObjectURL(data);
         const link = document.createElement('a');
         link.href = href;
-        link.setAttribute('download', `${projectData.name}_records.${exportType}`);
+        link.setAttribute('download', `${name}_records.${exportType}`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
 
         // update project settings to include selected columns
         let settings;
-        if (projectData.settings)  {
-            settings = projectData.settings
+        if (objSettings)  {
+            settings = objSettings
             settings["exportColumns"] = selectedColumns
         } else {
             settings = {exportColumns: selectedColumns}
         }
-        handleUpdateProject({"settings": settings})
+        handleUpdate({"settings": settings})
     };
 
     return (
@@ -113,7 +112,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
                 sx: styles.dialogPaper
             }}
         >
-            <DialogTitle id="export-dialog-title">Export Project</DialogTitle>
+            <DialogTitle id="export-dialog-title">Export {location}</DialogTitle>
             <IconButton
                 aria-label="close"
                 onClick={handleClose}

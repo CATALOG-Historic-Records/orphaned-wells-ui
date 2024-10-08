@@ -1,58 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { useParams, useNavigate } from "react-router-dom";
-import { getProjectData, uploadDocument, deleteProject, updateProject } from '../../services/app.service';
-import RecordsTable from '../../components/RecordsTable/RecordsTable';
 import Subheader from '../../components/Subheader/Subheader';
-import UploadDocumentsModal from '../../components/UploadDocumentsModal/UploadDocumentsModal';
+import RecordGroupsTable from '../../components/RecordGroupsTable/RecordGroupsTable';
+import NewRecordGroupDialog from '../../components/NewRecordGroupDialog/NewRecordGroupDialog';
+import { getRecordGroups, getRecords, updateProject, deleteProject } from '../../services/app.service';
+import { callAPI, DEFAULT_FILTER_OPTIONS } from '../../assets/util';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ProjectData, FilterOption } from '../../types';
 import PopupModal from '../../components/PopupModal/PopupModal';
-import { callAPI } from '../../assets/helperFunctions';
-import { convertFiltersToMongoFormat } from '../../assets/helperFunctions';
-import { ProjectData } from '../../types';
+import ProjectTabs from '../../components/ProjectTabs/ProjectTabs';
+import RecordsTable from '../../components/RecordsTable/RecordsTable';
 
 const Project = () => {
-    const params = useParams<{ id: string }>(); 
+    let params = useParams();
     const navigate = useNavigate();
-    const [records, setRecords] = useState<any[]>([]);
-    const [projectData, setProjectData] = useState<ProjectData>({ } as ProjectData);
-    const [showDocumentModal, setShowDocumentModal] = useState(false);
+    const [projectData, setProjectData] = useState({} as ProjectData)
+    const [projectName, setProjectName] = useState("")
+    const [record_groups, setRecordGroups] = useState<any[]>([]);
+    const [unableToConnect, setUnableToConnect] = useState(false);
+    const [showNewRecordGroupDialog, setShowNewRecordGroupDialog] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [openUpdateNameModal, setOpenUpdateNameModal] = useState(false);
-    const [projectName, setProjectName] = useState("");
-    const [recordCount, setRecordCount] = useState(0);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [pageSize, setPageSize] = useState(100);
-    const [sortBy, setSortBy] = useState('dateCreated');
-    const [sortAscending, setSortAscending] = useState(1);
-    const [filterBy, setFilterBy] = useState<any[]>(
-            JSON.parse(localStorage.getItem("appliedFilters") || '{}')[params.id || ""] || []
-    );
+    const [currentTab, setCurrentTab] = useState(0)
+    const [filters, setFilters] = useState({...DEFAULT_FILTER_OPTIONS})
+    const tabs = ["Record Groups", "All Records"]
+
+    /*
+        TODO: write useeffect that runs upon page load to fetch project data
+        this way we only load project data once, and records/record groups load separately depending on the tab
+    */
 
     useEffect(() => {
-        loadData();
-    }, [params.id, pageSize, currentPage, sortBy, sortAscending, filterBy]);
+        if (tabs[currentTab] === "Record Groups") callAPI(getRecordGroups, [params.id], handleFetchedRecordGroups, handleError);
+        else if (tabs[currentTab] === "All Records") {
+            if (projectData.record_groups) {
+                // const query = {"project_id": params.id}
+                // callAPI(getRecords, ["project", query], handleFetchedRecords, handleError);
+            } else {
+                console.error("missing project data")
+            }
+            
+        }
+    }, [currentTab]);
 
     useEffect(() => {
-        setCurrentPage(0);
-    }, [sortBy, sortAscending, filterBy]);
+        let filterOptions = []
+        let selectedFilterOptions = []
+        for (let rg of record_groups) {
+            filterOptions.push({
+                name: rg.name,
+                checked: true,
+                value: rg._id,
+            })
+            selectedFilterOptions.push(rg.name)
+        }
+        let tempFilters = {...filters}
+        tempFilters["record_group_id"] = {
+            key: 'record_group_id',
+            displayName: "Record Group",   
+            type: "checkbox",
+            operator: 'equals',
+            options: filterOptions,
+            selectedOptions: selectedFilterOptions
+        }
+        setFilters(tempFilters)
+    },[record_groups])
 
-
-    const loadData = () => {
-        const sort: [string, number] = [sortBy, sortAscending];
-        const args: [string, number, number, [string, number], any] = [params.id || "", currentPage, pageSize, sort, convertFiltersToMongoFormat(filterBy)];
-        callAPI(
-            getProjectData,
-            args,
-            handleSuccess,
-            (e: Error) => { console.error('error getting project data: ', e); }
-        );
+    const handleFetchedRecordGroups = (data: any) => {
+        setRecordGroups(data.record_groups);
+        setProjectData(data.project)
+        setProjectName(data.project.name)
     };
 
-    const handleSuccess = (data: { records: any[], project_data: ProjectData, record_count: number }) => {
-        setRecords(data.records);
-        setProjectData(data.project_data);
-        setProjectName(data.project_data.name);
-        setRecordCount(data.record_count);
+    const handleError = (e: Error) => {
+        console.error(e);
+        setUnableToConnect(true);
     };
 
     const styles = {
@@ -66,25 +88,8 @@ const Project = () => {
         },
     };
 
-    const handleUploadDocument = (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file, file.name);
-        callAPI(
-            uploadDocument,
-            [formData, projectData._id],
-            handleSuccessfulDocumentUpload,
-            (e: Error) => { console.error('error on file upload: ', e); }
-        );
-    };
-
-    const handleSuccessfulDocumentUpload = () => {
-        setTimeout(() => {
-            window.location.reload();
-        }, 500);
-    };
-
-    const handleClickChangeName = () => {
-        setOpenUpdateNameModal(true);
+    const handleClickNewRecordGroup = () => {
+        setShowNewRecordGroupDialog(true);
     };
 
     const handleDeleteProject = () => {
@@ -95,11 +100,11 @@ const Project = () => {
             (data: any) => navigate("/projects", { replace: true }),
             (e: Error) => { console.error('error on deleting project: ', e); }
         );
-    };
+    }
 
     const handleChangeProjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setProjectName(event.target.value);
-    };
+    }
 
     const handleUpdateProjectName = () => {
         setOpenUpdateNameModal(false);
@@ -107,66 +112,76 @@ const Project = () => {
             updateProject,
             [params.id, { name: projectName }],
             (data: any) => window.location.reload(),
-            (e: Error) => console.error('error on updating project name: ', e)
+            (e: Error) => console.error('error on updating record group name: ', e)
         );
-    };
+    }
 
     const handleUpdateProject = (update: any) => {
+        setOpenUpdateNameModal(false);
         callAPI(
             updateProject,
             [params.id, update],
             (data: ProjectData) => setProjectData(data),
-            (e: Error) => console.error('error on updating project name: ', e)
+            (e: Error) => console.error('error on updating record group name: ', e)
         );
-    };
+    }
+
+    const placeHolder = (data: any) => {
+        console.log("placeholder")
+    }
 
     return (
         <Box sx={styles.outerBox}>
             <Subheader
                 currentPage={projectData.name}
-                buttonName="Upload new record(s)"
-                handleClickButton={() => setShowDocumentModal(true)}
+                buttonName="New Record Group"
+                handleClickButton={handleClickNewRecordGroup}
+                previousPages={
+                    { 
+                        "Projects": () => navigate("/projects", { replace: true }),
+                    }
+                }
                 actions={(localStorage.getItem("role") && localStorage.getItem("role") === "10") ?
                     {
-                        "Change project name": handleClickChangeName, 
+                        "Change project name": () => setOpenUpdateNameModal(true), 
                         "Delete project": () => setOpenDeleteModal(true),
                     }
                     :
-                    {
-                        "Change project name": handleClickChangeName, 
-                    }
+                    null
                 }
-                previousPages={{ "Projects": () => navigate("/projects", { replace: true }) }}
             />
             <Box sx={styles.innerBox}>
-                <RecordsTable
-                    projectData={projectData}
-                    records={records}
-                    setRecords={setRecords}
-                    pageSize={pageSize}
-                    currentPage={currentPage}
-                    sortBy={sortBy}
-                    sortAscending={sortAscending}
-                    recordCount={recordCount}
-                    setPageSize={setPageSize}
-                    setCurrentPage={setCurrentPage}
-                    appliedFilters={filterBy}
-                    setAppliedFilters={setFilterBy}
-                    setSortBy={setSortBy}
-                    setSortAscending={setSortAscending}
-                    handleUpdateProject={handleUpdateProject}
+                {!unableToConnect ? 
+                    <div>
+                        <ProjectTabs options={tabs} value={currentTab} setValue={setCurrentTab}/>
+                        {
+                            tabs[currentTab] === "Record Groups" ? 
+                                <RecordGroupsTable record_groups={record_groups} />
+                            :
+                            tabs[currentTab] === "All Records" &&
+                                <RecordsTable
+                                    location="project"
+                                    params={params}
+                                    filter_options={filters}
+                                    handleUpdate={handleUpdateProject}
+                                    recordGroups={record_groups}
+                                />
+                        }
+                        
+                    </div>
+                :
+                    <h1>Unable to connect to backend. Please make sure that backend server is up and running.</h1>
+                }
+                <NewRecordGroupDialog 
+                    open={showNewRecordGroupDialog} 
+                    onClose={() => setShowNewRecordGroupDialog(false)} 
+                    project_id={params.id || ''}
                 />
             </Box>
-            {showDocumentModal && 
-                <UploadDocumentsModal 
-                    setShowModal={setShowDocumentModal}
-                    handleUploadDocument={handleUploadDocument}
-                />
-            }
             <PopupModal
                 open={openDeleteModal}
                 handleClose={() => setOpenDeleteModal(false)}
-                text="Are you sure you want to delete this project?"
+                text="Are you sure you want to delete this record group?"
                 handleSave={handleDeleteProject}
                 buttonText='Delete'
                 buttonColor='error'
@@ -178,7 +193,7 @@ const Project = () => {
                 open={openUpdateNameModal}
                 handleClose={() => setOpenUpdateNameModal(false)}
                 text={projectName}
-                textLabel='Project Name'
+                textLabel='Document group Name'
                 handleEditText={handleChangeProjectName}
                 handleSave={handleUpdateProjectName}
                 buttonText='Update'

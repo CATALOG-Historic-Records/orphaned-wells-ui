@@ -3,11 +3,12 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import LoginPage from './views/LoginPage/LoginPage';
 import ProjectsListPage from './views/ProjectsListPage/ProjectsListPage';
 import Project from './views/ProjectPage/ProjectPage';
+import RecordGroup from './views/RecordGroupPage/RecordGroupPage';
 import Record from './views/RecordPage/RecordPage';
 import TeamRecordsPage from './views/TeamRecordsPage/TeamRecordsPage';
 import AdminPage from './views/AdminPage/AdminPage';
 import Header from './components/Header/Header'; 
-import { callAPI } from './assets/helperFunctions';
+import { callAPI } from './assets/util';
 import { checkAuth } from './services/app.service';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import './App.css';
@@ -85,6 +86,10 @@ function App() {
           <Route 
               path="project/:id" 
               element={<Project />}
+          />
+          <Route 
+              path="record_group/:id" 
+              element={<RecordGroup />}
           />
           <Route 
               path="records" 

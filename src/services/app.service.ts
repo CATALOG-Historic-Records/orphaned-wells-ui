@@ -7,6 +7,13 @@ export const getProjects = () => {
     });
 };
 
+export const getRecordGroups = (project_id: string) => {
+    return fetch(BACKEND_URL + '/get_record_groups/'+project_id, {
+        mode: 'cors',
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
 export const getProcessors = (state: string) => {
     return fetch(BACKEND_URL + '/get_processors/'+state, {
         mode: 'cors',
@@ -16,6 +23,13 @@ export const getProcessors = (state: string) => {
 
 export const getProcessorData = (google_id: string) => {
     return fetch(BACKEND_URL + '/get_processor_data/'+google_id, {
+        mode: 'cors',
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+}
+
+export const getColumnData = (location: string, _id: string) => {
+    return fetch(BACKEND_URL + '/get_column_data/'+location+'/'+_id, {
         mode: 'cors',
         headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
     });
@@ -35,15 +49,34 @@ export const getProjectData = (project_id: string, page: number, records_per_pag
     });
 };
 
-export const getTeamRecords = () => {
-    return fetch(BACKEND_URL + '/get_team_records', {
+export const getRecordGroup = (rg_id: string) => {
+    return fetch(BACKEND_URL + '/get_record_group/' + rg_id, {
         mode: 'cors',
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
+export const getRecords = (get_by: string, data: any, page: number, records_per_page: number) => {
+    let route = BACKEND_URL + '/get_records/' + get_by + '?page=' + page + '&records_per_page=' + records_per_page;
+    return fetch(route, {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(data),
         headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
     });
 };
 
 export const addProject = (data: any) => {
     return fetch(BACKEND_URL + '/add_project', {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(data),
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
+export const addRecordGroup = (data: any) => {
+    return fetch(BACKEND_URL + '/add_record_group', {
         method: 'POST',
         mode: 'cors',
         body: JSON.stringify(data),
@@ -73,8 +106,8 @@ export const downloadRecordsCSV = (project_id: string) => {
     });
 };
 
-export const downloadRecords = (project_id: string, data: any) => {
-    return fetch(BACKEND_URL + '/download_records/' + project_id, {
+export const downloadRecords = (location: string, _id: string, export_type: string, data: any) => {
+    return fetch(BACKEND_URL + '/download_records/' + location + '/' + _id + '/' + export_type, {
         method: 'POST',
         mode: 'cors',
         body: JSON.stringify(data),
@@ -84,6 +117,15 @@ export const downloadRecords = (project_id: string, data: any) => {
 
 export const updateProject = (project_id: string, data: any) => {
     return fetch(BACKEND_URL + '/update_project/' + project_id, {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(data),
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
+export const updateRecordGroup = (rg_id: string, data: any) => {
+    return fetch(BACKEND_URL + '/update_record_group/' + rg_id, {
         method: 'POST',
         mode: 'cors',
         body: JSON.stringify(data),
@@ -102,6 +144,14 @@ export const updateRecord = (record_id: string, data: any) => {
 
 export const deleteProject = (project_id: string) => {
     return fetch(BACKEND_URL + '/delete_project/' + project_id, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
+export const deleteRecordGroup = (rg_id: string) => {
+    return fetch(BACKEND_URL + '/delete_record_group/' + rg_id, {
         method: 'POST',
         mode: 'cors',
         headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }

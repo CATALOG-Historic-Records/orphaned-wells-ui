@@ -5,7 +5,7 @@ import Subheader from '../../components/Subheader/Subheader';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import ErrorBar from '../../components/ErrorBar/ErrorBar';
 import { getUsers, approveUser, addUser, deleteUser } from '../../services/app.service';
-import { callAPI } from '../../assets/helperFunctions';
+import { callAPI } from '../../assets/util';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
