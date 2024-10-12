@@ -47,6 +47,8 @@ export interface RecordGroup {
       email?: string;
     };
     dateCreated?: number;
+    reviewed_amt?: number;
+    total_amt?: number;
 }
 
 export interface Attribute {

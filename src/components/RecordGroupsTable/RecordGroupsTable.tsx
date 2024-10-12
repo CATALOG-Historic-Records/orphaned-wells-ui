@@ -20,7 +20,7 @@ const RecordGroupsTable = ({ record_groups }: RecordGroupsTableProps) => {
       <Table sx={{ minWidth: 650 }} aria-label="Record Groups table">
         <TableHead>
           <TableRow>
-            {["Record Group Name", "Description", "Document Type", "Locations", "Creator", "Date Created"].map((value: string) => (
+            {["Record Group Name", "Description", "Document Type", "Locations", "Progress", "Date Created"].map((value: string) => (
               <TableCell sx={styles.headerRow} key={value}>{value}</TableCell>
             ))}
           </TableRow>
@@ -40,7 +40,7 @@ const RecordGroupsTable = ({ record_groups }: RecordGroupsTableProps) => {
               <TableCell>{row.description}</TableCell>
               <TableCell>{row.documentType}</TableCell>
               <TableCell>{row.state}</TableCell>
-              <TableCell>{row.creator?.name || ""}</TableCell>
+              <TableCell>{row.reviewed_amt || 0} / {row.total_amt || 0}</TableCell>
               <TableCell>{formatDate(row.dateCreated || null)}</TableCell>
             </TableRow>
           ))}
