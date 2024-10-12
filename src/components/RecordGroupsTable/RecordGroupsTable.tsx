@@ -1,43 +1,45 @@
 import { useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { formatDate } from '../../assets/util';
-import { ProjectData } from "../../types";
+import { RecordGroup } from "../../types";
 import { styles } from "../../assets/styles";
 
-interface ProjectsListTableProps {
-  projects: ProjectData[];
+interface RecordGroupsTableProps {
+  record_groups: RecordGroup[];
 }
 
-const ProjectsListTable = ({ projects }: ProjectsListTableProps) => {
+const RecordGroupsTable = ({ record_groups }: RecordGroupsTableProps) => {
   const navigate = useNavigate();
 
-  const handleClickProject = (project_id: string) => {
-    navigate("/project/" + project_id);
+  const handleClickRecordGroup = (rg_id: string) => {
+    navigate("/record_group/" + rg_id);
   }
   
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="projects table">
+      <Table sx={{ minWidth: 650 }} aria-label="Record Groups table">
         <TableHead>
           <TableRow>
-            {["Project Name", "Record Group Count", "Creator", "Date Created"].map((value: string) => (
+            {["Record Group Name", "Description", "Document Type", "Locations", "Creator", "Date Created"].map((value: string) => (
               <TableCell sx={styles.headerRow} key={value}>{value}</TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {projects.map((row: ProjectData, idx: number) => (
+          {record_groups.map((row: RecordGroup, idx: number) => (
             <TableRow
               key={row.name + " " + idx}
               sx={styles.tableRow}
-              onClick={() => handleClickProject(row._id)}
-              id={row.name.replaceAll(" ", "")+"_project_row"}
-              className="project_row"
+              onClick={() => handleClickRecordGroup(row._id)}
+              id={row.name.replaceAll(" ", "")+"_record_group_row"}
+              className="record_group_row"
             >
               <TableCell component="th" scope="row">
                 {row.name}
               </TableCell>
-              <TableCell>{row.record_groups.length}</TableCell>
+              <TableCell>{row.description}</TableCell>
+              <TableCell>{row.documentType}</TableCell>
+              <TableCell>{row.state}</TableCell>
               <TableCell>{row.creator?.name || ""}</TableCell>
               <TableCell>{formatDate(row.dateCreated || null)}</TableCell>
             </TableRow>
@@ -48,4 +50,4 @@ const ProjectsListTable = ({ projects }: ProjectsListTableProps) => {
   );
 }
 
-export default ProjectsListTable;
+export default RecordGroupsTable;

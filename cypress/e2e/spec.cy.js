@@ -22,20 +22,34 @@ describe('End to end testing', () => {
 
     // navigate to project page
     cy.findByRole('rowheader', {
-      name: /test project 1/i
+      name: /test project/i
     }).click()
 
     // test that project page loaded correctly
     cy.findByRole('button', {
-      name: /test project 1/i
+      name: /test project/i
     }).should('be.visible')
     cy.findByRole('columnheader', {
-      name: /record name/i
+      name: /record group name/i
     }).should('be.visible')
 
     cy.screenshot('project page')
 
-    // click record
+    // click first record group
+    cy.findByRole('rowheader', {
+      name: /test record group 1/i
+    }).click()
+
+    // test that record group page loaded correctly
+    cy.findByRole('button', {
+      name: /test record group/i
+    }).should('be.visible')
+    cy.findByRole('columnheader', {
+      name: /record name/i
+    }).should('be.visible')
+    cy.screenshot('record group page')
+
+    // click first record
     cy.get('.MuiTableRow-root').eq(1).click();
     
     // test that record page loaded correctly
@@ -60,11 +74,11 @@ describe('End to end testing', () => {
     cy.screenshot('clicked new project')
     
     // enter project name: test project
-    cy.enter_text('id', 'project-name-textbox', 'test project')
+    cy.enter_text('id', 'project-name-textbox', 'cypress test project')
 
     // click first processor available
-    cy.get('#processor_0').click()
-    cy.screenshot('entered project name and selected processor')
+    // cy.get('#processor_0').click()
+    // cy.screenshot('entered project name and selected processor')
 
     // click create project button and wait for API response
     cy.intercept({
@@ -79,7 +93,7 @@ describe('End to end testing', () => {
     cy.wait('@createProject', {timeout: 10000});
 
     // click first processor available
-    cy.get('#testproject_project_row').should('be.visible')
+    cy.get('#cypresstestproject_project_row').should('be.visible')
     cy.screenshot('end test create new project')
 
   })
@@ -97,7 +111,7 @@ describe('End to end testing', () => {
       cy.log(project_amt)
 
       // click on last created project (should be named test project)
-      cy.get('#testproject_project_row').click();
+      cy.get('#cypresstestproject_project_row').click();
       cy.wait(2000)
       cy.screenshot('navigated to project')
 
@@ -130,16 +144,18 @@ describe('End to end testing', () => {
 
   it('tests edit field, review status updates, mark as unreviewed', () => {
     // click on record
-    cy.visit('/#/record/665dc43463bca3e588d279b9');
+    cy.visit('/#/record/6699518f8107c59f0b6c8c11');
     cy.wait(2000)
-    cy.screenshot('navigated to record bulk3')
+    cy.screenshot('navigated to record cypress test record')
 
-    // click on field FIELD_NAME
-    cy.get('#FIELD_NAME_confidence').contains('%')
-    cy.findByRole('cell', {
-      name: /field_name/i
-    }).click()
-    cy.screenshot('clicked on field_name')
+    // make table full screen
+    cy.get('#fullscreen-table-button').click()
+
+    // click on field
+    let field_name = "Dry_Hole"
+    cy.get('#'+field_name+'_confidence').contains(/not found/i)
+    cy.findByText(field_name).click()
+    cy.screenshot('clicked on '+field_name)
 
     // click on edit icon
     cy.get('#edit-field-icon').click()
@@ -151,7 +167,7 @@ describe('End to end testing', () => {
     cy.screenshot('entered text and hit enter')
 
     // verify that field now shows edited
-    cy.get('#FIELD_NAME_confidence').contains(/edited/i)
+    cy.get('#'+field_name+'_confidence').contains(/edited/i)
     cy.screenshot('edited field')
 
     // verifew review status is incomplete
@@ -174,13 +190,13 @@ describe('End to end testing', () => {
   })
 
   it('tests export data', () => {
-    cy.visit('/#/project/6699515b8107c59f0b6c8c0e');
+    cy.visit('/#/record_group/6699515b8107c59f0b6c8c0e');
     cy.wait(1000)
     cy.screenshot('navigated to project test list')
 
     // click export project
     cy.findByRole('button', {
-      name: /export project/i
+      name: /export/i
     }).click()
     cy.wait(1000)
 
@@ -189,7 +205,7 @@ describe('End to end testing', () => {
 
     // verify that file was downloaded
     const downloadsFolder = Cypress.config("downloadsFolder");
-    cy.readFile(path.join(downloadsFolder, "test project 1_records.csv")).should("exist");
+    cy.readFile(path.join(downloadsFolder, "test record group 1_records.csv")).should("exist");
   })
 
 })

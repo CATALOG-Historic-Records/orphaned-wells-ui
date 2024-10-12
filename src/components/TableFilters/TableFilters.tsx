@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent } from 'react';
+import React, { useState, MouseEvent, useEffect } from 'react';
 import { Button, Menu, MenuItem, Checkbox, Box, TextField, IconButton } from '@mui/material';
 import { Select, FormControl, InputLabel, Grid, ListItemText, Badge, SelectChangeEvent } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -7,10 +7,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import Draggable from 'react-draggable';
 import ApprovalIcon from '@mui/icons-material/Approval';
-import { FILTER_OPTIONS } from '../../assets/filterOptions';
+import { DEFAULT_FILTER_OPTIONS } from '../../assets/util';
 import { FilterOption, TableFiltersProps } from '../../types';
 
-const TableFilters = ({ applyFilters, appliedFilters }: TableFiltersProps) => {
+const TableFilters = ({ applyFilters, appliedFilters, filter_options }: TableFiltersProps) => {
     const styles = {
         tableFilter: {
             paddingBottom: 2,
@@ -30,6 +30,7 @@ const TableFilters = ({ applyFilters, appliedFilters }: TableFiltersProps) => {
     }
     const [anchorFilterMenu, setAnchorFilterMenu] = useState<null | HTMLElement>(null);
     const [currentFilters, setCurrentFilters] = useState<FilterOption[]>(appliedFilters);
+    const [availableFilters, setAvailableFilters] = useState(filter_options || DEFAULT_FILTER_OPTIONS)
     const openFilterMenu = Boolean(anchorFilterMenu);
 
     const handleOpenFilters = (event: MouseEvent<HTMLElement>) => {
@@ -43,7 +44,7 @@ const TableFilters = ({ applyFilters, appliedFilters }: TableFiltersProps) => {
         let tempFilters = [...currentFilters];
         let tempFilter = { ...tempFilters[idx] };
         if (field === 'filter') {
-            let updatedValue = structuredClone(FILTER_OPTIONS[newValue]);
+            let updatedValue = structuredClone(availableFilters[newValue]);
             tempFilter = updatedValue;
         } else if (field === 'operator') {
             tempFilter['operator'] = newValue;
@@ -67,7 +68,7 @@ const TableFilters = ({ applyFilters, appliedFilters }: TableFiltersProps) => {
 
     const addNewFilter = () => {
         let tempFilters = [...currentFilters];
-        tempFilters.push(structuredClone(FILTER_OPTIONS['review_status']));
+        tempFilters.push(structuredClone(availableFilters['review_status']));
         setCurrentFilters(tempFilters);
     }
 
@@ -134,6 +135,7 @@ const TableFilters = ({ applyFilters, appliedFilters }: TableFiltersProps) => {
                                         operator={filter.operator}
                                         idx={idx}
                                         removeFilter={removeFilter}
+                                        availableFilters={availableFilters}
                                     />
                                 </Box>
                             ))
@@ -161,10 +163,11 @@ interface TableFilterProps {
     operator: string;
     idx: number;
     removeFilter: (idx: number) => void;
+    availableFilters: {[key: string]: FilterOption};
 }
 
 const TableFilter = (props: TableFilterProps) => {
-    const { thisFilter, updateCurrentFilters, operator, idx, removeFilter } = props;
+    const { thisFilter, updateCurrentFilters, operator, idx, removeFilter, availableFilters } = props;
 
     const styles = {
         menuContainer: {
@@ -204,7 +207,7 @@ const TableFilter = (props: TableFilterProps) => {
                         label="Column"
                         onChange={(e) => handleSelectChange(e, 'filter')}
                     >
-                        {Object.entries(FILTER_OPTIONS).map(([key, filter]) => (
+                        {Object.entries(availableFilters).map(([key, filter]) => (
                             <MenuItem key={key} value={key}>{filter.displayName}</MenuItem>
                         ))}
                     </Select>

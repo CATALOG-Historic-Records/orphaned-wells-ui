@@ -2,17 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
 import { useParams, useNavigate } from "react-router-dom";
 import { getRecordData, updateRecord, deleteRecord } from '../../services/app.service';
-import { callAPI, useKeyDown } from '../../assets/helperFunctions';
+import { callAPI, useKeyDown } from '../../assets/util';
 import Subheader from '../../components/Subheader/Subheader';
 import Bottombar from '../../components/BottomBar/BottomBar';
 import DocumentContainer from '../../components/DocumentContainer/DocumentContainer';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import ErrorBar from '../../components/ErrorBar/ErrorBar';
-import { RecordData, handleChangeValueSignature } from '../../types';
+import { RecordData, handleChangeValueSignature, PreviousPages } from '../../types';
 
-interface PreviousPages {
-    [key: string]: () => void;
-}
+
 
 const Record = () => {
     const [recordData, setRecordData] = useState<RecordData>({} as RecordData);
@@ -85,7 +83,10 @@ const Record = () => {
         let tempPreviousPages: PreviousPages = {
             "Projects": () => navigate("/projects", { replace: true }),
         };
-        tempPreviousPages[newRecordData.project_name] = () => navigate("/project/" + newRecordData.project_id, { replace: true });
+        tempPreviousPages[newRecordData.project_name] = 
+            () => navigate("/project/" + newRecordData.project_id, { replace: true });
+        tempPreviousPages[newRecordData.rg_name] = 
+            () => navigate("/record_group/" + newRecordData.rg_id, { replace: true });
         setPreviousPages(tempPreviousPages);
     }
 
@@ -125,7 +126,7 @@ const Record = () => {
             setShowErrorBar(true);
             setErrorMsg(`Unable to update record: ${data.detail}. Returning to records list in 5 seconds.`);
             setTimeout(() => {
-                goToProject();
+                goToRecordGroup();
             }, 5000);
         } else {
             console.error('error updating record data: ', data);
@@ -162,13 +163,13 @@ const Record = () => {
         callAPI(
             deleteRecord,
             [params.id],
-            goToProject,
+            goToRecordGroup,
             (e) => console.error('error on deleting record: ', e)
         );
     }
 
-    const goToProject = () => {
-        navigate("/project/" + recordData.project_id, { replace: true });
+    const goToRecordGroup = () => {
+        navigate("/record_group/" + recordData.record_group_id, { replace: true })
     }
 
     const handleClickNext = () => {

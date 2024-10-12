@@ -4,7 +4,7 @@ import Subheader from '../../components/Subheader/Subheader';
 import ProjectsListTable from '../../components/ProjectsListTable/ProjectsListTable';
 import NewProjectDialog from '../../components/NewProjectDialog/NewProjectDialog';
 import { getProjects } from '../../services/app.service';
-import { callAPI } from '../../assets/helperFunctions';
+import { callAPI } from '../../assets/util';
 
 const ProjectsListPage = () => {
     const [projects, setProjects] = useState<any[]>([]);

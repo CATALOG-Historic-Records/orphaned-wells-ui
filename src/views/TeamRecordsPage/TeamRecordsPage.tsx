@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { getTeamRecords } from '../../services/app.service';
+import { getRecords } from '../../services/app.service';
 import Subheader from '../../components/Subheader/Subheader';
-import { callAPI } from '../../assets/helperFunctions';
+import { callAPI } from '../../assets/util';
 import { RecordData } from '../../types';
 
 const TeamRecordsPage = () => {
@@ -10,7 +10,7 @@ const TeamRecordsPage = () => {
 
     useEffect(() => {
         callAPI(
-            getTeamRecords,
+            getRecords,
             [],
             handleSuccess,
             (e: Error) => { console.error('error getting team records: ', e) }

@@ -1,4 +1,4 @@
-import { useState, Fragment, MouseEvent } from 'react';
+import { useState, Fragment, MouseEvent, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Button, Grid, IconButton, Box, Menu, MenuItem, Chip } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
@@ -81,15 +81,24 @@ const Subheader = (props: SubheaderProps) => {
                         /
                         {
                             previousPages &&
-                            Object.entries(previousPages).map(([page, pageAction]) => (
-                                <Fragment key={page}>
-                                    <Button sx={styles.iconButton} size="small" onClick={pageAction}>{page}</Button>
-                                    /
-                                </Fragment>
-                            ))
+                            Object.entries(previousPages).map(([page, pageAction]) => {
+                                if (page && page !== "undefined") return (
+                                    <Fragment key={page}>
+                                        <Button 
+                                            sx={styles.iconButton} 
+                                            size="small" 
+                                            onClick={pageAction}
+                                        >
+                                            {page}
+                                        </Button>
+                                        /
+                                    </Fragment>
+                                )
+                                
+                            })
                         }
 
-                        <Button sx={styles.iconButton} size="small">{currentPage}</Button>
+                        <Button sx={styles.iconButton} size="small">{currentPage!== undefined ? currentPage : ""}</Button>
                     </div>
                     <div style={styles.pageName}>
                         {currentPage}&nbsp;

@@ -1,6 +1,51 @@
-import { parse } from "path";
 import { refreshAuth, revokeToken } from "../services/app.service"
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { FilterOption, TableColumns } from "../types";
+
+export const DEFAULT_FILTER_OPTIONS: {
+  [key: string]: FilterOption;
+} = {
+  review_status: {
+      key: 'review_status',
+      displayName: "Review Status",   
+      type: "checkbox",
+      operator: 'equals',
+      options: [
+          { name: "reviewed", checked: true, value: "reviewed" },
+          { name: "unreviewed", checked: true, value: "unreviewed" },
+          { name: "incomplete", checked: true, value: "incomplete" },
+          { name: "defective", checked: true, value: "defective" },
+      ],
+      selectedOptions: ["reviewed", "unreviewed", "incomplete", "defective"]
+  },
+  name: {
+    key: "name",
+    displayName: "Record Name",
+    type: "string",
+    operator: 'equals',
+    value: ''
+  },
+  dateCreated: {
+    key: "dateCreated",
+    displayName: "Date Uploaded",
+    type: "date",
+    operator: 'is',
+    value: ''
+  }
+}
+
+export const TABLE_ATTRIBUTES: {
+  [key: string]: TableColumns;
+} = {
+  record_group: {
+      displayNames: ["Record Name", "Date Uploaded", "API Number", "Mean Confidence", "Lowest Confidence", "Notes", "Digitization Status", "Review Status"],
+      keyNames: ["name", "dateCreated", "API_NUMBER", "confidence_median", "confidence_lowest", "notes", "status", "review_status"],
+  },
+  project: {
+    displayNames: ["Record Name", "Record Group", "Date Uploaded", "API Number", "Notes", "Digitization Status", "Review Status"],
+    keyNames: ["name", "record_group", "dateCreated", "API_NUMBER", "notes", "status", "review_status"],
+  },
+}
 
 export const round = (num: number, scale: number): number => {
   if(!("" + num).includes("e")) {
@@ -104,19 +149,14 @@ export const logout = (): void => {
   window.location.replace("/");
 }
 
-export const convertFiltersToMongoFormat = (filters: Array<{ type: string; options?: Array<{ checked: boolean; name: string; }>; value?: string; operator?: string; key: string; }>): object => {
+export const convertFiltersToMongoFormat = (filters: FilterOption[]): object => {
   let filterBy: { [key: string]: any } = {};
   for (let filter of filters) {
       let nextFilter: any;
       if (filter.type === 'checkbox') {
-          let allOptionsTrue: boolean = true;
           nextFilter = { "$in": [] };
           for (let each of filter.options || []) {
-              if (each.checked) nextFilter["$in"].push(each.name);
-              else allOptionsTrue = false;
-          }
-          if (allOptionsTrue) {
-              nextFilter = {};
+              if (each.checked) nextFilter["$in"].push(each.value);
           }
       }
       else if (filter.type === 'date') {

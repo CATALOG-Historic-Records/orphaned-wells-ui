@@ -11,8 +11,6 @@ test('test project list table', (): void => {
     //test for component elements
     screen.getByRole('table', {  name: /projects table/i});
     screen.getByRole('columnheader', {  name: /project name/i});
-    screen.getByRole('columnheader', {  name: /description/i});
-    screen.getByRole('columnheader', {  name: /locations/i});
     screen.getByRole('columnheader', {  name: /date/i});
 });
 

@@ -4,8 +4,10 @@ objects
 export interface RecordData {
     _id: string;
     name: string;
+    filename: string;
     project_id: string;
     project_name: string;
+    record_group_id: string;
     attributesList: Array<any>;
     img_urls: Array<string>;
     recordIndex?: number;
@@ -18,6 +20,19 @@ export interface RecordData {
 }
 
 export interface ProjectData {
+    _id: string;
+    name: string;
+    record_groups: RecordGroup[]
+    settings?: any;
+    state?: string;
+    creator?: {
+      name?: string;
+      email?: string;
+    };
+    dateCreated?: number;
+}
+
+export interface RecordGroup {
     _id: string;
     attributes: any[];
     name: string;
@@ -60,7 +75,7 @@ export interface FilterOption {
     displayName: string;
     type: string;
     operator: string;
-    options?: { name: string; checked: boolean }[];
+    options?: { name: string; checked: boolean, value: string }[];
     selectedOptions?: string[];
     value?: string;
 }
@@ -73,6 +88,15 @@ export interface User {
     role: number,
     user_info?: any
   }
+
+export interface PreviousPages {
+    [key: string]: () => void;
+}
+
+export interface TableColumns {
+    displayNames: string[];
+    keyNames: string[];
+}
 
 /*
 props interfaces
@@ -88,21 +112,11 @@ export interface RecordAttributesTableProps {
 }
 
 export interface RecordsTableProps {
-    projectData: ProjectData;
-    records: RecordData[];
-    setRecords: (records: RecordData[]) => void;
-    pageSize: number;
-    currentPage: number;
-    sortBy: string;
-    sortAscending: number;
-    recordCount: number;
-    setPageSize: (size: number) => void;
-    setCurrentPage: (page: number) => void;
-    appliedFilters: any;
-    setAppliedFilters: (filters: any) => void;
-    setSortBy: (sortBy: string) => void;
-    setSortAscending: (ascending: number) => void;
-    handleUpdateProject: (update: any) => void;
+    location: string;
+    params: any;
+    handleUpdate: (update: any) => void;
+    filter_options?: {[key: string]: FilterOption};
+    recordGroups?: RecordGroup[];
 }
 
 export interface PopupModalProps {
@@ -139,13 +153,14 @@ export interface SubheaderProps {
     handleClickButton?: () => void;
     disableButton?: boolean;
     previousPages?: Record<string, () => void>;
-    actions?: Record<string, () => void>;
+    actions?: Record<string, () => void> | null;
     locked?: boolean;
 }
 
 export interface TableFiltersProps {
     applyFilters: (filters: FilterOption[]) => void;
     appliedFilters: FilterOption[];
+    filter_options?: {[key: string]: FilterOption};
 }
 
 export interface UploadDocumentsModalProps {
@@ -174,8 +189,9 @@ export interface DocumentContainerProps {
 export interface ColumnSelectDialogProps {
     open: boolean;
     onClose: () => void;
-    projectData: ProjectData;
-    handleUpdateProject: (update: any) => void;
+    location: string;
+    handleUpdate: (update: any) => void;
+    _id: string;
 }
 
 export interface CheckboxesGroupProps {

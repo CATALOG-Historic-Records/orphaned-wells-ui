@@ -2,7 +2,7 @@ import './Header.css';
 import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Menu, MenuItem, IconButton, Avatar, Tabs, Tab } from '@mui/material';
-import { logout } from '../../assets/helperFunctions';
+import { logout } from '../../assets/util';
 import { useUserContext } from '../../usercontext';
 
 

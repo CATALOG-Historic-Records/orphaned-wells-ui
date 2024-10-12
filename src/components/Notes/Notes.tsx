@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PopupModal from '../PopupModal/PopupModal';
 import { updateRecord } from '../../services/app.service';
-import { callAPI } from '../../assets/helperFunctions';
+import { callAPI } from '../../assets/util';
 
 interface NotesProps {
     record_id: string | undefined | null;
