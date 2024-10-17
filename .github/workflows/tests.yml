@@ -50,10 +50,6 @@ jobs:
       - name: run frontend
         run: npm start & sleep 30
 
-      - name: print
-        run: |
-            cat .env
-
       - name: run E2E tests
         run: npx cypress run
 

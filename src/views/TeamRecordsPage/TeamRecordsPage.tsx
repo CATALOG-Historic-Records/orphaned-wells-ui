@@ -1,25 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { getRecords } from '../../services/app.service';
+import { getTeamInfo } from '../../services/app.service';
 import Subheader from '../../components/Subheader/Subheader';
 import { callAPI } from '../../assets/util';
-import { RecordData } from '../../types';
+import RecordsTable from '../../components/RecordsTable/RecordsTable';
+import { useUserContext } from '../../usercontext';
 
 const TeamRecordsPage = () => {
-    const [records, setRecords] = useState<RecordData[]>([]);
-
-    useEffect(() => {
-        callAPI(
-            getRecords,
-            [],
-            handleSuccess,
-            (e: Error) => { console.error('error getting team records: ', e) }
-        );
-    }, []);
-
-    const handleSuccess = (data: { records: RecordData[] }) => {
-        setRecords(data.records);
-    };
+    const { user } = useUserContext();
 
     const styles = {
         outerBox: {
@@ -38,6 +26,11 @@ const TeamRecordsPage = () => {
                 currentPage="All Records"
             />
             <Box sx={styles.innerBox}>
+                <RecordsTable
+                    location="team"
+                    params={{id: user?.default_team || ''}}
+                    handleUpdate={(e) => {console.log(e)}}
+                />
             </Box>
         </Box>
     );

@@ -45,7 +45,7 @@ const Header = (props: any) => {
   useEffect(() => {
     if (window.location.hash.includes("project")) {
       setTabValue(0);
-    } else if (window.location.hash.includes("record")) {
+    } else if (window.location.hash.includes("records")) {
       setTabValue(1);
     } else if (window.location.hash.includes("users")) {
       setTabValue(2);
@@ -88,7 +88,7 @@ const Header = (props: any) => {
             TabIndicatorProps={{ style: { background: '#727272' } }}
           >
             <Tab label="Projects" {...a11yProps(0)} />
-            <Tab label="Records" {...a11yProps(1)} disabled />
+            <Tab label="Records" {...a11yProps(1)} />
             {userRole && userRole === "10" &&
               <Tab label="Users" {...a11yProps(2)} />
             }

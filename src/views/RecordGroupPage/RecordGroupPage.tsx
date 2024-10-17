@@ -8,7 +8,6 @@ import UploadDocumentsModal from '../../components/UploadDocumentsModal/UploadDo
 import PopupModal from '../../components/PopupModal/PopupModal';
 import { callAPI } from '../../assets/util';
 import { RecordGroup, ProjectData, PreviousPages } from '../../types';
-import ColumnSelectDialog from '../../components/ColumnSelectDialog/ColumnSelectDialog';
 
 const RecordGroupPage = () => {
     const params = useParams<{ id: string }>(); 
