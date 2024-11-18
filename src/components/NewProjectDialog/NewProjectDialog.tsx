@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Box, TextField, IconButton, Grid, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
+import { useEffect, useState, useRef } from 'react';
+import { TextField, IconButton, Grid, Button, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { addProject } from '../../services/app.service';
 import { callAPI } from '../../assets/util';
-import { Processor } from '../../types';
 
 interface NewProjectDialogProps {
     open: boolean;

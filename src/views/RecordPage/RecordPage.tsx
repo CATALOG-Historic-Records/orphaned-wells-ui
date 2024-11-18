@@ -205,13 +205,16 @@ const Record = () => {
         setShowResetPrompt(true);
     }
 
-    const handleUpdateReviewStatus = (new_status: string) => {
+    const handleUpdateReviewStatus = (new_status: string, categories?: string[], description?: string) => {
         let data_update;
         if (new_status === "unreviewed") {
             let tempRecordData = { ...recordData };
             tempRecordData["review_status"] = "unreviewed";
             data_update = tempRecordData;
-        } else data_update = { review_status: new_status };
+        } else if (new_status === "defective") {
+            data_update = {review_status: new_status, defective_categories: categories, defective_description: description};
+        } 
+        else data_update = { review_status: new_status };
         callAPI(
             updateRecord,
             [params.id, { data: data_update, type: "review_status" }],

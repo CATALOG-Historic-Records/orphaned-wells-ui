@@ -10,13 +10,14 @@ export interface RecordData {
     record_group_id: string;
     attributesList: Array<any>;
     img_urls: Array<string>;
+    dateCreated: number;
+    status: string;
+    api_number: number | null;
+    previous_id?: string;
+    next_id?: string;
     recordIndex?: number;
     review_status?: string;
     notes?: string | null;
-    dateCreated: number;
-    status: string;
-    previous_id?: string;
-    next_id?: string;
 }
 
 export interface ProjectData {
@@ -175,7 +176,7 @@ export interface BottombarProps {
     onPreviousButtonClick: () => void;
     onNextButtonClick: () => void;
     onReviewButtonClick: () => void;
-    handleUpdateReviewStatus: (status: string) => void;
+    handleUpdateReviewStatus: (status: string, categories?: string[], description?: string) => void;
     promptResetRecord: () => void;
     locked?: boolean;
 }
