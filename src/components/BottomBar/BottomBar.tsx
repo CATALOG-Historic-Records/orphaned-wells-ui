@@ -14,6 +14,7 @@ import SplitButton from '../SplitButton/SplitButton';
 import ErrorIcon from '@mui/icons-material/Error';
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
+import DefectiveDialog from '../DefectiveDialog/DefectiveDialog';
 import { BottombarProps } from '../../types';
 
 const Bottombar = (props: BottombarProps) => {
@@ -28,6 +29,7 @@ const Bottombar = (props: BottombarProps) => {
     locked
   } = props;
   const [openNotesModal, setOpenNotesModal] = useState(false);
+  const [openDefectiveDialog, setOpenDefectiveDialog] = useState(false);
   
   const splitButtonOptions: Record<string, Array<{ text: string; onClick: () => void; icon: JSX.Element; selected?: boolean }>> = {
     unreviewed: [
@@ -39,7 +41,7 @@ const Bottombar = (props: BottombarProps) => {
       },
       {
         text: "Mark as defective",
-        onClick: () => handleUpdateReviewStatus("defective"),
+        onClick: () => setOpenDefectiveDialog(true),
         icon: <CancelIcon sx={{ color: "#9F0100" }} />,
       },
     ],
@@ -52,7 +54,7 @@ const Bottombar = (props: BottombarProps) => {
       },
       {
         text: "Mark as defective",
-        onClick: () => handleUpdateReviewStatus("defective"),
+        onClick: () => setOpenDefectiveDialog(true),
         icon: <CancelIcon sx={{ color: "#9F0100" }} />,
       },
     ],
@@ -97,6 +99,10 @@ const Bottombar = (props: BottombarProps) => {
       zIndex: 2,
     }
   };
+
+  const handleMarkDefective = (categories: string[], description: string) => {
+    handleUpdateReviewStatus("defective", categories, description);
+  }
 
   return ( 
     <Box sx={{ width: 500 }}>
@@ -157,6 +163,11 @@ const Bottombar = (props: BottombarProps) => {
             </Box>
           </Grid>
         </Grid>
+        <DefectiveDialog
+          open={openDefectiveDialog}
+          handleMarkDefective={handleMarkDefective}
+          onClose={() => setOpenDefectiveDialog(false)}
+        />
         <Notes
           record_id={params.id}
           notes={recordData.notes}
