@@ -1,25 +1,17 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
 import { Box, Button, Typography, Modal } from '@mui/material';
 import { useGoogleLogin } from '@react-oauth/google';
 import { authLogin } from '../../services/app.service';
 import GoogleIcon from '@mui/icons-material/Google';
+import { LoginPageStyles as styles } from '../../assets/styles';
 
 interface LoginPageProps {
     handleSuccessfulAuthentication: (accessToken: string, refreshToken: string, idToken: string) => void;
-    authenticated: boolean;
 }
 
 const LoginPage = (props: LoginPageProps) => {
-    const { handleSuccessfulAuthentication, authenticated } = props;
+    const { handleSuccessfulAuthentication } = props;
     const [showUnauthorizedMessage, setShowUnauthorizedMessage] = useState(false);
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (authenticated) {
-            navigate("/");
-        }
-    }, [authenticated, navigate]);
 
     const googleLogin = useGoogleLogin({
         onSuccess: async ({ code }: { code: string }) => {
@@ -49,49 +41,6 @@ const LoginPage = (props: LoginPageProps) => {
         },
         flow: 'auth-code',
     });
-
-    const styles = {
-        outerBox: {
-            backgroundColor: "#F5F5F6",
-            height: "100vh"
-        },
-        innerBox: {
-            paddingY: 5,
-            paddingX: 5,
-        },
-        modalBox: {
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 400,
-            backgroundColor: "#FAFAFA",
-            boxShadow: 24,
-            px: 4,
-            py: 8,
-            borderRadius: 4,
-            "&:focus": {
-                outline: "none"
-            },
-        },
-        modalTitle: {
-            display: "flex",
-            justifyContent: "center",
-            fontWeight: "bold"
-        },
-        modalBody: {
-            display: "flex",
-            justifyContent: "center",
-            mt: 4
-        },
-        button: {
-            backgroundColor: "#4285F4",
-        },
-        unauthorized: {
-            pt: 5,
-            color: "red"
-        }
-    };
 
     return (
         <Box sx={styles.outerBox}>

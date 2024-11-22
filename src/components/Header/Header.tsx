@@ -1,46 +1,22 @@
 import './Header.css';
 import { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
-import { Menu, MenuItem, IconButton, Avatar, Tabs, Tab } from '@mui/material';
-import { logout } from '../../assets/util';
+import { useNavigate, useLocation } from "react-router-dom";
+import { HeaderStyles as styles } from '../../assets/styles';
 import { useUserContext } from '../../usercontext';
+import { fetchTeams, updateDefaultTeam } from '../../services/app.service';
+import { Menu, MenuItem, IconButton, Avatar, Tabs, Tab, Divider, ListItemIcon } from '@mui/material';
+import { logout, callAPI } from '../../assets/util';
+import Logout from '@mui/icons-material/Logout';
 
 
 const Header = (props: any) => {
   const navigate = useNavigate();
-  const { user, username, userPhoto, userRole} = useUserContext();
+  const location = useLocation();
+  const { userName, userPhoto, userPermissions} = useUserContext();
   const [anchorAr, setAnchorAr] = useState<null | HTMLElement>(null);
   const [profileActions, setProfileActions] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-
-  const styles = {
-    iconLeft: {
-      top: 5,
-      color: "black",
-    },
-    icon: {
-      top: 5,
-      color: "black",
-      right: 5
-    },
-    avatar: {
-      width: 24,
-      height: 24
-    },
-    tabPanel: {
-      marginLeft: 10,
-    },
-    logo: {
-      marginTop: 2.5,
-      marginLeft: "1em",
-      width: "2.5em",
-      height: "2.5em",
-      borderRadius: "50%",
-      display: "inline-block",
-      verticalAlign: "middle",
-      cursor: "pointer"
-    },
-  }
+  const [teams, setTeams] = useState<string[]>([])
 
   useEffect(() => {
     if (window.location.hash.includes("project")) {
@@ -52,7 +28,8 @@ const Header = (props: any) => {
     } else {
       setTabValue(0);
     }
-  }, [props]);
+    if (userPermissions && userPermissions.includes('manage_system')) callAPI(fetchTeams, [], fetchedTeams, failedFetchTeams)
+  }, [props, userPermissions, location]);
 
   const handleNavigateHome = () => {
     navigate("/", { replace: true });
@@ -75,6 +52,22 @@ const Header = (props: any) => {
     }
   };
 
+  const changeTeam = (team: string) => {
+    let data = {
+      new_team: team
+    }
+    setProfileActions(false)
+    callAPI(updateDefaultTeam, [data], (data) => window.location.reload(), (e)=> console.error(e.detail))
+  }
+
+  const fetchedTeams = (data: string[]) => {
+    setTeams(data)
+  }
+
+  const failedFetchTeams = () => {
+
+  }
+
   return (
     <div id="Header">
       <div className="titlebar">
@@ -89,7 +82,7 @@ const Header = (props: any) => {
           >
             <Tab label="Projects" {...a11yProps(0)} />
             <Tab label="Records" {...a11yProps(1)} />
-            {userRole && userRole === "10" &&
+            {userPermissions && userPermissions.includes("manage_team") &&
               <Tab label="Users" {...a11yProps(2)} />
             }
           </Tabs>
@@ -97,7 +90,7 @@ const Header = (props: any) => {
 
         <div className="right">
           <IconButton sx={styles.icon} onClick={handleShowProfileActions}>
-            <Avatar sx={styles.avatar} alt={username} src={userPhoto}/>
+            <Avatar sx={styles.avatar} alt={userName} src={userPhoto}/>
             
           </IconButton>
           <Menu
@@ -105,8 +98,27 @@ const Header = (props: any) => {
             anchorEl={anchorAr}
             open={profileActions}
             onClose={() => setProfileActions(false)}
+            slotProps={
+              styles.menuSlotProps
+            }
           >
-            <MenuItem onClick={logout}>Sign out</MenuItem>
+            {userPermissions && userPermissions.includes('manage_system') && (
+              <span>
+              {teams.map((team) => (
+                <MenuItem key={team} onClick={() => changeTeam(team)}>
+                  Change to {team}
+                </MenuItem>
+              ))}
+              <Divider />
+              </span>
+            )
+            }
+            <MenuItem onClick={logout}>
+              <ListItemIcon>
+                <Logout fontSize="small" />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
           </Menu>
         </div>
       </div>

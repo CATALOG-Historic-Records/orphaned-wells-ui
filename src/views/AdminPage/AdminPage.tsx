@@ -1,31 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import { Select, MenuItem, FormControl, IconButton, Tooltip, InputLabel } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import CancelIcon from '@mui/icons-material/Cancel';
 import Subheader from '../../components/Subheader/Subheader';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import ErrorBar from '../../components/ErrorBar/ErrorBar';
-import { getUsers, approveUser, addUser, deleteUser } from '../../services/app.service';
+import ChangeRoleDialog from '../../components/ChangeRoleDialog/ChangeRoleDialog';
+import { getUsers, addUser, deleteUser } from '../../services/app.service';
+import { useUserContext } from '../../usercontext';
 import { callAPI } from '../../assets/util';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-
-const ROLES: { [key: string]: string } = {
-    "-1": "pending",
-    1: "base user",
-    10: "admin"
-}
+import { User } from '../../types';
 
 const AdminPage = () => {
-    const [users, setUsers] = useState<any[]>([]);
+    const { user, userPermissions } = useUserContext();
+    const [users, setUsers] = useState<User[]>([]);
     const [unableToConnect, setUnableToConnect] = useState(false);
     const [showNewUserModal, setShowNewUserModal] = useState(false);
-    const [showApproveUserModal, setShowApproveUserModal] = useState(false);
     const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<string | null>(null);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [newUser, setNewUser] = useState("");
     const [disableSubmitNewUserButton, setDisableSubmitNewUserButton] = useState(true);
-    const [showError, setShowError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState<string | null>("");
+    const [showChangeRoleDialog, setShowChangeRoleDialog] = useState(false)
 
     const styles = {
         outerBox: {
@@ -39,7 +36,7 @@ const AdminPage = () => {
     }
 
     useEffect(() => {
-        callAPI(getUsers, ["admin", {}], handleAuthSuccess, handleAuthError);
+        callAPI(getUsers, [], handleAuthSuccess, handleAuthError);
     }, []);
 
     useEffect(() => {
@@ -59,16 +56,12 @@ const AdminPage = () => {
         setUnableToConnect(true);
     }
 
-    const handleApproveUser = () => {
-        callAPI(approveUser, [selectedUser], handleSuccess, (e) => handleUserError("unable to approve user", e));
-    }
-
     const handleAddUser = () => {
         callAPI(addUser, [newUser], handleSuccess, (e) => handleUserError("unable to add user", e));
     }
 
     const handleDeleteUser = () => {
-        callAPI(deleteUser, [selectedUser], handleSuccess, (e) => handleUserError("unable to delete user", e));
+        callAPI(deleteUser, [selectedUser?.email], handleSuccess, (e) => handleUserError("unable to delete user", e));
     }
 
     const handleSuccess = () => {
@@ -78,7 +71,6 @@ const AdminPage = () => {
     }
 
     const handleClose = () => {
-        setShowApproveUserModal(false);
         setSelectedUser(null);
         setShowNewUserModal(false);
         setNewUser("");
@@ -86,8 +78,6 @@ const AdminPage = () => {
     }
 
     const handleUserError = (message: string, e: any) => {
-        console.error(e.detail);
-        setShowError(true);
         setErrorMessage(e.detail);
     }
 
@@ -95,31 +85,23 @@ const AdminPage = () => {
         <Box sx={styles.outerBox}>
             <Subheader
                 currentPage="Admin"
-                buttonName="+ Add user"
+                buttonName={(userPermissions && userPermissions.includes('add_user')) ? "+ Add user" : undefined}
                 handleClickButton={() => setShowNewUserModal(true)}
             />
             <Box sx={styles.innerBox}>
                 {!unableToConnect ?
                     <UsersTable
+                        user={user}
                         users={users}
                         setSelectedUser={setSelectedUser}
-                        setShowApproveUserModal={setShowApproveUserModal}
+                        setShowChangeRoleDialog={setShowChangeRoleDialog}
                         setShowDeleteUserModal={setShowDeleteUserModal}
+                        userPermissions={userPermissions}
                     />
                     :
                     <h1>You are not authorized to view this page.</h1>
                 }
             </Box>
-            <PopupModal
-                open={showApproveUserModal}
-                handleClose={handleClose}
-                text="Would you like to approve this user for use of the application?"
-                handleSave={handleApproveUser}
-                buttonText='Approve'
-                buttonColor='primary'
-                buttonVariant='contained'
-                width={400}
-            />
             <PopupModal
                 input
                 open={showNewUserModal}
@@ -144,22 +126,32 @@ const AdminPage = () => {
                 buttonVariant='contained'
                 width={400}
             />
-            {
-                showError && <ErrorBar duration={10000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />
-            }
+            <ChangeRoleDialog
+                open={showChangeRoleDialog}
+                selectedUser={selectedUser}
+                onClose={() => setShowChangeRoleDialog(false)}
+                team={user?.default_team}
+            />
+            <ErrorBar 
+                duration={10000} 
+                setErrorMessage={setErrorMessage} 
+                errorMessage={errorMessage} 
+            />
         </Box>
     );
 }
 
 interface UsersTableProps {
-    users: any[];
-    setSelectedUser: (user: string | null) => void;
-    setShowApproveUserModal: (show: boolean) => void;
+    user: User;
+    users: User[];
+    setSelectedUser: (user: any) => void;
+    setShowChangeRoleDialog: (show: boolean) => void;
     setShowDeleteUserModal: (show: boolean) => void;
+    userPermissions: any;
 }
 
-const UsersTable = ({ users, setSelectedUser, setShowApproveUserModal, setShowDeleteUserModal }: UsersTableProps) => {
-    const [tableRole, setTableRole] = useState(-1);
+const UsersTable = ({ user, users, setSelectedUser, setShowChangeRoleDialog, setShowDeleteUserModal, userPermissions }: UsersTableProps) => {
+    
 
     const styles = {
         headerRow: {
@@ -172,23 +164,34 @@ const UsersTable = ({ users, setSelectedUser, setShowApproveUserModal, setShowDe
         }
     }
 
-    const handleSelectUser = (user: any) => {
-        setShowApproveUserModal(true);
-        setSelectedUser(user.email);
-    }
-
-    const handleDeleteUser = (user: any) => {
+    const handleDeleteUser = (user: User) => {
         setShowDeleteUserModal(true);
-        setSelectedUser(user.email);
+        setSelectedUser(user);
     }
 
-    return (
+    const handleClickChangeRole = (row: User) => {
+        setSelectedUser(row)
+        setShowChangeRoleDialog(true)
+    }
+
+    const getRole = (roles: any) => {
+        if (roles.team && roles.team[user.default_team]) {
+            let team_roles = roles.team[user.default_team]
+            return team_roles.map((role: string, idx: number)=> {
+                if (idx === team_roles.length-1) return role.replace('_', ' ')
+                return role.replace('_', ' ')+', '
+            })
+        }
+        return null
+    }
+
+    if (user) return (
         <TableContainer component={Paper}>
             <h1>Users</h1>
             <Table sx={{ minWidth: 650, borderTop: "5px solid #F5F5F6" }} aria-label="pending users table" size="small">
                 <TableHead>
                     <TableRow>
-                        {[["Name", "20%"], ["Email", "25%"], ["Organization", "15%"], ["Role", "20%"], ["Actions", "20%"]].map((value) => (
+                        {[["Name", "25%"], ["Email", "25%"], ["Roles", "25%"], ["Actions", "25%"]].map((value) => (
                             <TableCell width={value[1]} sx={styles.headerRow} key={value[0]}>{value[0]}</TableCell>
                         ))}
                     </TableRow>
@@ -203,17 +206,21 @@ const UsersTable = ({ users, setSelectedUser, setShowApproveUserModal, setShowDe
                                 {row.name}
                             </TableCell>
                             <TableCell>{row.email}</TableCell>
-                            <TableCell>{row.hd}</TableCell>
-                            <TableCell>{ROLES[row.role]}</TableCell>
+                            <TableCell>{getRole(row.roles)}</TableCell>
                             <TableCell>
-                                {row.role === -1 &&
-                                    <Tooltip title="Approve User">
-                                        <IconButton color="success" disabled={row.role !== -1} onClick={() => handleSelectUser(row)}><CheckCircleIcon /></IconButton>
-                                    </Tooltip>
-                                }
+                            {userPermissions && userPermissions.includes('manage_team') &&
+                                <Tooltip title="Update Roles">
+                                    <IconButton color="primary" onClick={()=> handleClickChangeRole(row)}>
+                                        <ManageAccountsIcon/>
+                                    </IconButton>
+                                </Tooltip>
+                            }
+                            {userPermissions && userPermissions.includes('delete') &&
                                 <Tooltip title="Remove User">
                                     <IconButton color="error" onClick={() => handleDeleteUser(row)}><CancelIcon /></IconButton>
                                 </Tooltip>
+                            }
+                                
                             </TableCell>
                         </TableRow>
                     ))}
@@ -221,37 +228,11 @@ const UsersTable = ({ users, setSelectedUser, setShowApproveUserModal, setShowDe
             </Table>
         </TableContainer>
     );
-}
+    else return (
+        <div>
 
-interface RoleDropdownProps {
-    role: number;
-    handleSelectRole: (role: number) => void;
-}
-
-const RoleDropdown = ({ role, handleSelectRole }: RoleDropdownProps) => {
-
-    return (
-        <FormControl sx={{ width: 200, pb: 3 }}>
-            <InputLabel id="role-dropdown-label">Role</InputLabel>
-            <Select
-                labelId="role-dropdown-label"
-                id="role-dropdown"
-                label="Role"
-                value={role}
-                onChange={(event) => handleSelectRole(event.target.value as unknown as number)}
-                size="small"
-            >
-                {[-1, 1].map((roleIdx) => (
-                    <MenuItem
-                        key={roleIdx}
-                        value={roleIdx}
-                    >
-                        {ROLES[roleIdx]}
-                    </MenuItem>
-                ))}
-            </Select>
-        </FormControl>
-    );
+        </div>
+    )
 }
 
 export default AdminPage;

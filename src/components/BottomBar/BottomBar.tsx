@@ -1,21 +1,18 @@
 import { useState } from 'react';
 import { useParams } from "react-router-dom";
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import CssBaseline from '@mui/material/CssBaseline';
-import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
+import Notes from '../Notes/Notes';
+import SplitButton from '../SplitButton/SplitButton';
+import DefectiveDialog from '../DefectiveDialog/DefectiveDialog';
+import { BottombarProps } from '../../types';
+import { BottomBarStyles as styles } from '../../assets/styles';
+import { Grid, Box, Paper, Button, CssBaseline } from '@mui/material';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import Notes from '../Notes/Notes';
-import SplitButton from '../SplitButton/SplitButton';
 import ErrorIcon from '@mui/icons-material/Error';
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
-import DefectiveDialog from '../DefectiveDialog/DefectiveDialog';
-import { BottombarProps } from '../../types';
 
 const Bottombar = (props: BottombarProps) => {
   let params = useParams(); 
@@ -86,19 +83,7 @@ const Bottombar = (props: BottombarProps) => {
     ],
   };
 
-  const styles = {
-    button: {
-      marginX: 1,
-    },
-    paper: {
-      position: 'fixed',
-      bottom: 0, 
-      left: '0px',
-      right: 0,
-      height: '60px',
-      zIndex: 2,
-    }
-  };
+  
 
   const handleMarkDefective = (categories: string[], description: string) => {
     handleUpdateReviewStatus("defective", categories, description);

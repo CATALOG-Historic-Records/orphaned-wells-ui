@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Subheader from '../../components/Subheader/Subheader';
 import RecordGroupsTable from '../../components/RecordGroupsTable/RecordGroupsTable';
 import NewRecordGroupDialog from '../../components/NewRecordGroupDialog/NewRecordGroupDialog';
-import { getRecordGroups, updateProject, deleteProject } from '../../services/app.service';
-import { callAPI, DEFAULT_FILTER_OPTIONS } from '../../assets/util';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ProjectData } from '../../types';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import ProjectTabs from '../../components/ProjectTabs/ProjectTabs';
 import RecordsTable from '../../components/RecordsTable/RecordsTable';
+import ErrorBar from '../../components/ErrorBar/ErrorBar';
+import { useUserContext } from '../../usercontext';
+import { getRecordGroups, updateProject, deleteProject } from '../../services/app.service';
+import { callAPI, DEFAULT_FILTER_OPTIONS } from '../../assets/util';
+import { ProjectData } from '../../types';
 
 const Project = () => {
     let params = useParams();
     const navigate = useNavigate();
+    const { userPermissions} = useUserContext();
     const [projectData, setProjectData] = useState({} as ProjectData)
     const [projectName, setProjectName] = useState("")
     const [record_groups, setRecordGroups] = useState<any[]>([]);
@@ -22,20 +25,15 @@ const Project = () => {
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [openUpdateNameModal, setOpenUpdateNameModal] = useState(false);
     const [currentTab, setCurrentTab] = useState(0)
+    const [errorMsg, setErrorMsg] = useState<string | null>("")
     const [filters, setFilters] = useState({...DEFAULT_FILTER_OPTIONS})
     const tabs = ["Record Groups", "All Records"]
-
-    /*
-        TODO: write useeffect that runs upon page load to fetch project data
-        this way we only load project data once, and records/record groups load separately depending on the tab
-    */
 
     useEffect(() => {
         if (tabs[currentTab] === "Record Groups") callAPI(getRecordGroups, [params.id], handleFetchedRecordGroups, handleError);
         else if (tabs[currentTab] === "All Records") {
             if (projectData.record_groups) {
-                // const query = {"project_id": params.id}
-                // callAPI(getRecords, ["project", query], handleFetchedRecords, handleError);
+                
             } else {
                 console.error("missing project data")
             }
@@ -98,7 +96,7 @@ const Project = () => {
             deleteProject,
             [projectData._id],
             (data: any) => navigate("/projects", { replace: true }),
-            (e: Error) => { console.error('error on deleting project: ', e); }
+            handleAPIErrorResponse
         );
     }
 
@@ -112,7 +110,7 @@ const Project = () => {
             updateProject,
             [params.id, { name: projectName }],
             (data: any) => window.location.reload(),
-            (e: Error) => console.error('error on updating record group name: ', e)
+            handleAPIErrorResponse
         );
     }
 
@@ -122,26 +120,26 @@ const Project = () => {
             updateProject,
             [params.id, update],
             (data: ProjectData) => setProjectData(data),
-            (e: Error) => console.error('error on updating record group name: ', e)
+            handleAPIErrorResponse
         );
     }
 
-    const placeHolder = (data: any) => {
-        console.log("placeholder")
+    const handleAPIErrorResponse = (e: any) => {
+        setErrorMsg(e.detail)
     }
 
     return (
         <Box sx={styles.outerBox}>
             <Subheader
                 currentPage={projectData.name}
-                buttonName="New Record Group"
+                buttonName={(userPermissions && userPermissions.includes('create_record_group')) ? "New Record Group" : undefined}
                 handleClickButton={handleClickNewRecordGroup}
                 previousPages={
                     { 
                         "Projects": () => navigate("/projects", { replace: true }),
                     }
                 }
-                actions={(localStorage.getItem("role") && localStorage.getItem("role") === "10") ?
+                actions={(userPermissions && userPermissions.includes('manage_project')) ?
                     {
                         "Change project name": () => setOpenUpdateNameModal(true), 
                         "Delete project": () => setOpenDeleteModal(true),
@@ -200,6 +198,10 @@ const Project = () => {
                 buttonColor='primary'
                 buttonVariant='contained'
                 width={400}
+            />
+            <ErrorBar
+                errorMessage={errorMsg}
+                setErrorMessage={setErrorMsg}
             />
         </Box>
     );

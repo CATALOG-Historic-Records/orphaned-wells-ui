@@ -1,11 +1,16 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from "react-router-dom";
+import { checkAuth, } from './services/app.service';
+import { callAPI } from './assets/util';
+import { User } from './types';
+import LoginPage from './views/LoginPage/LoginPage';
 
 interface UserContextObject {
   user: any;
-  username?: string;
-  userPhoto?: string;
-  userRole?: string;
+  userEmail: string;
+  userName: string;
+  userPhoto: string;
+  userPermissions: any;
 }
 
 const UserContext = createContext({} as UserContextObject);
@@ -15,30 +20,79 @@ export const useUserContext = () => {
 };
 
 export const UserContextProvider = ({ children }: any) => {
+  const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState<any>(null);
-  const [username, setUsername] = useState<string | undefined>(undefined);
-  const [userPhoto, setUserPhoto] = useState<string | undefined>(undefined);
-  const [userRole, setUserRole] = useState<string | undefined>(undefined);
+  const [userEmail, setUserEmail] = useState("");
+  const [userName, setUserName] = useState("");
+  const [userPhoto, setUserPhoto] = useState("");
+  const [userPermissions, setUserPermissions] = useState<any>(undefined);
+  const [loading, setLoading] = useState(true)
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    setUser(JSON.parse(localStorage.getItem('user_info') || '{}'))
-    setUsername(localStorage.getItem('user_name') || undefined);
-    setUserPhoto(localStorage.getItem('user_picture') || undefined);
-    setUserRole(localStorage.getItem('role') || undefined);
+    if (!authenticated) {
+      // check if logged in
+      let id_token = localStorage.getItem("id_token")
+      if (id_token !== null) {
+        callAPI(
+          checkAuth,
+          [id_token],
+          handlePassedAuthentication,
+          handleFailedAuthentication
+        )
+      } else handleFailedAuthentication() // user has no id token so is not logged in
+    }
+    else setLoading(false)
+    
   },[location]);
 
+  const handlePassedAuthentication = (user_data: User) => {
+    setAuthenticated(true)
+    setUser(user_data)
+    setUserEmail(user_data.email)
+    setUserPermissions(JSON.stringify(user_data.permissions))
+    if (user_data.name && user_data.name !== "") setUserName(user_data.name)
+    if (user_data.picture) setUserPhoto(user_data.picture)
+    if (window.location.hash.includes("login")){
+      navigate('/projects')
+    }
+    setLoading(false)
+  }
+
+  const handleFailedAuthentication = () => {
+    setAuthenticated(false)
+    setLoading(false)
+    if (!window.location.hash.includes("login")) navigate('/login')//window.location.href = '/#/login'
+  }
+
+  const handleSuccessfulLogin = (access_token: string, refresh_token: string, id_token: string) => {
+    // gotta store credentials so they stay logged in
+    localStorage.setItem("access_token", access_token)
+    localStorage.setItem("refresh_token", refresh_token)
+    localStorage.setItem("id_token", id_token)
+    callAPI(
+      checkAuth,
+      [id_token],
+      handlePassedAuthentication,
+      handleFailedAuthentication
+    )
+  }
 
   const value = {
     user,
-    username,
+    userEmail,
+    userName,
     userPhoto,
-    userRole
+    userPermissions
   };
 
   return (
     <UserContext.Provider value={value}>
-      {children}
+      {(!loading && authenticated) ? children :
+      !loading &&
+      <LoginPage handleSuccessfulAuthentication={handleSuccessfulLogin}/>
+      }
     </UserContext.Provider>
   );
 };

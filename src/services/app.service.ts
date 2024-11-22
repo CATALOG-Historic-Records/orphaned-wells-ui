@@ -91,9 +91,9 @@ export const addRecordGroup = (data: any) => {
     });
 };
 
-export const uploadDocument = (data: FormData, project_id: string, reprocessed?: boolean)  => {
+export const uploadDocument = (data: FormData, project_id: string, user_email: any, reprocessed?: boolean)  => {
     if (!reprocessed) reprocessed = false
-    return fetch(BACKEND_URL + '/upload_document/' + project_id + '/' + localStorage.getItem("user_email")+'?reprocessed='+reprocessed, {
+    return fetch(BACKEND_URL + '/upload_document/' + project_id + '/' + user_email+'?reprocessed='+reprocessed, {
         method: 'POST',
         mode: 'cors',
         body: data,
@@ -201,8 +201,21 @@ export const refreshAuth = () => {
     });
 };
 
-export const getUsers = (role: string, data: any) => {
-    return fetch(BACKEND_URL + '/get_users/' + role, {
+export const getUsers = () => {
+    return fetch(BACKEND_URL + '/get_users', {
+        mode: 'cors',
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
+export const addUser = (email: string, team_lead?: boolean, sys_admin?: boolean) => {
+    if (!team_lead) team_lead = false
+    if (!sys_admin) sys_admin = false
+    let data = {
+        team_lead: team_lead,
+        sys_admin: sys_admin
+    }
+    return fetch(BACKEND_URL + '/add_user/' + email, {
         method: 'POST',
         mode: 'cors',
         body: JSON.stringify(data),
@@ -210,17 +223,33 @@ export const getUsers = (role: string, data: any) => {
     });
 };
 
-export const approveUser = (email: string) => {
-    return fetch(BACKEND_URL + '/approve_user/' + email, {
+export const updateUserRoles = (data: any) => {
+    return fetch(BACKEND_URL + '/update_user_roles', {
         method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(data),
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
+export const updateDefaultTeam = (data: any) => {
+    return fetch(BACKEND_URL + '/update_default_team', {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(data),
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
+export const fetchRoles = (role_category: string) => {
+    return fetch(BACKEND_URL + '/fetch_roles/'+role_category, {
         mode: 'cors',
         headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
     });
 };
 
-export const addUser = (email: string) => {
-    return fetch(BACKEND_URL + '/add_user/' + email, {
-        method: 'POST',
+export const fetchTeams = () => {
+    return fetch(BACKEND_URL + '/fetch_teams', {
         mode: 'cors',
         headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
     });

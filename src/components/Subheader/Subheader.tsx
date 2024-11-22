@@ -3,60 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { Button, Grid, IconButton, Box, Menu, MenuItem, Chip } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { SubheaderProps } from '../../types';
 import LockIcon from '@mui/icons-material/Lock';
+import { SubheaderProps } from '../../types';
+import { SubheaderStyles as styles } from '../../assets/styles';
 
 const Subheader = (props: SubheaderProps) => {
     const navigate = useNavigate();
     const { currentPage, buttonName, status, subtext, handleClickButton, disableButton, previousPages, actions, locked } = props;
     const [showActions, setShowActions] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const styles = {
-        iconButton: {
-            top: -5,
-            color: "black",
-        },
-        icon: {
-            fontSize: "15px"
-        },
-        box: {
-            paddingTop: 1,
-            paddingBottom: 1,
-            backgroundColor: "white",
-            width: "100%",
-            boxShadow: 1
-        },
-        gridContainer: {
-            margin: 0,
-            padding: 0,
-        },
-        directoryDisplay: {
-            display: "flex",
-            justifyContent: "flex-start",
-            marginLeft: 40,
-            overflow: "auto",
-            width: "80vw"
-        },
-        pageName: {
-            display: "flex",
-            justifyContent: "flex-start",
-            marginLeft: 50,
-            fontSize: "25px"
-        },
-        newProjectColumn: {
-            display: "flex",
-            justifyContent: "flex-end",
-            marginRight: 5,
-            marginTop: 3
-        },
-        subtext: {
-            marginTop: 2,
-            display: "flex",
-            justifyContent: "flex-start",
-            marginLeft: 50,
-            fontSize: "15px"
-        }
-    }
 
     const handleNavigate = (path: string) => {
         navigate(path, { replace: true });
@@ -131,7 +86,7 @@ const Subheader = (props: SubheaderProps) => {
                 </Grid>
                 <Grid item xs={3}>
                     <Box sx={styles.newProjectColumn}>
-                        {buttonName && localStorage.getItem("role") && localStorage.getItem("role") === "10" &&
+                        {buttonName &&
                             <Button variant="contained" onClick={handleClickButton} disabled={disableButton}>
                                 {buttonName}
                             </Button>

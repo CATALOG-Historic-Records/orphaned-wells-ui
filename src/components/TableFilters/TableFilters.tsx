@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent, useEffect } from 'react';
+import React, { useState, MouseEvent } from 'react';
 import { Button, Menu, MenuItem, Checkbox, Box, TextField, IconButton } from '@mui/material';
 import { Select, FormControl, InputLabel, Grid, ListItemText, Badge, SelectChangeEvent } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -9,25 +9,10 @@ import Draggable from 'react-draggable';
 import ApprovalIcon from '@mui/icons-material/Approval';
 import { DEFAULT_FILTER_OPTIONS } from '../../assets/util';
 import { FilterOption, TableFiltersProps } from '../../types';
+import { TableFiltersStyles as styles } from '../../assets/styles';
 
 const TableFilters = ({ applyFilters, appliedFilters, filter_options }: TableFiltersProps) => {
-    const styles = {
-        tableFilter: {
-            paddingBottom: 2,
-        },
-        box: {
-            width: '50vw',
-            display: 'flex',
-            justifyContent: 'space-between',
-            paddingTop: 5
-        },
-        closeIcon: {
-            position: 'absolute',
-            right: 0,
-            top: 8,
-            mb: 2,
-        }
-    }
+    
     const [anchorFilterMenu, setAnchorFilterMenu] = useState<null | HTMLElement>(null);
     const [currentFilters, setCurrentFilters] = useState<FilterOption[]>(appliedFilters);
     const [availableFilters, setAvailableFilters] = useState(filter_options || DEFAULT_FILTER_OPTIONS)

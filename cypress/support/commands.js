@@ -39,6 +39,7 @@ Cypress.Commands.add('loginByGoogleApi', () => {
       window.localStorage.setItem("user_email", body.email)
       window.localStorage.setItem("user_hd", body.hd)
       window.localStorage.setItem("role", ""+body.role)
+      window.localStorage.setItem("permissions", JSON.stringify(body.permissions))
       window.localStorage.setItem("user_name", body.name)
       window.localStorage.setItem("user_picture", body.picture)
       window.localStorage.setItem("user_info", JSON.stringify(body))
