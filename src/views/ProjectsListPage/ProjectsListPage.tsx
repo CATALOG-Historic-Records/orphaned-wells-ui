@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
+import { getProjects } from '../../services/app.service';
+import { callAPI } from '../../assets/util';
+import { useUserContext } from '../../usercontext';
 import Subheader from '../../components/Subheader/Subheader';
 import ProjectsListTable from '../../components/ProjectsListTable/ProjectsListTable';
 import NewProjectDialog from '../../components/NewProjectDialog/NewProjectDialog';
-import { getProjects } from '../../services/app.service';
-import { callAPI } from '../../assets/util';
+import ErrorBar from '../../components/ErrorBar/ErrorBar';
+import { Box } from '@mui/material';
 
 const ProjectsListPage = () => {
+    const { userPermissions} = useUserContext();
     const [projects, setProjects] = useState<any[]>([]);
     const [unableToConnect, setUnableToConnect] = useState(false);
     const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>("")
 
     useEffect(() => {
         callAPI(getProjects, [], handleSuccess, handleError);
@@ -43,7 +47,7 @@ const ProjectsListPage = () => {
         <Box sx={styles.outerBox}>
             <Subheader
                 currentPage="Projects"
-                buttonName="New Project"
+                buttonName={(userPermissions && userPermissions.includes('create_project')) ? "New Project" : undefined}
                 handleClickButton={handleClickNewProject}
             />
             <Box sx={styles.innerBox}>
@@ -52,8 +56,17 @@ const ProjectsListPage = () => {
                 :
                     <h1>Unable to connect to backend. Please make sure that backend server is up and running.</h1>
                 }
-                <NewProjectDialog open={showNewProjectDialog} onClose={() => setShowNewProjectDialog(false)} />
-            </Box>
+                <NewProjectDialog 
+                    open={showNewProjectDialog} 
+                    onClose={() => setShowNewProjectDialog(false)}
+                    setErrorMsg={setErrorMsg}
+                />
+        </Box>
+            <ErrorBar
+                setErrorMessage={setErrorMsg}
+                errorMessage={errorMsg}
+            />
+            
         </Box>
     );
 };

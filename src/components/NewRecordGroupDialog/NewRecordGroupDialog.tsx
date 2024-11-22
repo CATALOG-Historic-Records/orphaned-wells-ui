@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { addRecordGroup, getProcessors } from '../../services/app.service';
 import { callAPI } from '../../assets/util';
 import { Processor } from '../../types';
+import ErrorBar from '../ErrorBar/ErrorBar';
 
 interface NewRecordGroupDialogProps {
     open: boolean;
@@ -18,6 +19,7 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
     const [processors, setProcessors] = useState<Processor[]>([])
     const [selectedProcessor, setSelectedProcessor] = useState<Processor>({} as Processor);
     const [disableCreateButton, setDisableCreateButton] = useState(true);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null)
     const dialogHeight = '85vh';
     const dialogWidth = '60vw';
     const state = process.env.REACT_APP_STATE || "illinois";
@@ -124,7 +126,8 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
             addRecordGroup,
             [body],
             handleSuccessfulRecordGroupCreation,
-            (e: Error) => console.error('error on recordGroup add ', e)
+            (e: any) => setErrorMsg(e.detail)
+            // (e: Error) => console.error('error on recordGroup add ', e)
         );
     };
 
@@ -230,6 +233,10 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
                     Create Record Group
                 </Button>
             </DialogContent>
+            <ErrorBar
+                errorMessage={errorMsg}
+                setErrorMessage={setErrorMsg}
+            />
         </Dialog>
     );
 }

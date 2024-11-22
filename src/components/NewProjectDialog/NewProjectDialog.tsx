@@ -7,9 +7,10 @@ import { callAPI } from '../../assets/util';
 interface NewProjectDialogProps {
     open: boolean;
     onClose: () => void;
+    setErrorMsg: (msg: string) => void;
 }
 
-const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
+const NewProjectDialog = ({ open, onClose, setErrorMsg }: NewProjectDialogProps) => {
     const [projectName, setProjectName] = useState("");
     const [projectDescription, setProjectDescription] = useState("");
     const [disableCreateButton, setDisableCreateButton] = useState(true);
@@ -39,22 +40,6 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
         projectName: {
             marginBottom: 2
         },
-        processorGridItem: {
-            paddingX: 1,
-            paddingBottom: 5
-        },
-        processorTextBox: {
-            display: "flex",
-            justifyContent: "center",
-        },
-        processorImageBox: {
-            display: "flex",
-            justifyContent: "center",
-            cursor: "pointer",
-        },
-        processorImage: {
-            maxHeight: "20vh"
-        }
     };
 
 
@@ -71,7 +56,7 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
             addProject,
             [body],
             handleSuccessfulProjectCreation,
-            (e: Error) => console.error('error on project add ', e)
+            handleError
         );
     };
 
@@ -80,6 +65,11 @@ const NewProjectDialog = ({ open, onClose }: NewProjectDialogProps) => {
             window.location.reload();
         }, 500);
     };
+
+    const handleError = (e: any) => {
+        setErrorMsg(e.detail)
+        onClose()
+    }
 
     return (
         <Dialog

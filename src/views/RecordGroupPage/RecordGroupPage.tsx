@@ -6,18 +6,22 @@ import RecordsTable from '../../components/RecordsTable/RecordsTable';
 import Subheader from '../../components/Subheader/Subheader';
 import UploadDocumentsModal from '../../components/UploadDocumentsModal/UploadDocumentsModal';
 import PopupModal from '../../components/PopupModal/PopupModal';
+import ErrorBar from '../../components/ErrorBar/ErrorBar';
 import { callAPI } from '../../assets/util';
 import { RecordGroup, ProjectData, PreviousPages } from '../../types';
+import { useUserContext } from '../../usercontext';
 
 const RecordGroupPage = () => {
     const params = useParams<{ id: string }>(); 
     const navigate = useNavigate();
+    const { userEmail, userPermissions} = useUserContext();
     const [project, setProject] = useState({} as ProjectData)
     const [recordGroup, setRecordGroup] = useState<RecordGroup>({ } as RecordGroup);
     const [showDocumentModal, setShowDocumentModal] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [openUpdateNameModal, setOpenUpdateNameModal] = useState(false);
     const [recordGroupName, setRecordGroupName] = useState("");
+    const [errorMsg, setErrorMsg] = useState<string | null>("")
     const [navigation, setNavigation] = useState<PreviousPages>({"Projects": () => navigate("/projects", { replace: true })})
     
 
@@ -51,7 +55,7 @@ const RecordGroupPage = () => {
             getRecordGroup,
             [params.id],
             gotRecordGroup,
-            (e: Error) => { console.error('error on deleting record group: ', e); }
+            handleAPIErrorResponse
         );
     }
 
@@ -66,9 +70,9 @@ const RecordGroupPage = () => {
         formData.append('file', file, file.name);
         callAPI(
             uploadDocument,
-            [formData, recordGroup._id, false],
+            [formData, recordGroup._id, userEmail, false],
             handleSuccessfulDocumentUpload,
-            (e: Error) => { console.error('error on file upload: ', e); }
+            handleAPIErrorResponse
         );
     };
 
@@ -88,7 +92,7 @@ const RecordGroupPage = () => {
             deleteRecordGroup,
             [recordGroup._id],
             (data: any) => navigate("/project/"+project._id, { replace: true }),
-            (e: Error) => { console.error('error on deleting record group: ', e); }
+            handleAPIErrorResponse
         );
     };
 
@@ -102,7 +106,7 @@ const RecordGroupPage = () => {
             updateRecordGroup,
             [params.id, { name: recordGroupName }],
             (data: any) => window.location.reload(),
-            (e: Error) => console.error('error on updating record group name: ', e)
+            handleAPIErrorResponse
         );
     };
 
@@ -111,27 +115,27 @@ const RecordGroupPage = () => {
             updateRecordGroup,
             [params.id, update],
             (data: RecordGroup) => setRecordGroup(data),
-            (e: Error) => console.error('error on updating record group name: ', e)
+            handleAPIErrorResponse
         );
     };
 
-    
+    const handleAPIErrorResponse = (e: any) => {
+        setErrorMsg(e.detail)
+    }
 
     return (
         <Box sx={styles.outerBox}>
             <Subheader
                 currentPage={recordGroup.name}
-                buttonName="Upload new record(s)"
+                buttonName={(userPermissions && userPermissions.includes('upload_document')) ? "Upload new record(s)" : undefined}
                 handleClickButton={() => setShowDocumentModal(true)}
-                actions={(localStorage.getItem("role") && localStorage.getItem("role") === "10") ?
+                actions={(userPermissions && userPermissions.includes('manage_project')) ?
                     {
                         "Change record group name": handleClickChangeName, 
                         "Delete record group": () => setOpenDeleteModal(true),
                     }
                     :
-                    {
-                        "Change record group name": handleClickChangeName, 
-                    }
+                    null
                 }
                 previousPages={navigation}
             />
@@ -170,6 +174,10 @@ const RecordGroupPage = () => {
                 buttonColor='primary'
                 buttonVariant='contained'
                 width={400}
+            />
+            <ErrorBar
+                errorMessage={errorMsg}
+                setErrorMessage={setErrorMsg}
             />
         </Box>
     );

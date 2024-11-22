@@ -1,5 +1,5 @@
 const path = require("path");
-
+const test_record_group_name = "cypress test record group"
 describe('End to end testing', () => {
   beforeEach(() => {
     cy.loginByGoogleApi()
@@ -37,12 +37,12 @@ describe('End to end testing', () => {
 
     // click first record group
     cy.findByRole('rowheader', {
-      name: /test record group 1/i
+      name: test_record_group_name
     }).click()
 
     // test that record group page loaded correctly
     cy.findByRole('button', {
-      name: /test record group/i
+      name: test_record_group_name
     }).should('be.visible')
     cy.findByRole('columnheader', {
       name: /record name/i
@@ -184,6 +184,7 @@ describe('End to end testing', () => {
     cy.wait(1000)
 
     // verify review status is unreviewed
+    cy.wait(5000)
     cy.get('#review_status_chip').contains('unreviewed')
     cy.screenshot('review status is unreviewed')
 
@@ -205,7 +206,7 @@ describe('End to end testing', () => {
 
     // verify that file was downloaded
     const downloadsFolder = Cypress.config("downloadsFolder");
-    cy.readFile(path.join(downloadsFolder, "test record group 1_records.csv")).should("exist");
+    cy.readFile(path.join(downloadsFolder, test_record_group_name+"_records.csv")).should("exist");
   })
 
 })

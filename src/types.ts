@@ -84,12 +84,15 @@ export interface FilterOption {
 }
 
 export interface User {
-    email: string,
-    name: string,
-    picture: string,
-    hd: string,
-    role: number,
-    user_info?: any
+    email: string;
+    name: string;
+    picture: string;
+    hd: string;
+    role: number;
+    roles: string[];
+    user_info?: any;
+    permissions?: any;
+    default_team: string;
   }
 
 export interface PreviousPages {
@@ -206,11 +209,10 @@ export interface CheckboxesGroupProps {
 }
 
 export interface ErrorBarProps {
-    setOpen: (open: boolean) => void;
+    errorMessage: string | null;
+    setErrorMessage: (v: string | null) => void;
     duration?: number;
     margin?: boolean;
-    severity?: "error" | "warning" | "info" | "success";
-    errorMessage: string;
   }
 
 

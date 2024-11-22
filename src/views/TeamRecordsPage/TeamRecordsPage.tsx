@@ -1,8 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { getTeamInfo } from '../../services/app.service';
 import Subheader from '../../components/Subheader/Subheader';
-import { callAPI } from '../../assets/util';
 import RecordsTable from '../../components/RecordsTable/RecordsTable';
 import { useUserContext } from '../../usercontext';
 

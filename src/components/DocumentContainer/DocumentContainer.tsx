@@ -7,27 +7,8 @@ import { ImageCropper } from '../ImageCropper/ImageCropper';
 import { useKeyDown } from '../../assets/util';
 import AttributesTable from '../RecordAttributesTable/RecordAttributesTable';
 import { DocumentContainerProps } from '../../types';
+import { DocumentContainerStyles as styles } from '../../assets/styles';
 
-const styles = {
-    imageBox: {
-        height: "70vh",
-        overflowX: "scroll",
-    },
-    image: {
-        height: "50vh"
-    },
-    gridContainer: {
-        backgroundColor: "white",
-    },
-    containerActions: {
-        display: 'flex',
-        justifyContent: 'flex-end',
-        marginRight: '10px',
-    },
-    outerBox: {
-        paddingBottom: "45px"
-    },
-}
 
 const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, handleUpdateRecord, locked }: DocumentContainerProps) => {
     const [imgIndex, setImgIndex] = useState(0);

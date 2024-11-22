@@ -1,48 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
 import { Box, TextField, Collapse, Typography, IconButton, Badge } from '@mui/material';
-import { formatConfidence, useKeyDown, useOutsideClick, round } from '../../assets/util';
+import { formatConfidence, useKeyDown, useOutsideClick } from '../../assets/util';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import EditIcon from '@mui/icons-material/Edit';
 import { Attribute, RecordAttributesTableProps } from '../../types';
+import { styles } from '../../assets/styles';
 
-const styles: { [key: string]: React.CSSProperties } = {
-    fieldsTable: {
-        width: "100%",
-        maxHeight: "70vh",
-        backgroundColor: "white"
-    },
-    tableHead: {
-        backgroundColor: "#EDF2FA",
-        fontWeight: "bold",
-    }, 
-    fieldKey: {
-        cursor: "pointer",
-    },
-    headerRow: {
-        fontWeight: "bold"
-    },
-    subattributesTable: {
-        backgroundColor: "#FAFAFA",
-    },
-    rowIconButton: {
-        padding: 0.5,
-        marginTop: -0.5
-    },
-    rowIcon: {
-        fontSize: "16px"
-    },
-    flaggedConfidence: {
-        padding: 0,
-        margin: 0,
-        color: "#9E0101",
-    },
-    unflaggedConfidence: {
-        padding: 0,
-        margin: 0,
-    }
-}
 
 const LOW_CONFIDENCE: number = 0.01;
 

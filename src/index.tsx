@@ -11,7 +11,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <HashRouter>
-    <GoogleOAuthProvider clientId="1095146523031-a9mobes1iqad5vo8unoc9o6muuk3shru.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENTID || ''}>
     <UserContextProvider>
     <App />
     </UserContextProvider>

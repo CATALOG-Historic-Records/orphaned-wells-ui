@@ -9,8 +9,7 @@ import DocumentContainer from '../../components/DocumentContainer/DocumentContai
 import PopupModal from '../../components/PopupModal/PopupModal';
 import ErrorBar from '../../components/ErrorBar/ErrorBar';
 import { RecordData, handleChangeValueSignature, PreviousPages } from '../../types';
-
-
+import { useUserContext } from '../../usercontext';
 
 const Record = () => {
     const [recordData, setRecordData] = useState<RecordData>({} as RecordData);
@@ -18,12 +17,12 @@ const Record = () => {
     const [openUpdateNameModal, setOpenUpdateNameModal] = useState(false);
     const [recordName, setRecordName] = useState("");
     const [previousPages, setPreviousPages] = useState<PreviousPages>({ "Projects": () => navigate("/projects", { replace: true }) });
-    const [showErrorBar, setShowErrorBar] = useState(false);
-    const [errorMsg, setErrorMsg] = useState("");
+    const [errorMsg, setErrorMsg] = useState<string | null>("");
     const [showResetPrompt, setShowResetPrompt] = useState(false);
     const [locked, setLocked] = useState(false)
     const params = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { userPermissions} = useUserContext();
 
     const styles = {
         outerBox: {
@@ -69,12 +68,10 @@ const Record = () => {
     const handleSuccessfulFetchRecord = (data: any, lock_record?: boolean) => {
         let newRecordData = data.recordData;
         if (lock_record) {
-            setShowErrorBar(true)
             setErrorMsg("This record is currently being reviewed by a team member.")
             setLocked(true)
         }
         else {
-            setShowErrorBar(false)
             setErrorMsg("")
             setLocked(false)
         }
@@ -125,11 +122,7 @@ const Record = () => {
 
     const handleFailedUpdate = (data: any, response_status?: number) => {
         if (response_status === 403) {
-            setShowErrorBar(true);
-            setErrorMsg(`Unable to update record: ${data.detail}. Returning to records list in 5 seconds.`);
-            setTimeout(() => {
-                goToRecordGroup();
-            }, 5000);
+            setErrorMsg(`${data.detail}.`);
         } else {
             console.error('error updating record data: ', data);
         }
@@ -185,7 +178,6 @@ const Record = () => {
     const handleClickMarkReviewed = () => {
         if (locked) return
         handleUpdateReviewStatus("reviewed")
-        navigateToRecord({recordData: {_id: recordData.next_id}})
     }
 
     useKeyDown("ArrowLeft", undefined, undefined, handleClickPrevious, undefined);
@@ -218,16 +210,21 @@ const Record = () => {
         callAPI(
             updateRecord,
             [params.id, { data: data_update, type: "review_status" }],
-            (data) => window.location.reload(),
+            (data) => handleSuccessfulStatusUpdate(data, new_status),
             handleFailedUpdate
         );
+    }
+
+    const handleSuccessfulStatusUpdate = (data: any, new_status: string) => {
+        if (new_status === "reviewed") navigateToRecord({recordData: {_id: recordData.next_id}})
+        else window.location.reload()
     }
 
     return (
         <Box sx={styles.outerBox}>
             <Subheader
                 currentPage={`${recordData.recordIndex !== undefined ? recordData.recordIndex : ""}. ${recordData.name !== undefined ? recordData.name : ""}`}
-                actions={(localStorage.getItem("role") && localStorage.getItem("role") === "10") ?
+                actions={(userPermissions && userPermissions.includes('manage_project')) ?
                     {
                         "Change record name": () => setOpenUpdateNameModal(true),
                         "Delete record": () => setOpenDeleteModal(true)
@@ -292,14 +289,12 @@ const Record = () => {
                 buttonVariant='contained'
                 width={400}
             />
-            {showErrorBar &&
-                <ErrorBar
-                    errorMessage={errorMsg}
-                    setOpen={setShowErrorBar}
-                    duration={1200000}
-                    margin
-                />
-            }
+            <ErrorBar
+                errorMessage={errorMsg}
+                setErrorMessage={setErrorMsg}
+                duration={1200000}
+                margin
+            />
         </Box>
     );
 }
