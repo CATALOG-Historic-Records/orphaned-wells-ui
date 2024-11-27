@@ -4,9 +4,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { HeaderStyles as styles } from '../../assets/styles';
 import { useUserContext } from '../../usercontext';
 import { fetchTeams, updateDefaultTeam } from '../../services/app.service';
-import { Menu, MenuItem, IconButton, Avatar, Tabs, Tab, Divider, ListItemIcon } from '@mui/material';
+import { Menu, MenuItem, IconButton, Avatar, Tabs, Tab, Divider, ListItemIcon, Button } from '@mui/material';
 import { logout, callAPI } from '../../assets/util';
 import Logout from '@mui/icons-material/Logout';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 
 const Header = (props: any) => {
@@ -89,6 +90,15 @@ const Header = (props: any) => {
         </div>
 
         <div className="right">
+          <Button 
+            style={styles.issueButton}
+            href='https://github.com/orgs/CATALOG-Historic-Records/discussions/171'
+            target='_blank'
+            endIcon={<OpenInNewIcon/>}
+          >
+            Report an issue
+          </Button>
+            
           <IconButton sx={styles.icon} onClick={handleShowProfileActions}>
             <Avatar sx={styles.avatar} alt={userName} src={userPhoto}/>
             

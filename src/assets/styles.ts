@@ -67,6 +67,11 @@ export const HeaderStyles = {
     color: "black",
     right: 5
   },
+  issueButton: {
+    top: 5,
+    bottom: 5,
+    right: 5,
+  },
   avatar: {
     width: 24,
     height: 24
