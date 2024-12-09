@@ -18,6 +18,7 @@ export interface RecordData {
     recordIndex?: number;
     review_status?: string;
     notes?: string | null;
+    verification_status?: string;
 }
 
 export interface ProjectData {
@@ -155,6 +156,7 @@ export interface SubheaderProps {
     currentPage: string;
     buttonName?: string;
     status?: string;
+    verification_status?: string;
     subtext?: string;
     handleClickButton?: () => void;
     disableButton?: boolean;
@@ -180,6 +182,7 @@ export interface BottombarProps {
     onNextButtonClick: () => void;
     onReviewButtonClick: () => void;
     handleUpdateReviewStatus: (status: string, categories?: string[], description?: string) => void;
+    handleUpdateVerificationStatus: (verification_status: string, review_status?: string) => void;
     promptResetRecord: () => void;
     locked?: boolean;
 }

@@ -9,7 +9,7 @@ import { SubheaderStyles as styles } from '../../assets/styles';
 
 const Subheader = (props: SubheaderProps) => {
     const navigate = useNavigate();
-    const { currentPage, buttonName, status, subtext, handleClickButton, disableButton, previousPages, actions, locked } = props;
+    const { currentPage, buttonName, status, verification_status, subtext, handleClickButton, disableButton, previousPages, actions, locked } = props;
     const [showActions, setShowActions] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -25,6 +25,12 @@ const Subheader = (props: SubheaderProps) => {
     const handleSelectAction = (action_func: Function) => {
         setShowActions(false);
         action_func();
+    }
+
+    const displayStatus = () => {
+        if (verification_status === 'required') return 'Awaiting Verification'
+        else if (verification_status === 'verified') return `${status}-Verified`
+        else return `${status}`
     }
 
     return (
@@ -113,7 +119,7 @@ const Subheader = (props: SubheaderProps) => {
                                         status === "reviewed" ? "#C8E6C9" :
                                         undefined
                                 }}
-                                label={status}
+                                label={displayStatus()}
                                 id="review_status_chip"
                             />
                         }
