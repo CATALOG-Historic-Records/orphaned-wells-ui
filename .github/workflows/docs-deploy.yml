@@ -9,6 +9,7 @@ on:
 
 jobs:
   build:
+    if: github.repository == 'CATALOG-Historic-Records/orphaned-wells-ui'
     name: Build Docusaurus
     runs-on: ubuntu-latest
     steps:
@@ -34,6 +35,7 @@ jobs:
           path: docs/build
 
   deploy:
+    if: github.repository == 'CATALOG-Historic-Records/orphaned-wells-ui'
     name: Deploy to GitHub Pages
     needs: build
 

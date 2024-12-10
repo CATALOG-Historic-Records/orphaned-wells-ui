@@ -223,6 +223,9 @@ const RecordsTable = (props: RecordsTableProps) => {
           <Typography variant='inherit' noWrap>
           <IconButton>
             {
+              row.verification_status === 'required' ? 
+                <ErrorIcon sx={{ color: "#E3B62E" }} /> 
+              :
               row.review_status === "unreviewed" ? 
                 <ErrorIcon /> 
               :
@@ -238,7 +241,11 @@ const RecordsTable = (props: RecordsTableProps) => {
               null
             }
           </IconButton>
-          {row.review_status}
+          {
+            row.verification_status === 'required' ? 'Awaiting Verification' :
+            row.verification_status === 'verified' ? `${row.review_status}-${row.verification_status}` :
+            row.review_status
+          }
           </Typography>
         </TableCell>
     )
