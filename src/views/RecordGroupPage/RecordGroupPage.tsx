@@ -21,9 +21,8 @@ const RecordGroupPage = () => {
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [openUpdateNameModal, setOpenUpdateNameModal] = useState(false);
     const [recordGroupName, setRecordGroupName] = useState("");
-    const [errorMsg, setErrorMsg] = useState<string | null>("")
+    const [errorMsg, setErrorMsg] = useState<string | null>("");
     const [navigation, setNavigation] = useState<PreviousPages>({"Projects": () => navigate("/projects", { replace: true })})
-    
 
     useEffect(() => {
         if (params.id) {
@@ -65,21 +64,24 @@ const RecordGroupPage = () => {
         setProject(data.project)
     } 
 
-    const handleUploadDocument = (file: File) => {
+    const handleUploadDocument = (file: File, refresh: boolean = true) => {
         const formData = new FormData();
         formData.append('file', file, file.name);
-        callAPI(
+        return callAPI(
             uploadDocument,
             [formData, recordGroup._id, userEmail, false],
-            handleSuccessfulDocumentUpload,
+            () => handleSuccessfulDocumentUpload(refresh),
             handleAPIErrorResponse
         );
     };
 
-    const handleSuccessfulDocumentUpload = () => {
-        setTimeout(() => {
-            window.location.reload();
-        }, 500);
+    const handleSuccessfulDocumentUpload = (refresh: boolean = true) => {
+        if (refresh) {
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        } else console.log('finished upload')
+        
     };
 
     const handleClickChangeName = () => {
