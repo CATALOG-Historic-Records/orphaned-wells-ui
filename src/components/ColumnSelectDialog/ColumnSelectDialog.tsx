@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { Box, FormLabel, FormControl, IconButton, FormGroup, FormControlLabel, RadioGroup, Grid } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, Button, Checkbox, Radio } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { callAPIWithBlobResponse, callAPI } from '../../assets/util';
+import { callAPIWithBlobResponse, callAPI, convertFiltersToMongoFormat } from '../../assets/util';
 import { downloadRecords, getColumnData } from '../../services/app.service';
 import { ColumnSelectDialogProps, CheckboxesGroupProps } from '../../types';
 
 const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
-    const { open, onClose, location, handleUpdate, _id } = props;
+    const { open, onClose, location, handleUpdate, _id, appliedFilters, sortBy, sortAscending } = props;
 
     const [columns, setColumns] = useState<string[]>([]);
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -56,7 +56,9 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
 
     const handleExport = () => {
         const body = {
-            columns: selectedColumns
+            columns: selectedColumns,
+            sort: [sortBy, sortAscending],
+            filter: convertFiltersToMongoFormat(appliedFilters),
         };
         callAPIWithBlobResponse(
             downloadRecords,
