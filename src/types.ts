@@ -18,6 +18,7 @@ export interface RecordData {
     recordIndex?: number;
     review_status?: string;
     notes?: string | null;
+    verification_status?: string;
 }
 
 export interface ProjectData {
@@ -78,8 +79,8 @@ export interface FilterOption {
     displayName: string;
     type: string;
     operator: string;
-    options?: { name: string; checked: boolean, value: string }[];
-    selectedOptions?: string[];
+    options?: { name: string; checked: boolean, value: string | null }[];
+    selectedOptions?: string[]; // this is a list of the (default) selection option NAMES
     value?: string;
 }
 
@@ -88,7 +89,6 @@ export interface User {
     name: string;
     picture: string;
     hd: string;
-    role: number;
     roles: string[];
     user_info?: any;
     permissions?: any;
@@ -155,6 +155,7 @@ export interface SubheaderProps {
     currentPage: string;
     buttonName?: string;
     status?: string;
+    verification_status?: string;
     subtext?: string;
     handleClickButton?: () => void;
     disableButton?: boolean;
@@ -171,7 +172,13 @@ export interface TableFiltersProps {
 
 export interface UploadDocumentsModalProps {
     setShowModal: (show: boolean) => void;
-    handleUploadDocument: (file: File) => void;
+    handleUploadDocument: (file: File, refresh?: boolean) => void;
+}
+
+export interface UploadDirectoryProps {
+    setShowModal: (show: boolean) => void;
+    directoryFiles: File[]
+    directoryName: string
 }
 
 export interface BottombarProps {
@@ -180,6 +187,7 @@ export interface BottombarProps {
     onNextButtonClick: () => void;
     onReviewButtonClick: () => void;
     handleUpdateReviewStatus: (status: string, categories?: string[], description?: string) => void;
+    handleUpdateVerificationStatus: (verification_status: string, review_status?: string) => void;
     promptResetRecord: () => void;
     locked?: boolean;
 }
@@ -198,6 +206,9 @@ export interface ColumnSelectDialogProps {
     location: string;
     handleUpdate: (update: any) => void;
     _id: string;
+    appliedFilters: FilterOption[];
+    sortBy: string;
+    sortAscending: number;
 }
 
 export interface CheckboxesGroupProps {

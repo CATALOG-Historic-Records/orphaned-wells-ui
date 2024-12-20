@@ -68,7 +68,7 @@ const Record = () => {
     const handleSuccessfulFetchRecord = (data: any, lock_record?: boolean) => {
         let newRecordData = data.recordData;
         if (lock_record) {
-            setErrorMsg("This record is currently being reviewed by a team member.")
+            setErrorMsg(data.lockedMessage)
             setLocked(true)
         }
         else {
@@ -159,7 +159,7 @@ const Record = () => {
             deleteRecord,
             [params.id],
             goToRecordGroup,
-            (e) => console.error('error on deleting record: ', e)
+            handleFailedUpdate
         );
     }
 
@@ -187,7 +187,8 @@ const Record = () => {
         let record_data = data.recordData;
         if (record_data?._id) {
             let newUrl = "/#/record/" + record_data._id;
-            window.location.href = newUrl;
+            if (record_data._id == recordData._id) window.location.reload()
+            else window.location.href = newUrl;
         } else {
             console.error("error redirecting")
         }
@@ -205,12 +206,33 @@ const Record = () => {
             data_update = tempRecordData;
         } else if (new_status === "defective") {
             data_update = {review_status: new_status, defective_categories: categories, defective_description: description};
-        } 
+        } else if (new_status === "verification_required") {
+            return
+        } else if (new_status === "reviewed-verified") {
+            return
+        } else if (new_status === "defective-verified") {
+            return
+        }
         else data_update = { review_status: new_status };
         callAPI(
             updateRecord,
             [params.id, { data: data_update, type: "review_status" }],
             (data) => handleSuccessfulStatusUpdate(data, new_status),
+            handleFailedUpdate
+        );
+    }
+
+    const handleUpdateVerificationStatus = (verification_status: string, review_status?: string) => {
+        let data_update: any;
+        let type = "verification_status"
+        data_update = { verification_status: verification_status };
+        if (review_status) {
+            data_update["review_status"] = review_status
+        }
+        callAPI(
+            updateRecord,
+            [params.id, { data: data_update, type: type }],
+            (data) => handleSuccessfulStatusUpdate(data, verification_status),
             handleFailedUpdate
         );
     }
@@ -224,7 +246,7 @@ const Record = () => {
         <Box sx={styles.outerBox}>
             <Subheader
                 currentPage={`${recordData.recordIndex !== undefined ? recordData.recordIndex : ""}. ${recordData.name !== undefined ? recordData.name : ""}`}
-                actions={(userPermissions && userPermissions.includes('manage_project')) ?
+                actions={(userPermissions && userPermissions.includes('delete')) ?
                     {
                         "Change record name": () => setOpenUpdateNameModal(true),
                         "Delete record": () => setOpenDeleteModal(true)
@@ -236,6 +258,7 @@ const Record = () => {
                 }
                 previousPages={previousPages}
                 status={recordData.review_status}
+                verification_status={recordData.verification_status}
                 locked={locked}
             />
             <Box sx={styles.innerBox}>
@@ -253,6 +276,7 @@ const Record = () => {
                 onReviewButtonClick={handleClickMarkReviewed}
                 recordData={recordData}
                 handleUpdateReviewStatus={handleUpdateReviewStatus}
+                handleUpdateVerificationStatus={handleUpdateVerificationStatus}
                 promptResetRecord={promptResetRecord}
                 locked={locked}
             />
