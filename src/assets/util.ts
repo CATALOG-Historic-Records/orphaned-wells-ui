@@ -87,6 +87,30 @@ export const formatDate = (timestamp: number | null): string | null => {
   } else return String(timestamp);
 }
 
+export function formatDateTime(timestamp: number): string {
+  if (timestamp === -1) return 'unknown'
+  if (timestamp > 1e12) {
+    timestamp = Math.floor(timestamp / 1000); // Convert milliseconds to seconds
+  }
+  // Convert the timestamp to milliseconds (UNIX timestamps are in seconds)
+  const date = new Date(timestamp * 1000);
+
+  // Options for formatting the date
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  };
+
+  // Format the date using Intl.DateTimeFormat
+  return new Intl.DateTimeFormat("en-US", options).format(date);
+}
+
+
 export const median = (numbers: number[]): number => {
   const sorted: number[] = Array.from(numbers).sort((a, b) => a - b);
   const middle: number = Math.floor(sorted.length / 2);

@@ -13,6 +13,7 @@ export interface RecordData {
     dateCreated: number;
     status: string;
     api_number: number | null;
+    record_notes?: RecordNote[];
     previous_id?: string;
     next_id?: string;
     recordIndex?: number;
@@ -93,7 +94,60 @@ export interface User {
     user_info?: any;
     permissions?: any;
     default_team: string;
-  }
+}
+
+export interface RecordNote {
+    text: string;
+    record_id: string;
+    isReply: boolean;
+    resolved: boolean;
+    timestamp?: number;
+    creator?: string;
+    lastUpdated?: number;
+    replies?: number[]; // list of indexes of notes that reply to this guy
+    repliesTo?: number; // the index that this comment replies to, if this is a reply
+}
+
+export const TEST_NOTES = [
+    {
+        text: 'Company not legible',
+        record_id: '67619d1576a84e22d6cc71cc',
+        timestamp: 1734715386,
+        creator: 'mpesce@lbl.gov',
+        resolved: false,
+        lastUpdated: 1734715386,
+        isReply: false,
+        replies: [2]
+    },
+    {
+        text: 'A wee bit blurry',
+        record_id: '67619d1576a84e22d6cc71cc',
+        timestamp: 1734715426,
+        creator: 'pescemike@lbl.gov',
+        resolved: false,
+        lastUpdated: 1734715486,
+        isReply: false
+    } as RecordNote,
+    {
+        text: 'It says OGRRE dummy',
+        record_id: '67619d1576a84e22d6cc71cc',
+        timestamp: 1734715486,
+        creator: 'michaelcpesce@lbl.gov',
+        resolved: false,
+        lastUpdated: 1734715486,
+        isReply: true,
+        repliesTo: 0,
+    } as RecordNote,
+    {
+        text: 'Something something somethingSomething something somethingSomething something somethingSomething something somethingSomething something something',
+        record_id: '67619d1576a84e22d6cc71cc',
+        timestamp: 1734716486,
+        creator: 'mpesce@lbl.gov',
+        resolved: false,
+        lastUpdated: 1734716486,
+        isReply: false
+    } as RecordNote,
+]
 
 export interface PreviousPages {
     [key: string]: () => void;
@@ -189,6 +243,7 @@ export interface BottombarProps {
     handleUpdateReviewStatus: (status: string, categories?: string[], description?: string) => void;
     handleUpdateVerificationStatus: (verification_status: string, review_status?: string) => void;
     promptResetRecord: () => void;
+    refreshRecordNotes: () => void;
     locked?: boolean;
 }
 
@@ -224,7 +279,15 @@ export interface ErrorBarProps {
     setErrorMessage: (v: string | null) => void;
     duration?: number;
     margin?: boolean;
-  }
+}
+
+export interface RecordNotesDialogProps {
+    record_id?: string;
+    notes: RecordNote[];
+    open: boolean;
+    onClose: () => void;
+    refreshRecordNotes: () => void;
+}
 
 
 /*
