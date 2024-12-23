@@ -1,4 +1,4 @@
-import { Grid, Button, Modal, TextField, IconButton } from '@mui/material';
+import { Grid, Button, Modal, TextField, IconButton, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { PopupModalProps } from '../../types';
 
@@ -87,17 +87,18 @@ const PopupModal = (props: PopupModalProps) => {
                         rows={inputrows || 1}
                     />
                 </Grid>
-                <Grid item xs={8}></Grid>
-                <Grid item xs={4}>
-                    <Button 
-                        onClick={handleSave} 
-                        variant={buttonVariant} 
-                        color={buttonColor} 
-                        disabled={disableSubmit}
-                        className="popup-primary-button"
-                    >
-                        {buttonText}
-                    </Button>
+                <Grid item xs={12}>
+                    <Stack direction={'row'} justifyContent={'center'}>
+                        <Button 
+                            onClick={handleSave} 
+                            variant={buttonVariant} 
+                            color={buttonColor} 
+                            disabled={disableSubmit}
+                            className="popup-primary-button"
+                        >
+                            {buttonText}
+                        </Button>
+                    </Stack>
                 </Grid>
             </Grid>
             :
