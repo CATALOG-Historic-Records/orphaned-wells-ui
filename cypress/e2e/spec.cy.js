@@ -177,7 +177,7 @@ describe('End to end testing', () => {
 
     // mark as unreviewed
     cy.findByRole('button', {
-      name: /mark as unreviewed/i
+      name: /reset to unreviewed/i
     }).click()
     cy.wait(1000)
     cy.get('.popup-primary-button').click()

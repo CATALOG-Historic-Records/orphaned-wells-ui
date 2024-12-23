@@ -18,6 +18,18 @@ export const DEFAULT_FILTER_OPTIONS: {
       ],
       selectedOptions: ["reviewed", "unreviewed", "incomplete", "defective"]
   },
+  verification_status: {
+    key: 'verification_status',
+    displayName: "Verification Status",   
+    type: "checkbox",
+    operator: 'equals',
+    options: [
+        { name: "unverified", checked: true, value: null },
+        { name: "awaiting verification", checked: true, value: "required" },
+        { name: "verified", checked: true, value: "verified" },
+    ],
+    selectedOptions: ["unverified", "awaiting verification", "verified"]
+},
   name: {
     key: "name",
     displayName: "Record Name",
@@ -194,8 +206,8 @@ export const callAPI = (
   apiParams: any[], 
   onSuccess: (data: any) => void, 
   onError: (error: any, status?: number) => void
-): void => {
-  apiFunc(...apiParams)
+): Promise<void> => {
+  return apiFunc(...apiParams)
   .then(response => {
       response.json()
       .then((data) => {
@@ -242,7 +254,7 @@ export const callAPI = (
                 // logout();
               });
             } else {
-              onError(data);
+              onError(data, response.status);
           }
       }).catch((e) => {
         onError(e);

@@ -1,6 +1,11 @@
 # orphaned-wells-ui
 WP7 UI
 
+## Documentation
+
+See our draft [documentation site](https://catalog-historic-records.github.io/orphaned-wells-ui/).
+This site is built from the contents of the `docs/` directory and hosted by Github pages.
+
 ## Getting started (developer)
 
 ### 1. Install Javascript dependencies

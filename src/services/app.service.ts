@@ -91,9 +91,10 @@ export const addRecordGroup = (data: any) => {
     });
 };
 
-export const uploadDocument = (data: FormData, project_id: string, user_email: any, reprocessed?: boolean)  => {
+export const uploadDocument = (data: FormData, project_id: string, user_email: any, reprocessed?: boolean, preventDuplicates?: boolean)  => {
     if (!reprocessed) reprocessed = false
-    return fetch(BACKEND_URL + '/upload_document/' + project_id + '/' + user_email+'?reprocessed='+reprocessed, {
+    if (!preventDuplicates) preventDuplicates = false
+    return fetch(BACKEND_URL + '/upload_document/' + project_id + '/' + user_email+'?reprocessed='+reprocessed+'&preventDuplicates='+preventDuplicates, {
         method: 'POST',
         mode: 'cors',
         body: data,
@@ -102,13 +103,6 @@ export const uploadDocument = (data: FormData, project_id: string, user_email: a
 
 export const getRecordData = (record_id: string) => {
     return fetch(BACKEND_URL + '/get_record/' + record_id, {
-        mode: 'cors',
-        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
-    });
-};
-
-export const downloadRecordsCSV = (project_id: string) => {
-    return fetch(BACKEND_URL + '/download_records/' + project_id, {
         mode: 'cors',
         headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
     });
@@ -251,6 +245,15 @@ export const fetchRoles = (role_category: string) => {
 export const fetchTeams = () => {
     return fetch(BACKEND_URL + '/fetch_teams', {
         mode: 'cors',
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
+export const checkForDuplicateRecords = (data: any, rg_id: string) => {
+    return fetch(BACKEND_URL + '/check_if_records_exist/'+rg_id, {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(data),
         headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
     });
 };

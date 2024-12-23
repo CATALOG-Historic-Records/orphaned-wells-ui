@@ -7,10 +7,11 @@ interface NotesProps {
     record_id: string | undefined | null;
     notes: string | null | undefined;
     open: boolean;
-    onClose: (recordId?: NotesProps["record_id"], notes?: NotesProps["notes"]) => void;
+    onClose: (recordId?: NotesProps["record_id"], notes?: NotesProps["notes"], submitted?: boolean) => void;
+    buttonText?: string;
 }
 
-const Notes = ({ record_id, notes, open, onClose }: NotesProps) => {
+const Notes = ({ record_id, notes, open, onClose, buttonText }: NotesProps) => {
     const [recordNotes, setRecordNotes] = useState<string | null | undefined>("");
 
     useEffect(() => {
@@ -25,7 +26,7 @@ const Notes = ({ record_id, notes, open, onClose }: NotesProps) => {
         callAPI(
             updateRecord,
             [record_id, { data: { "notes": recordNotes }, type: "notes" }],
-            () => onClose(record_id, recordNotes),
+            () => onClose(record_id, recordNotes, true),
             handleFailedUpdate
         );
     }
@@ -45,7 +46,7 @@ const Notes = ({ record_id, notes, open, onClose }: NotesProps) => {
             textLabel='Notes'
             handleEditText={handleChangeRecordNotes}
             handleSave={handleUpdateRecordNotes}
-            buttonText='Save notes'
+            buttonText={buttonText || 'Save notes'}
             buttonColor='primary'
             buttonVariant='contained'
             width={600}

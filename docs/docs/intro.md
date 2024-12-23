@@ -11,7 +11,7 @@ the U.S. Department of Energy's (DOE) Consortium Advancing Technology for Assess
 a collaborative effort between NETL, LANL, SNL, and LLNL.
 
 The co-oauthors of the OGGRE software are:
-Dan Gunter (LBNL), Michael Pesce (LBNL), Rajshree Deshmukh (LBNL), Mumbi Mundia-Howe (NETL), Jacob Shay (NETL), Nathan D. Webb (ISGS), Chester J. Weiss (SNL), David Buttler (LLNL), Daniel O’Malley (LANL)
+Dan Gunter (LBNL), Michael Pesce (LBNL), Rajshree Deshmukh (LBNL), Greg Lackey (NETL), Benjamin Houghton (NETL), Jacob Shay (NETL), Nathan D. Webb (ISGS), Chester J. Weiss (SNL), David Buttler (LLNL), and Martin Ma (LANL)
 
 ## Motivation
 Details describing the construction and use history of all wells in the U.S. are missing from most public and proprietary well databases.

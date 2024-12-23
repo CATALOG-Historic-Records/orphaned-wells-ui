@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Button, ButtonGroup, ClickAwayListener, Grow, Paper } from '@mui/material';
 import { Popper, MenuItem, MenuList } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { useEffect } from 'react';
 
 interface Option {
     text: string;
@@ -18,6 +19,10 @@ const SplitButton = ({ options, disabled }: SplitButtonProps) => {
     const [open, setOpen] = React.useState(false);
     const anchorRef = React.useRef<HTMLDivElement>(null);
     const [selectedIndex, setSelectedIndex] = React.useState(0);
+
+    useEffect(() => {
+        if (selectedIndex >= options.length) setSelectedIndex(0)
+    }, [options])
 
     const handleClick = () => {
         options[selectedIndex].onClick();
@@ -38,8 +43,7 @@ const SplitButton = ({ options, disabled }: SplitButtonProps) => {
         }
         setOpen(false);
     };
-
-    return (
+    if (options.length > 0 && selectedIndex < options.length) return (
         <React.Fragment>
             <ButtonGroup
                 variant="outlined"
@@ -95,7 +99,7 @@ const SplitButton = ({ options, disabled }: SplitButtonProps) => {
                 )}
             </Popper>
         </React.Fragment>
-    );
+    ); else return <span></span>
 }
 
 export default SplitButton;
