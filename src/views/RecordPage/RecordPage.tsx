@@ -60,9 +60,20 @@ const Record = () => {
     const handleFailedFetchRecord = (data: any, response_status?: number) => {
         if (response_status === 303) {
             handleSuccessfulFetchRecord(data, true)
-        } else {
-            console.error('error getting record data: ', data);
+        } else if (response_status === 403) {
+            setErrorMsg(`${data.detail}`);
         }
+        else {
+            setErrorMsg('error getting record data: ' + data)
+        }
+    }
+
+    const handleSuccessfulRefreshRecord = (data: any, lock_record?: boolean) => {
+        let newRecordData = data.recordData;
+        let newNotes = newRecordData.record_notes
+        let tempRecordData = {...recordData}
+        tempRecordData.record_notes = newNotes;
+        setRecordData(tempRecordData)
     }
 
     const handleSuccessfulFetchRecord = (data: any, lock_record?: boolean) => {
@@ -180,8 +191,8 @@ const Record = () => {
         handleUpdateReviewStatus("reviewed")
     }
 
-    useKeyDown("ArrowLeft", undefined, undefined, handleClickPrevious, undefined);
-    useKeyDown("ArrowRight", undefined, undefined, handleClickNext, handleClickMarkReviewed);
+    useKeyDown("ArrowLeft", undefined, undefined, handleClickPrevious, undefined, true);
+    useKeyDown("ArrowRight", undefined, undefined, handleClickNext, handleClickMarkReviewed, true);
 
     const navigateToRecord = (data: any) => {
         let record_data = data.recordData;

@@ -1,18 +1,29 @@
 import { useEffect, useState } from 'react';
-import { Box, FormLabel, FormControl, IconButton, FormGroup, FormControlLabel, RadioGroup, Grid } from '@mui/material';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, Button, Checkbox, Radio } from '@mui/material';
+import { Box, FormLabel, FormControl, IconButton, FormGroup, FormControlLabel, Grid } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, Button, Checkbox, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import DownloadIcon from '@mui/icons-material/Download';
 import { callAPIWithBlobResponse, callAPI, convertFiltersToMongoFormat } from '../../assets/util';
 import { downloadRecords, getColumnData } from '../../services/app.service';
-import { ColumnSelectDialogProps, CheckboxesGroupProps } from '../../types';
+import { ColumnSelectDialogProps, CheckboxesGroupProps, ExportTypeSelectionProps } from '../../types';
+import CircularProgress from '@mui/material/CircularProgress';
+import ErrorBar from '../ErrorBar/ErrorBar';
 
 const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
     const { open, onClose, location, handleUpdate, _id, appliedFilters, sortBy, sortAscending } = props;
 
     const [columns, setColumns] = useState<string[]>([]);
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-    const [exportType, setExportType] = useState("csv");
+    const [downloading, setDownloading] = useState(false);
     const [objSettings, setObjSettings] = useState<any>()
+    const [errorMsg, setErrorMsg] = useState<string | null>("")
+    const [ exportTypes, setExportTypes ] = useState<{ [key: string]: boolean }>(
+        {
+            'csv': true,
+            'json': false,
+            'image_files': false
+        }
+    )
     const [name, setName] = useState("")
     const dialogHeight = '85vh';
     const dialogWidth = '60vw';
@@ -36,6 +47,23 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
             minWidth: dialogWidth,
             maxWidth: dialogWidth,
         },
+        dialogContent: {
+            position: "relative",
+            paddingBottom: "70px"
+        },
+        dialogButtons: {
+            paddingTop: "70px"
+        },
+        loader: {
+            position: 'absolute',
+            right: '50%',
+            top: '50%',
+        },
+        closeIcon: {
+            position: 'absolute',
+            right: 0,
+            top: 8,
+        }
     };
 
     const setDefaultColumns = (data: {columns: string[], obj: any}) => {
@@ -60,20 +88,23 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
             sort: [sortBy, sortAscending],
             filter: convertFiltersToMongoFormat(appliedFilters),
         };
+        setDownloading(true)
         callAPIWithBlobResponse(
             downloadRecords,
-            [location, _id, exportType, body],
+            [location, _id, exportTypes, name, body],
             handleSuccessfulExport,
-            (e: Error) => console.error("unable to download csv: " + e)
+            handleFailedExport,
         );
+
     };
 
     const handleSuccessfulExport = (data: Blob) => {
-        onClose();
+        handleClose();
+        setDownloading(false)
         const href = window.URL.createObjectURL(data);
         const link = document.createElement('a');
         link.href = href;
-        link.setAttribute('download', `${name}_records.${exportType}`);
+        link.setAttribute('download', `${name}_records.zip`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -89,10 +120,30 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         handleUpdate({"settings": settings})
     };
 
+    const handleFailedExport = (e: Error) => {
+        setDownloading(false)
+        console.error("unable to export: " + e)
+        setErrorMsg("unable to export: " + e)
+    };
+
+    const handleChangeExportTypes = (name: string) => {
+        let tempExportTypes = {...exportTypes}
+        tempExportTypes[name] = !tempExportTypes[name]
+        setExportTypes(tempExportTypes)
+    };
+
+    const disableDownload = () => {
+        if (downloading) return true
+        for (let each of Object.keys(exportTypes)) {
+            if (exportTypes[each]) return false
+        }
+        return true
+    }
+
     return (
         <Dialog
             open={open}
-            onClose={handleClose}
+            onClose={!downloading ? handleClose : undefined} // if downloading, must click x to close dialog
             scroll={"paper"}
             aria-labelledby="export-dialog"
             aria-describedby="export-dialog-description"
@@ -104,51 +155,97 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
             <IconButton
                 aria-label="close"
                 onClick={handleClose}
-                sx={{
-                    position: 'absolute',
-                    right: 0,
-                    top: 8,
-                }}
+                sx={styles.closeIcon}
             >
                 <CloseIcon />
             </IconButton>
             <DialogContent dividers={true}>
+                {
+                    downloading && 
+                    <CircularProgress 
+                        sx={styles.loader}
+                    />
+                }
+                
                 <DialogContentText
                     id="scroll-dialog-description"
                     tabIndex={-1}
                     aria-labelledby="export-dialog-content-text"
                     component={'span'}
                 >
+                    <ExportTypeSelection
+                        exportTypes={exportTypes}
+                        updateExportTypes={handleChangeExportTypes}
+                        disabled={downloading}
+                    />
                     <CheckboxesGroup
                         columns={columns}
                         selected={selectedColumns}
                         setSelected={setSelectedColumns}
-                        exportType={exportType}
-                        setExportType={setExportType}
+                        disabled={downloading}
                     />
                 </DialogContentText>
-                <Button
-                    variant="contained"
-                    sx={{
-                        position: 'absolute',
-                        right: 10,
-                        bottom: 10,
-                    }}
-                    onClick={handleExport}
-                    id='download-button'
-                >
-                    Download
-                </Button>
             </DialogContent>
+                <div style={styles.dialogButtons}> 
+                    <Button
+                        variant="contained"
+                        sx={{
+                            position: 'absolute',
+                            right: 10,
+                            bottom: 10,
+                        }}
+                        startIcon={<DownloadIcon/>}
+                        onClick={handleExport}
+                        id='download-button'
+                        disabled={disableDownload()}
+                    >
+                        Export Data
+                    </Button>
+                </div>
+                <ErrorBar
+                    errorMessage={errorMsg}
+                    setErrorMessage={setErrorMsg}
+                />
+                
         </Dialog>
     );
 };
 
-const CheckboxesGroup = (props: CheckboxesGroupProps) => {
-    const { columns, selected, setSelected, exportType, setExportType } = props;
+const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
+    const { exportTypes, updateExportTypes, disabled } = props;
 
-    useEffect(() => {
-    }, [columns]);
+    const handleChangeExportTypes = (event: React.ChangeEvent<HTMLInputElement>) => {
+        let name = event.target.name
+        updateExportTypes(name)
+    };
+
+    return (
+        <Box sx={{ display: 'flex' }}>
+            <FormControl sx={{ mx: 3 }} component="fieldset" variant="standard" required disabled={disabled}>
+                <FormLabel component="legend" id="export-type-label">Export Format</FormLabel>
+                
+                <FormGroup>
+                    <Stack direction='row'>
+                    {Object.entries(exportTypes).map(([ export_type, is_selected] ) => (
+                        <FormControlLabel
+                            key={export_type}
+                            control={
+                                <Checkbox checked={is_selected} onChange={handleChangeExportTypes} name={export_type} />
+                            }
+                            label={export_type.replace('_', ' ')}
+                        />
+                    ))}
+                    </Stack>
+                    
+                    
+                </FormGroup>
+            </FormControl>
+        </Box>
+    );
+};
+
+const CheckboxesGroup = (props: CheckboxesGroupProps) => {
+    const { columns, selected, setSelected, disabled } = props;
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const isSelected = event.target.checked;
@@ -167,18 +264,7 @@ const CheckboxesGroup = (props: CheckboxesGroupProps) => {
 
     return (
         <Box sx={{ display: 'flex' }}>
-            <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" required>
-                <FormLabel component="legend" id="export-type-label">Export Type</FormLabel>
-                <RadioGroup
-                    row
-                    name="export-type"
-                    sx={{ paddingBottom: 5 }}
-                    value={exportType}
-                    onChange={(event) => setExportType(event.target.value)}
-                >
-                    <FormControlLabel value="csv" control={<Radio />} label="CSV" />
-                    <FormControlLabel value="json" control={<Radio />} label="JSON" />
-                </RadioGroup>
+            <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" required disabled={disabled}>
 
                 <FormLabel component="legend">Select attributes to export</FormLabel>
                 <FormGroup row>

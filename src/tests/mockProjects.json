@@ -5,7 +5,12 @@
         "description": "This is a Colorado project",
         "state": "CO",
         "creator": {
-            "name": "test"
+            "name": "test",
+            "email": "test@gmail.com",
+            "picture": "https://www.the-sun.com/wp-content/uploads/sites/6/2020/01/NINTCHDBPICT000554064593-e1578990885229.jpg",
+            "hd": "idk",
+            "roles": [],
+            "default_team": "testing"
         },
         "history": [
             ""
@@ -23,7 +28,12 @@
         "description": "This is a California project",
         "state": "CA",
         "creator": {
-            "name": "test"
+            "name": "test",
+            "email": "test@gmail.com",
+            "picture": "https://www.the-sun.com/wp-content/uploads/sites/6/2020/01/NINTCHDBPICT000554064593-e1578990885229.jpg",
+            "hd": "idk",
+            "roles": [],
+            "default_team": "testing"
         },
         "history": [
             ""
