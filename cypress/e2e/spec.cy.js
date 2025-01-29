@@ -206,7 +206,7 @@ describe('End to end testing', () => {
 
     // verify that file was downloaded
     const downloadsFolder = Cypress.config("downloadsFolder");
-    cy.readFile(path.join(downloadsFolder, test_record_group_name+"_records.csv")).should("exist");
+    cy.readFile(path.join(downloadsFolder, test_record_group_name+"_records.zip")).should("exist");
   })
 
 })

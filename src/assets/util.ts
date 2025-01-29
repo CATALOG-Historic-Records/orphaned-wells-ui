@@ -1,6 +1,6 @@
 import { refreshAuth, revokeToken } from "../services/app.service"
 import { useEffect, useRef } from 'react';
-import { FilterOption, TableColumns } from "../types";
+import { FilterOption, TableColumns, RecordNote } from "../types";
 
 export const DEFAULT_FILTER_OPTIONS: {
   [key: string]: FilterOption;
@@ -63,6 +63,84 @@ export const TABLE_ATTRIBUTES: {
   }
 }
 
+export const deleteCommentFromNotes = (recordNotes: RecordNote[], deleteIdx?: number) => {
+  let tempNotes = structuredClone(recordNotes)
+  if (deleteIdx === undefined) {
+    console.log('could not delete note')
+    return tempNotes
+  }
+  
+  let isReply, repliesTo
+  let currentNote = tempNotes[deleteIdx]
+  isReply = currentNote.isReply || false
+  repliesTo = currentNote.repliesTo
+  let replies = currentNote.replies || []
+  replies.sort(function(a,b){ return b - a; });
+  for (let reply of replies) {
+      tempNotes.splice(reply, 1);
+  }
+  tempNotes.splice(deleteIdx, 1);
+
+
+  /*
+    if this note was a reply, remove it from the replies of the parent note
+  */
+ if (isReply && repliesTo !== undefined) {
+  const replyIdx = tempNotes[repliesTo].replies?.indexOf(deleteIdx);
+  if (replyIdx !== undefined && replyIdx > -1) {
+    tempNotes[repliesTo].replies?.splice(replyIdx, 1);
+  }
+  
+ }
+
+  /*
+    compare indexes from before and after
+    make sure all reply indexes are properly updated
+  */
+  let idxesAfter: {
+    [key: number]: number;
+  } = {}
+  let nextIdx = 0
+
+  for (let note of tempNotes) {
+    idxesAfter[note.timestamp] = nextIdx
+    nextIdx += 1
+  }
+
+  let newIndexes: {
+    [key: number]: number;
+  } = {}
+
+  nextIdx = 0
+  for (let note of recordNotes) {
+    newIndexes[nextIdx] = idxesAfter[note.timestamp]
+    nextIdx += 1
+  }
+
+  /*
+    update reply indexes
+  */
+  for (let note of tempNotes) {
+    let replies = note.replies
+    if (replies) {
+      let newReplies = []
+      for (let reply of replies) {
+        if (newIndexes[reply] !== undefined) newReplies.push(newIndexes[reply])
+      }
+      note.replies = newReplies
+    }
+
+    if (note.isReply && note.repliesTo !== undefined) {
+      if (newIndexes[note.repliesTo] === undefined) {
+        console.log('newIndexes[note.repliesTo] === undefined, this should never happen')
+        console.log(note)
+      }
+      note.repliesTo = newIndexes[note.repliesTo] 
+    }
+  }
+  return tempNotes
+}
+
 export const round = (num: number, scale: number): number => {
   if(!("" + num).includes("e")) {
     return +(Math.round(parseFloat(num + "e+" + scale))  + "e-" + scale);
@@ -86,6 +164,30 @@ export const formatDate = (timestamp: number | null): string | null => {
     return formattedDate;
   } else return String(timestamp);
 }
+
+export function formatDateTime(timestamp: number): string {
+  if (timestamp === -1) return 'unknown'
+  if (timestamp > 1e12) {
+    timestamp = Math.floor(timestamp / 1000); // Convert milliseconds to seconds
+  }
+  // Convert the timestamp to milliseconds (UNIX timestamps are in seconds)
+  const date = new Date(timestamp * 1000);
+
+  // Options for formatting the date
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  };
+
+  // Format the date using Intl.DateTimeFormat
+  return new Intl.DateTimeFormat("en-US", options).format(date);
+}
+
 
 export const median = (numbers: number[]): number => {
   const sorted: number[] = Array.from(numbers).sort((a, b) => a - b);
@@ -272,52 +374,65 @@ export const callAPIWithBlobResponse = (
 ): void => {
   apiFunc(...apiParams)
   .then(response => {
-      response.blob()
-      .then((data) => {
-          if (response.status === 200) {
-              onSuccess(data);
-          } else if (response.status === 401) {
-              refreshAuth()
+      if (response.status === 200) {
+        response.blob()
+        .then((data) => {
+          onSuccess(data);
+        }).catch((e) => {
+          onError(e);
+        });
+      }
+      else if (response.status === 401) {
+        refreshAuth()
+        .then(response => {
+          response.json()
+          .then((data) => {
+            if (response.status === 200) {
+              console.log("refreshed tokens:");
+              localStorage.setItem("id_token", data.id_token);
+              localStorage.setItem("access_token", data.access_token);
+              apiFunc(...apiParams)
               .then(response => {
-                response.json()
-                .then((data) => {
                   if (response.status === 200) {
-                    console.log("refreshed tokens:");
-                    localStorage.setItem("id_token", data.id_token);
-                    localStorage.setItem("access_token", data.access_token);
-                    apiFunc(...apiParams)
-                    .then(response => {
-                        response.blob()
-                        .then((data) => {
-                            if (response.status === 200) {
-                                onSuccess(data);
-                            } else {
-                              logout();
-                            }
-                        }).catch((e) => {
-                          onError(e);
-                        });
-                      }).catch((e) => {
-                        onError(e);
-                      });
-                  } else {
-                    console.error('received response status '+response.status+' when attempting to refresh tokens')
-                    logout();
-                  }
+                    response.blob()
+                    .then((data) => {
+                        onSuccess(data);
+                    }).catch((e) => {
+                      onError(e);
+                    });
+                } else {
+                  response.json()
+                  .then((data) => {
+                    onError(data)
+                  }).catch((e) => {
+                    onError(e)
+                  })
+                }
                 }).catch((e) => {
-                  console.error(e)
-                  // logout();
+                  onError(e);
                 });
-              }).catch((e) => {
-                console.error(e)
-                  // logout();
-              });
-          } else {
-              onError(data);
-          }
-      }).catch((e) => {
-        onError(e);
-      });
+            } else {
+              console.error('received response status '+response.status+' when attempting to refresh tokens')
+              logout();
+            }
+          }).catch((e) => {
+            console.error(e)
+            // logout();
+          });
+        }).catch((e) => {
+          console.error(e)
+            // logout();
+        });
+      }
+      else{
+        response.json()
+        .then((data) => {
+          onError(data.detail)
+        }).catch((e) => {
+          onError(e)
+        })
+      }
+      
   }).catch((e) => {
     onError(e);
   });  

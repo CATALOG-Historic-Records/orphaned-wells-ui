@@ -19,9 +19,9 @@ import LastPageIcon from '@mui/icons-material/LastPage';
 import PublishedWithChangesOutlinedIcon from '@mui/icons-material/PublishedWithChangesOutlined';
 import { formatDate, average, formatConfidence, callAPI, convertFiltersToMongoFormat, TABLE_ATTRIBUTES } from '../../assets/util';
 import { styles } from '../../assets/styles';
-import Notes from '../Notes/Notes';
+import RecordNotesDialog from '../RecordNotesDialog/RecordNotesDialog';
 import TableFilters from '../TableFilters/TableFilters';
-import { RecordData, RecordsTableProps } from '../../types';
+import { RecordData, RecordsTableProps, RecordNote } from '../../types';
 import { getRecords } from '../../services/app.service';
 import ColumnSelectDialog from '../ColumnSelectDialog/ColumnSelectDialog';
 
@@ -38,8 +38,8 @@ const RecordsTable = (props: RecordsTableProps) => {
   } = props;
 
   const [ showNotes, setShowNotes ] = useState(false);
-  const [ notesRecordId, setNotesRecordId ] = useState<string | null | undefined>(null);
-  const [ notes, setNotes ] = useState<string | null | undefined>(null);
+  const [ notesRecordId, setNotesRecordId ] = useState<string>();
+  const [ notes, setNotes ] = useState<RecordNote[]>();
   const [ openColumnSelect, setOpenColumnSelect ] = useState(false);
   const [records, setRecords] = useState<any[]>([]);
   const [recordCount, setRecordCount] = useState(0);
@@ -120,19 +120,19 @@ const RecordsTable = (props: RecordsTableProps) => {
     event.stopPropagation();
     setShowNotes(true);
     setNotesRecordId(row._id);
-    setNotes(row.notes || null);
+    setNotes(row.record_notes);
   }
 
-  const handleCloseNotesModal = (record_id: string | null | undefined, newNotes: string | null | undefined) => {
+  const handleCloseNotesModal = (record_id?: string, newNotes?: RecordNote[]) => {
     setShowNotes(false);
-    setNotesRecordId(null);
-    setNotes(null);
+    setNotesRecordId(undefined);
+    setNotes(undefined);
     if (record_id) {
       const rowIdx = records.findIndex(r => r._id === record_id);
       if (rowIdx > -1) {
         let tempRecords = [...records];
         let tempRecord = {...tempRecords[rowIdx]};
-        tempRecord.notes = newNotes;
+        tempRecord.record_notes = newNotes;
         tempRecords[rowIdx] = tempRecord;
         setRecords(tempRecords);
       }
@@ -186,7 +186,7 @@ const RecordsTable = (props: RecordsTableProps) => {
     if (key === "confidence_lowest") return <TableCell key={key} align="right">{(row.status === "digitized" || row.status === "reprocessed") && calculateLowestConfidence(row.attributesList)}</TableCell>
     if (key === "notes") return (
       <TableCell key={key} align="right">
-          <IconButton sx={(row.notes === "" || !row.notes) ? {} : { color: "#F2DB6F" }} onClick={(e) => handleClickNotes(e, row)}>
+          <IconButton sx={(!row.record_notes || row.record_notes?.length === 0) ? {} : { color: "#F2DB6F" }} onClick={(e) => handleClickNotes(e, row)}>
           <StickyNote2Icon />
         </IconButton>
       </TableCell>
@@ -348,14 +348,11 @@ const RecordsTable = (props: RecordsTableProps) => {
               </TableRow>
             </TableFooter>
           }
-          
-        
       </Table>
-      <Notes
-        record_id={notesRecordId}
-        notes={notes}
-        open={showNotes}
-        onClose={handleCloseNotesModal}
+      <RecordNotesDialog
+          record_id={notesRecordId}
+          open={showNotes}
+          onClose={handleCloseNotesModal}
       />
       <ColumnSelectDialog
           open={openColumnSelect}

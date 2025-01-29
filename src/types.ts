@@ -13,6 +13,7 @@ export interface RecordData {
     dateCreated: number;
     status: string;
     api_number: number | null;
+    record_notes?: RecordNote[];
     previous_id?: string;
     next_id?: string;
     recordIndex?: number;
@@ -27,10 +28,7 @@ export interface ProjectData {
     record_groups: RecordGroup[]
     settings?: any;
     state?: string;
-    creator?: {
-      name?: string;
-      email?: string;
-    };
+    creator?: User;
     dateCreated?: number;
 }
 
@@ -44,10 +42,7 @@ export interface RecordGroup {
     description?: string;
     documentType?: string;
     state?: string;
-    creator?: {
-      name?: string;
-      email?: string;
-    };
+    creator?: User;
     dateCreated?: number;
     reviewed_amt?: number;
     total_amt?: number;
@@ -93,7 +88,21 @@ export interface User {
     user_info?: any;
     permissions?: any;
     default_team: string;
-  }
+}
+
+export interface RecordNote {
+    text: string;
+    record_id: string;
+    isReply: boolean;
+    resolved: boolean;
+    timestamp: number;
+    deleted?: boolean;
+    creator?: string;
+    lastUpdated?: number;
+    lastUpdatedUser?: number;
+    replies?: number[]; // list of indexes of notes that reply to this guy
+    repliesTo?: number; // the index that this comment replies to, if this is a reply
+}
 
 export interface PreviousPages {
     [key: string]: () => void;
@@ -215,8 +224,13 @@ export interface CheckboxesGroupProps {
     columns: string[];
     selected: string[];
     setSelected: (selected: string[]) => void;
-    exportType: string;
-    setExportType: (exportType: string) => void;
+    disabled?: boolean;
+}
+
+export interface ExportTypeSelectionProps {
+    exportTypes: { [key: string]: boolean };
+    updateExportTypes: (exportType: string) => void;
+    disabled?: boolean;
 }
 
 export interface ErrorBarProps {
@@ -224,7 +238,13 @@ export interface ErrorBarProps {
     setErrorMessage: (v: string | null) => void;
     duration?: number;
     margin?: boolean;
-  }
+}
+
+export interface RecordNotesDialogProps {
+    record_id?: string;
+    open: boolean;
+    onClose: (record_id?: string, newNotes?: RecordNote[], submitted?: boolean) => void;
+}
 
 
 /*
