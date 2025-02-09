@@ -15,6 +15,7 @@ import { callAPI, formatDateTime } from '../../assets/util';
 import { RecordNote, RecordNotesDialogProps } from '../../types';
 import { useUserContext } from '../../usercontext';
 import PopupModal from '../PopupModal/PopupModal';
+import ErrorBar from '../ErrorBar/ErrorBar';
 
 const RecordNotesDialog = ({ record_id, open, onClose }: RecordNotesDialogProps) => {
     const { userEmail } = useUserContext();
@@ -26,6 +27,7 @@ const RecordNotesDialog = ({ record_id, open, onClose }: RecordNotesDialogProps)
     const [ disableButton, setDisableButton ] = useState(true)
     const [ loading, setLoading ] = useState(true)
     const [ showResolved, setShowResolved ] = useState(false)
+    const [ errorMsg, setErrorMsg ] = useState<string | null>(null)
     const descriptionElementRef = useRef<HTMLDivElement | null>(null);
     const dialogHeight = '80vh';
     const dialogWidth = '35vw';
@@ -186,10 +188,8 @@ const RecordNotesDialog = ({ record_id, open, onClose }: RecordNotesDialogProps)
         reset(data)
     }
 
-    const handleFailed = (e: any) => {
-        // TODO: add error msg here
-        console.error('failed: ')
-        console.error(e)
+    const handleFailed = (e: string) => {
+        setErrorMsg(e)
     }
 
     const checkForResolved = () => {
@@ -344,6 +344,10 @@ const RecordNotesDialog = ({ record_id, open, onClose }: RecordNotesDialogProps)
                     width={400}
                 />
             </DialogContent>
+            <ErrorBar
+                errorMessage={errorMsg}
+                setErrorMessage={setErrorMsg}
+            />
             
         </Dialog>
     );

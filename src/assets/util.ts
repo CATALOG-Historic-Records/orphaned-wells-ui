@@ -303,137 +303,58 @@ export const convertFiltersToMongoFormat = (filters: FilterOption[]): object => 
   return filterBy;
 }
 
-export const callAPI = (
+export const callAPI = async (
   apiFunc: (...args: any[]) => Promise<Response>, 
   apiParams: any[], 
   onSuccess: (data: any) => void, 
-  onError: (error: any, status?: number) => void
+  onError: (error: any, status?: number) => void, 
+  isJson: boolean = true
 ): Promise<void> => {
-  return apiFunc(...apiParams)
-  .then(response => {
-      response.json()
-      .then((data) => {
-          if (response.status === 200) {
-              onSuccess(data);
-          } else if (response.status === 303 || response.status === 403) {
-              onError(data, response.status);
-          } else if (response.status === 401) {
-              refreshAuth()
-              .then(response => {
-                response.json()
-                .then((data) => {
-                  if (response.status === 200) {
-                    console.log("refreshed tokens:");
-                    localStorage.setItem("id_token", data.id_token);
-                    localStorage.setItem("access_token", data.access_token);
-                    apiFunc(...apiParams)
-                    .then(response => {
-                        response.json()
-                        .then((data) => {
-                            if (response.status === 200) {
-                                onSuccess(data);
-                            } else if (response.status === 303 || response.status === 403) {
-                              onError(data, response.status);
-                            } else {
-                              logout();
-                            }
-                        }).catch((e) => {
-                          onError(e);
-                        });
-                      }).catch((e) => {
-                        onError(e);
-                      });
-                  } else {
-                    console.error('received response status '+response.status+' when attempting to refresh tokens')
-                    logout();
-                  }
-                }).catch((e) => {
-                  console.error(e)
-                  // logout();
-                });
-              }).catch((e) => {
-                console.error(e)
-                // logout();
-              });
-            } else {
-              onError(data, response.status);
-          }
-      }).catch((e) => {
-        onError(e);
-      });
-  }).catch((e) => {
-    onError(e);
-  });
-}
+  try {
+    let response = await apiFunc(...apiParams);
+    
+    if (response.status === 200) {
+      const data = isJson ? await response.json() : await response.blob();
+      return onSuccess(data);
+    } 
+    else if (response.status < 400) {
+      const data = isJson ? await response.json() : await response.blob();
+      return onError(data, response.status);
+    }
 
-export const callAPIWithBlobResponse = (
-  apiFunc: (...args: any[]) => Promise<Response>, 
-  apiParams: any[], 
-  onSuccess: (data: Blob) => void, 
-  onError: (error: any) => void
-): void => {
-  apiFunc(...apiParams)
-  .then(response => {
-      if (response.status === 200) {
-        response.blob()
-        .then((data) => {
-          onSuccess(data);
-        }).catch((e) => {
-          onError(e);
-        });
+    else if (response.status === 401) {
+      try {
+        const refreshResponse = await refreshAuth();
+        const refreshData = await refreshResponse.json();
+
+        if (refreshResponse.status === 200) {
+          console.log("Refreshed tokens:");
+          localStorage.setItem("id_token", refreshData.id_token);
+          localStorage.setItem("access_token", refreshData.access_token);
+
+          response = await apiFunc(...apiParams);
+
+          if (response.status === 200) {
+            const data = isJson ? await response.json() : await response.blob();
+            return onSuccess(data);
+          } 
+
+          const errorData = await response.json();
+          return onError(errorData, response.status);
+        } else {
+          console.error(`Received response status ${refreshResponse.status} when attempting to refresh tokens`);
+          return logout();
+        }
+      } catch (error) {
+        console.error(error);
+        return logout();
       }
-      else if (response.status === 401) {
-        refreshAuth()
-        .then(response => {
-          response.json()
-          .then((data) => {
-            if (response.status === 200) {
-              console.log("refreshed tokens:");
-              localStorage.setItem("id_token", data.id_token);
-              localStorage.setItem("access_token", data.access_token);
-              apiFunc(...apiParams)
-              .then(response => {
-                  if (response.status === 200) {
-                    response.blob()
-                    .then((data) => {
-                        onSuccess(data);
-                    }).catch((e) => {
-                      onError(e);
-                    });
-                } else {
-                  response.json()
-                  .then((data) => {
-                    onError(data)
-                  }).catch((e) => {
-                    onError(e)
-                  })
-                }
-                }).catch((e) => {
-                  onError(e);
-                });
-            } else {
-              console.error('received response status '+response.status+' when attempting to refresh tokens')
-              logout();
-            }
-          }).catch((e) => {
-            console.error(e)
-            // logout();
-          });
-        }).catch((e) => {
-          console.error(e)
-            // logout();
-        });
-      }
-      else{
-        response.json()
-        .then((data) => {
-          onError(data.detail)
-        }).catch((e) => {
-          onError(e)
-        })
-      }
-      
-  }).catch((e) => {
-    onError(e);
-  });  
-}
+    } 
+
+    const errorData = await response.json();
+    return onError(errorData.detail, response.status);
+    
+  } catch (error) {
+    return onError(error);
+  }
+};

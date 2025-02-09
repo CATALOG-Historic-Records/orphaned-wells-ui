@@ -126,7 +126,7 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
             addRecordGroup,
             [body],
             handleSuccessfulRecordGroupCreation,
-            (e: any) => setErrorMsg(e.detail)
+            (e: string) => setErrorMsg(e)
             // (e: Error) => console.error('error on recordGroup add ', e)
         );
     };

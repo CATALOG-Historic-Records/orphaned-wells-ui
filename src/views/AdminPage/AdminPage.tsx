@@ -21,7 +21,7 @@ const AdminPage = () => {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [newUser, setNewUser] = useState("");
     const [disableSubmitNewUserButton, setDisableSubmitNewUserButton] = useState(true);
-    const [errorMessage, setErrorMessage] = useState<string | null>("");
+    const [errorMsg, setErrorMsg] = useState<string | null>("");
     const [showChangeRoleDialog, setShowChangeRoleDialog] = useState(false)
 
     const styles = {
@@ -77,8 +77,8 @@ const AdminPage = () => {
         setShowDeleteUserModal(false);
     }
 
-    const handleUserError = (message: string, e: any) => {
-        setErrorMessage(e.detail);
+    const handleUserError = (message: string, e: string) => {
+        setErrorMsg(e);
     }
 
     return (
@@ -134,8 +134,8 @@ const AdminPage = () => {
             />
             <ErrorBar 
                 duration={10000} 
-                setErrorMessage={setErrorMessage} 
-                errorMessage={errorMessage} 
+                setErrorMessage={setErrorMsg} 
+                errorMessage={errorMsg} 
             />
         </Box>
     );

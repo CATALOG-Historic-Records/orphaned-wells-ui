@@ -58,7 +58,7 @@ const Header = (props: any) => {
       new_team: team
     }
     setProfileActions(false)
-    callAPI(updateDefaultTeam, [data], (data) => window.location.reload(), (e)=> console.error(e.detail))
+    callAPI(updateDefaultTeam, [data], (data) => navigate('/', { replace: true }), (e)=> console.error(e.detail))
   }
 
   const fetchedTeams = (data: string[]) => {

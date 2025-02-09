@@ -3,7 +3,7 @@ import { Box, FormLabel, FormControl, IconButton, FormGroup, FormControlLabel, G
 import { Dialog, DialogTitle, DialogContent, DialogContentText, Button, Checkbox, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
-import { callAPIWithBlobResponse, callAPI, convertFiltersToMongoFormat } from '../../assets/util';
+import { callAPI, convertFiltersToMongoFormat } from '../../assets/util';
 import { downloadRecords, getColumnData } from '../../services/app.service';
 import { ColumnSelectDialogProps, CheckboxesGroupProps, ExportTypeSelectionProps } from '../../types';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -34,7 +34,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
                 getColumnData,
                 [location, _id],
                 setDefaultColumns,
-                (e: Error) => console.error("unable to get processor data: " + e)
+                handleFailedGetColumnData
             );
         }
         
@@ -89,11 +89,12 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
             filter: convertFiltersToMongoFormat(appliedFilters),
         };
         setDownloading(true)
-        callAPIWithBlobResponse(
+        callAPI(
             downloadRecords,
             [location, _id, exportTypes, name, body],
             handleSuccessfulExport,
             handleFailedExport,
+            false // this argument indicates that the response is NOT json (ie it is blob)
         );
 
     };
@@ -120,10 +121,13 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         handleUpdate({"settings": settings})
     };
 
-    const handleFailedExport = (e: Error) => {
+    const handleFailedExport = (e: string) => {
         setDownloading(false)
-        console.error("unable to export: " + e)
         setErrorMsg("unable to export: " + e)
+    };
+
+    const handleFailedGetColumnData = (e: string) => {
+        setErrorMsg("failed to get column data: " + e)
     };
 
     const handleChangeExportTypes = (name: string) => {

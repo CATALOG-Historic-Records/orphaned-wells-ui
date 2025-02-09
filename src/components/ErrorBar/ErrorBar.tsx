@@ -12,7 +12,6 @@ const ErrorBar = ({errorMessage, setErrorMessage, margin, duration}: ErrorBarPro
             setOpen(true)
             setTimeout(() => {
                 setErrorMessage(null)
-                console.log('setting error message null')
             }, duration || 30000)
         }
     }, [errorMessage])

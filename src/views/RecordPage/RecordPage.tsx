@@ -61,19 +61,11 @@ const Record = () => {
         if (response_status === 303) {
             handleSuccessfulFetchRecord(data, true)
         } else if (response_status === 403) {
-            setErrorMsg(`${data.detail}`);
+            setErrorMsg(`${data}`);
         }
         else {
             setErrorMsg('error getting record data: ' + data)
         }
-    }
-
-    const handleSuccessfulRefreshRecord = (data: any, lock_record?: boolean) => {
-        let newRecordData = data.recordData;
-        let newNotes = newRecordData.record_notes
-        let tempRecordData = {...recordData}
-        tempRecordData.record_notes = newNotes;
-        setRecordData(tempRecordData)
     }
 
     const handleSuccessfulFetchRecord = (data: any, lock_record?: boolean) => {
@@ -133,7 +125,7 @@ const Record = () => {
 
     const handleFailedUpdate = (data: any, response_status?: number) => {
         if (response_status === 403) {
-            setErrorMsg(`${data.detail}.`);
+            setErrorMsg(`${data}.`);
         } else {
             console.error('error updating record data: ', data);
         }
