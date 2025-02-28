@@ -163,7 +163,7 @@ const RecordNotesDialog = ({ record_id, open, onClose }: RecordNotesDialogProps)
         if (text) data['text'] = text
         if (isReply)  {
             data['isReply'] = true
-            data['replyToIndex'] = replyToIdx || -1
+            if (replyToIdx !== undefined) data['replyToIndex'] = replyToIdx
         }
         callAPI(
             updateRecord,
