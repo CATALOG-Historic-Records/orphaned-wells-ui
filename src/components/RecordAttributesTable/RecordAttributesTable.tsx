@@ -215,16 +215,14 @@ const AttributeRow = (props: AttributeRowProps) => {
                                 variant='outlined'
                             />
                             :
-                            <Tooltip title={(v.edited && v.lastUpdated) ? `Last updated ${formatDateTime(v.lastUpdated)} by ${v.lastUpdatedBy || 'unknown'}` : ''}>
-                                <p style={v.cleaning_error ? styles.errorParagraph : styles.noErrorParagraph}>
-                                    {formatAttributeValue(v.value)}&nbsp;
-                                    {isSelected && !locked &&
-                                        <IconButton id='edit-field-icon' sx={styles.rowIconButton} onClick={handleClickEditIcon}>
-                                            <EditIcon sx={styles.rowIcon}/>
-                                        </IconButton>
-                                    }
-                                </p>
-                            </Tooltip>
+                            <p style={v.cleaning_error ? styles.errorParagraph : styles.noErrorParagraph}>
+                                {formatAttributeValue(v.value)}&nbsp;
+                                {isSelected && !locked &&
+                                    <IconButton id='edit-field-icon' sx={styles.rowIconButton} onClick={handleClickEditIcon}>
+                                        <EditIcon sx={styles.rowIcon}/>
+                                    </IconButton>
+                                }
+                            </p>
                         }
                     </span>
                     {
@@ -253,18 +251,23 @@ const AttributeRow = (props: AttributeRowProps) => {
             <TableCell align="right" id={v.key+'_confidence'}>
                 {
                     v.edited ? 
-                    <p style={{padding:0, margin:0}}>
-                        <Badge
-                            variant="dot"
-                            sx={{
-                            "& .MuiBadge-badge": {
-                                color: "#2196F3",
-                                backgroundColor: "#2196F3"
-                            }
-                            }}
-                        /> 
-                        &nbsp; Edited
-                    </p> :
+                    (
+                        <Tooltip title={(v.lastUpdated) ? `Last updated ${formatDateTime(v.lastUpdated)} by ${v.lastUpdatedBy || 'unknown'}` : ''}>
+                            <p style={{padding:0, margin:0}}>
+                                <Badge
+                                    variant="dot"
+                                    sx={{
+                                    "& .MuiBadge-badge": {
+                                        color: "#2196F3",
+                                        backgroundColor: "#2196F3"
+                                    }
+                                    }}
+                                /> 
+                                &nbsp; Edited
+                            </p> 
+                        </Tooltip>
+                    )
+                    :
                      (v.confidence === null) ? 
                      <p style={{padding:0, margin:0}}>
                         <Badge
@@ -508,16 +511,14 @@ const SubattributeRow = (props: SubattributeRowProps) => {
                             sx={v.cleaning_error ? styles.errorTextField: {}}
                         />
                         :
-                        <Tooltip title={(v.edited && v.lastUpdated) ? `Last updated ${formatDateTime(v.lastUpdated)} by ${v.lastUpdatedBy}` : ''}>
-                            <p>
-                                {formatAttributeValue(v.value)}&nbsp;
-                                {isSelected && !locked &&
-                                    <IconButton sx={styles.rowIconButton} onClick={handleClickEditIcon}>
-                                        <EditIcon sx={styles.rowIcon}/>
-                                    </IconButton>
-                                }
-                            </p>
-                        </Tooltip>
+                        <p>
+                            {formatAttributeValue(v.value)}&nbsp;
+                            {isSelected && !locked &&
+                                <IconButton sx={styles.rowIconButton} onClick={handleClickEditIcon}>
+                                    <EditIcon sx={styles.rowIcon}/>
+                                </IconButton>
+                            }
+                        </p>
                     }
                     </span>
                     {

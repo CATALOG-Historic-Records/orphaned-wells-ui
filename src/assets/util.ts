@@ -1,6 +1,6 @@
 import { refreshAuth, revokeToken } from "../services/app.service"
 import { useEffect, useRef } from 'react';
-import { FilterOption, TableColumns, RecordNote } from "../types";
+import { FilterOption, TableColumns, RecordNote, ScehemaField } from "../types";
 
 export const DEFAULT_FILTER_OPTIONS: {
   [key: string]: FilterOption;
@@ -187,6 +187,12 @@ export function formatDateTime(timestamp?: number): string {
 
   // Format the date using Intl.DateTimeFormat
   return new Intl.DateTimeFormat("en-US", options).format(date);
+}
+
+export const checkFieldValidity = (fieldSchema: ScehemaField, value: any) => {
+  console.log('checking validity')
+  console.log(fieldSchema)
+  return true
 }
 
 

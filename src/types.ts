@@ -52,6 +52,25 @@ export interface RecordGroup {
     error_amt?: number;
 }
 
+
+export interface ScehemaField {
+    name: string;
+    data_type?: string;
+    google_data_type?: string;
+    database_data_type?: string;
+    cleaning_function?: string;
+    accepted_range?: string;
+    field_specific_notes?: string;
+    grouping?: string;
+    model_enabled?: string;
+    occurrence?: string;
+    page_order_sort?: number;
+}
+
+export interface RecordSchema {
+    [key: string]: ScehemaField;
+}
+
 export interface Attribute {
     name: string;
     key: string;

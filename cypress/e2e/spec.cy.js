@@ -26,6 +26,8 @@ describe('End to end testing', () => {
       name: test_project_name
     }).click()
 
+    cy.wait(5000)
+
     // test that project page loaded correctly
     cy.findByRole('button', {
       name: test_project_name
