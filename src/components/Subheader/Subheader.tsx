@@ -64,7 +64,7 @@ const Subheader = (props: SubheaderProps) => {
                     </div>
                     <div style={styles.pageName}>
                         {currentPage}&nbsp;
-                        {actions &&
+                        {actions && Object.keys(actions).length > 0 &&
                             <>
                                 <IconButton 
                                     id="options-button"

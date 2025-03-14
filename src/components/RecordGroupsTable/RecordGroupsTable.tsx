@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Tooltip } from '@mui/material';
 import { formatDate } from '../../assets/util';
 import { RecordGroup } from "../../types";
-import { styles } from "../../assets/styles";
+import { styles, ERROR_TEXT_COLOR } from "../../assets/styles";
+import WarningIcon from '@mui/icons-material/Warning';
 
 interface RecordGroupsTableProps {
   record_groups: RecordGroup[];
@@ -40,7 +41,17 @@ const RecordGroupsTable = ({ record_groups }: RecordGroupsTableProps) => {
               <TableCell>{row.description}</TableCell>
               <TableCell>{row.documentType}</TableCell>
               <TableCell>{row.state}</TableCell>
-              <TableCell>{row.reviewed_amt || 0} / {row.total_amt || 0}</TableCell>
+              <TableCell>
+                {row.reviewed_amt || 0} / {row.total_amt || 0}
+                {row.error_amt ? 
+                  <Tooltip title='This record group contains cleaning errors'>
+                    <IconButton sx={{color: ERROR_TEXT_COLOR}} size='small'><WarningIcon/></IconButton>
+                  </Tooltip>
+                  
+                  :
+                  null
+                }
+              </TableCell>
               <TableCell>{formatDate(row.dateCreated || null)}</TableCell>
             </TableRow>
           ))}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
-import { Grid, Box, IconButton } from '@mui/material';
+import { Grid, Box, IconButton, Alert } from '@mui/material';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { ImageCropper } from '../ImageCropper/ImageCropper';
@@ -8,9 +8,9 @@ import { useKeyDown } from '../../assets/util';
 import AttributesTable from '../RecordAttributesTable/RecordAttributesTable';
 import { DocumentContainerProps } from '../../types';
 import { DocumentContainerStyles as styles } from '../../assets/styles';
+import Switch from '@mui/material/Switch';
 
-
-const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, handleUpdateRecord, locked }: DocumentContainerProps) => {
+const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, handleUpdateRecord, locked, recordSchema }: DocumentContainerProps) => {
     const [imgIndex, setImgIndex] = useState(0);
     const [displayPoints, setDisplayPoints] = useState<number[][] | null>(null);
     const [displayKeyIndex, setDisplayKeyIndex] = useState(-1);
@@ -21,11 +21,50 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
     const [height, setHeight] = useState("auto");
     const [forceOpenSubtable, setForceOpenSubtable] = useState<number | null>(null);
     const [imageHeight, setImageHeight] = useState(0);
+    const [ showRawValues, setShowRawValues ] = useState(false)
+    const [ autoCleanFields, setAutoCleanFields ] = useState(true)
     const imageDivStyle = {
         width: width,
         height: height,
     }
     const params = useParams(); 
+
+    const [ hasErrors, setHasErrors ] = useState(false)
+    const checkForErrors = () => {
+        try {
+            if (attributesList) {
+                for (let attr of attributesList) {
+                    if (attr.cleaning_error) {
+                        setHasErrors(true)
+                        return
+                    }
+                    if (attr.subattributes) {
+                        for (let subattr of attr.subattributes) {
+                            if (subattr.cleaning_error) {
+                                setHasErrors(true)
+                                return
+                            }
+                        }
+                    }
+                }
+                setHasErrors(false)
+                return
+            } else {
+                setHasErrors(false)
+                return
+            }
+            
+        } catch (e) {
+            console.error(e)
+            setHasErrors(false)
+            return
+        }
+        
+    }
+
+    useEffect(() => {
+        checkForErrors()
+    },[attributesList])
 
     useEffect(() => {
         if (displayKeyIndex !== -1 && displayKeySubattributeIndex !== null) {
@@ -235,16 +274,22 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
     }
 
     const scrollToAttribute = (boxId: string, heightId: string, top: number) => {
-        const imageContainerId = boxId;
-        const imageContainerElement = document.getElementById(imageContainerId);
-        const imageElement = document.getElementById(heightId);
-        const scrollAmount = top * imageElement!.clientHeight * imageFiles.length - 100;
-        if (imageContainerElement) {
-            imageContainerElement.scrollTo({
-                top: scrollAmount,
-                behavior: "smooth",
-            });
+        try{
+            const imageContainerId = boxId;
+            const imageContainerElement = document.getElementById(imageContainerId);
+            const imageElement = document.getElementById(heightId);
+            const scrollAmount = top * imageElement!.clientHeight * imageFiles.length - 100;
+            if (imageContainerElement) {
+                imageContainerElement.scrollTo({
+                    top: scrollAmount,
+                    behavior: "smooth",
+                });
+            }
+        } catch(e) {
+            // this likely only occurs when table is in fullscreen mode and image is note displayed
+            console.error('failed to scroll')
         }
+        
     }
 
     function scrollIntoView(element: HTMLElement | null, container: HTMLElement | null) {
@@ -281,17 +326,33 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
 
     return (
         <Box style={styles.outerBox}>
+            {
+                hasErrors &&
+                <Alert severity='error' sx={styles.errorAlert} variant='outlined'>
+                    <b>Errors present: Record was cleaned with errors for some fields</b>
+                </Alert>
+            }
+            
             <Grid container>
                 {
                     fullscreen !== "image" && 
                     <Grid item xs={gridWidths[2]}>
                         <Box sx={styles.gridContainer}>
-                            <Box sx={styles.containerActions}>
-                                <IconButton id='fullscreen-table-button' onClick={() => handleSetFullscreen("table")}>
-                                    { 
-                                        fullscreen === "table" ? <FullscreenExitIcon/> : <FullscreenIcon/> 
-                                    }
-                                </IconButton>
+                            <Box sx={styles.containerActions.both}>
+                                <p style={{marginTop: '24px'}}>
+                                    {/* Automatically Clean Fields 
+                                    <Switch checked={autoCleanFields} onChange={() => setAutoCleanFields(!autoCleanFields)} size='small'/> */}
+                                </p>
+                                <p>
+                                    Raw Values 
+                                    <Switch checked={showRawValues} onChange={() => setShowRawValues(!showRawValues)} size='small'/>
+                                    <IconButton id='fullscreen-table-button' onClick={() => handleSetFullscreen("table")}>
+                                        { 
+                                            fullscreen === "table" ? <FullscreenExitIcon/> : <FullscreenIcon/> 
+                                        }
+                                    </IconButton>
+                                </p>
+                                
                             </Box>
                             {attributesList !== undefined && 
                                 <AttributesTable 
@@ -302,8 +363,10 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
                                     forceOpenSubtable={forceOpenSubtable}
                                     displayKeyIndex={displayKeyIndex}
                                     displayKeySubattributeIndex={displayKeySubattributeIndex}
-                                    handleUpdateRecord={handleUpdateRecord}
+                                    handleUpdateRecord={() => handleUpdateRecord(autoCleanFields)}
                                     locked={locked}
+                                    showRawValues={showRawValues}
+                                    recordSchema={recordSchema || {}}
                                 />
                             }
                         </Box>
@@ -313,7 +376,7 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
                 {fullscreen !== "table" && 
                     <Grid item xs={gridWidths[0]}>
                         <Box sx={styles.gridContainer}>
-                            <Box sx={styles.containerActions}>
+                            <Box sx={styles.containerActions.right}>
                                 <IconButton id='fullscreen-image-button' onClick={() => handleSetFullscreen("image")}>
                                     { 
                                         fullscreen === "image" ? <FullscreenExitIcon/> : <FullscreenIcon/> 

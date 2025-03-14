@@ -20,6 +20,9 @@ export interface RecordData {
     review_status?: string;
     notes?: string | null;
     verification_status?: string;
+    lastUpdated?: number;
+    lastUpdatedBy?: string;
+    has_errors?: boolean;
 }
 
 export interface ProjectData {
@@ -46,16 +49,44 @@ export interface RecordGroup {
     dateCreated?: number;
     reviewed_amt?: number;
     total_amt?: number;
+    error_amt?: number;
+}
+
+
+export interface SchemaField {
+    name: string;
+    data_type?: string;
+    google_data_type?: string;
+    database_data_type?: string;
+    cleaning_function?: string;
+    accepted_range?: string;
+    field_specific_notes?: string;
+    grouping?: string;
+    model_enabled?: string;
+    occurrence?: string;
+    page_order_sort?: number;
+}
+
+export interface RecordSchema {
+    [key: string]: SchemaField;
 }
 
 export interface Attribute {
     name: string;
     key: string;
-    value: string;
+    value: string | boolean | number | null;
+    raw_text: string;
+    normalized_value: string | boolean | number | Date;
+    uncleaned_value?: string;
+    cleaned?: boolean;
+    cleaning_error?: boolean;
     confidence: number | null;
     edited?: boolean;
     normalized_vertices: number[][] | null;
     subattributes?: Attribute[];
+    lastUpdated?: number; // timestamp in milliseconds
+    lastUpdatedBy?: string;
+    last_cleaned?: number; // timestamp in seconds
 }
 
 export interface Processor {
@@ -113,6 +144,10 @@ export interface TableColumns {
     keyNames: string[];
 }
 
+export interface SubheaderActions {
+    [key: string]: () => void;
+}
+
 /*
 props interfaces
 */
@@ -122,8 +157,10 @@ export interface RecordAttributesTableProps {
     fullscreen: string | null;
     displayKeyIndex: number;
     displayKeySubattributeIndex: number | null;
-    handleUpdateRecord: () => void;
+    handleUpdateRecord: (...args: any[]) => void;
     locked?: boolean;
+    showRawValues?: boolean;
+    recordSchema: RecordSchema;
 }
 
 export interface RecordsTableProps {
@@ -205,8 +242,9 @@ export interface DocumentContainerProps {
     imageFiles: string[];
     attributesList: any[];
     handleChangeValue: handleChangeValueSignature;
-    handleUpdateRecord: () => void;
+    handleUpdateRecord: (...args: any[]) => void;
     locked?: boolean;
+    recordSchema: RecordSchema;
 }
 
 export interface ColumnSelectDialogProps {

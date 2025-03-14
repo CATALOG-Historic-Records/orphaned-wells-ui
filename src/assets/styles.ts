@@ -1,3 +1,5 @@
+export const ERROR_TEXT_COLOR = '#B33E3b'
+
 export const styles = {
   headerRow: {
     fontWeight: "bold"
@@ -54,7 +56,55 @@ export const styles = {
   unflaggedConfidence: {
       padding: 0,
       margin: 0,
-  }
+  },
+  ocrRawText: {
+    color: 'grey',
+    fontSize: '12px',
+    fontStyle: 'italic'
+  },
+  errorParagraph: {
+    margin: 8,
+  },
+  errorText: {
+    color: ERROR_TEXT_COLOR,
+    fontSize: '14px',
+    fontWeight: 'bold'
+  },
+  errorSpan: {
+    backgroundColor: '#FECDD3',
+    borderRadius: 4,
+    border: '2px solid '+ERROR_TEXT_COLOR
+  },
+  noErrorParagraph: {
+    margin:0
+  },
+  infoIcon: {
+    fontSize: '12px',
+    padding: '2px',
+  },
+  errorInfoIcon: {
+    fontSize: '12px',
+    padding: '2px',
+    color: ERROR_TEXT_COLOR
+  },
+  errorTextField: {
+    '& .MuiOutlinedInput-root': {
+        // Default border
+        '& fieldset': {
+            border: '0px'
+        },
+        // On hover
+        '&:hover fieldset': {
+            borderWidth: '1.5px',
+            borderColor: 'black'
+        },
+        // On focus
+        '&.Mui-focused fieldset': {
+            borderWidth: '2px',
+            borderColor: 'black'
+        },
+    },
+  },
 }
 
 export const HeaderStyles = {
@@ -253,11 +303,28 @@ export const DocumentContainerStyles = {
       backgroundColor: "white",
   },
   containerActions: {
+    left: {
+      display: 'flex',
+      justifyContent: 'flex-start',
+      marginleft: '20px',
+    },
+    right: {
       display: 'flex',
       justifyContent: 'flex-end',
       marginRight: '10px',
+    },
+    both: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      paddingX: 4,
+    }
+      
   },
   outerBox: {
       paddingBottom: "45px"
   },
+  errorAlert: {
+    backgroundColor: '#FFECED',
+    marginBottom: '16px'
+  }
 }

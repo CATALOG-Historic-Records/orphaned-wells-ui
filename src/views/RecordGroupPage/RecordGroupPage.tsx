@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecordGroup, uploadDocument, deleteRecordGroup, updateRecordGroup } from '../../services/app.service';
+import { getRecordGroup, uploadDocument, deleteRecordGroup, updateRecordGroup, cleanRecords } from '../../services/app.service';
 import RecordsTable from '../../components/RecordsTable/RecordsTable';
 import Subheader from '../../components/Subheader/Subheader';
 import UploadDocumentsModal from '../../components/UploadDocumentsModal/UploadDocumentsModal';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import ErrorBar from '../../components/ErrorBar/ErrorBar';
 import { callAPI } from '../../assets/util';
-import { RecordGroup, ProjectData, PreviousPages } from '../../types';
+import { RecordGroup, ProjectData, PreviousPages, SubheaderActions } from '../../types';
 import { useUserContext } from '../../usercontext';
 
 const RecordGroupPage = () => {
@@ -19,9 +19,11 @@ const RecordGroupPage = () => {
     const [recordGroup, setRecordGroup] = useState<RecordGroup>({ } as RecordGroup);
     const [showDocumentModal, setShowDocumentModal] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
+    const [openCleanPrompt, setOpenCleanPrompt] = useState(false);
     const [openUpdateNameModal, setOpenUpdateNameModal] = useState(false);
     const [recordGroupName, setRecordGroupName] = useState("");
     const [errorMsg, setErrorMsg] = useState<string | null>("");
+    const [ subheaderActions, setSubheaderActions ] = useState<SubheaderActions>()
     const [navigation, setNavigation] = useState<PreviousPages>({"Projects": () => navigate("/projects", { replace: true })})
 
     useEffect(() => {
@@ -37,6 +39,20 @@ const RecordGroupPage = () => {
         temp_navigation[project.name] = () => navigate("/project/"+project._id, { replace: true })
         setNavigation(temp_navigation)
     }, [project]);
+
+    useEffect(() => {
+        let tempActions = {} as SubheaderActions
+        if (userPermissions && userPermissions.includes('manage_project')) {
+            tempActions['Change record group name'] = handleClickChangeName
+        }
+        if (userPermissions && userPermissions.includes('clean_record')) {
+            tempActions["Clean records"] = () => setOpenCleanPrompt(true)
+        }
+        if (userPermissions && userPermissions.includes('delete')) {
+            tempActions["Delete record group"] = () => setOpenDeleteModal(true)
+        }
+        setSubheaderActions(tempActions)
+    }, [userPermissions]);
 
     const styles = {
         outerBox: {
@@ -125,20 +141,27 @@ const RecordGroupPage = () => {
         setErrorMsg(e)
     }
 
+    const runCleaningFunctions = () => {
+        callAPI(
+            cleanRecords,
+            ['record_group', params.id],
+            handleSuccessfulClean,
+            handleAPIErrorResponse
+        );
+    }
+
+    const handleSuccessfulClean = () => {
+        setOpenCleanPrompt(false)
+        window.location.reload()
+    }
+
     return (
         <Box sx={styles.outerBox}>
             <Subheader
                 currentPage={recordGroup.name}
                 buttonName={(userPermissions && userPermissions.includes('upload_document')) ? "Upload new record(s)" : undefined}
                 handleClickButton={() => setShowDocumentModal(true)}
-                actions={(userPermissions && userPermissions.includes('manage_project')) ?
-                    {
-                        "Change record group name": handleClickChangeName, 
-                        "Delete record group": () => setOpenDeleteModal(true),
-                    }
-                    :
-                    null
-                }
+                actions={subheaderActions}
                 previousPages={navigation}
             />
             <Box sx={styles.innerBox}>
@@ -161,6 +184,16 @@ const RecordGroupPage = () => {
                 handleSave={handleDeleteRecordGroup}
                 buttonText='Delete'
                 buttonColor='error'
+                buttonVariant='contained'
+                width={400}
+            />
+            <PopupModal
+                open={openCleanPrompt}
+                handleClose={() => setOpenCleanPrompt(false)}
+                text="Are you sure you want to clean all the records in this record group?"
+                handleSave={runCleaningFunctions}
+                buttonText='Clean Records'
+                buttonColor='primary'
                 buttonVariant='contained'
                 width={400}
             />

@@ -125,6 +125,14 @@ export const downloadRecords = (location: string, _id: string, export_types: { [
     });
 };
 
+export const cleanRecords = (location: string, _id: string) => {
+    return fetch(BACKEND_URL + '/run_cleaning_functions/' + location + '/' + _id, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+    });
+};
+
 export const updateProject = (project_id: string, data: any) => {
     return fetch(BACKEND_URL + '/update_project/' + project_id, {
         method: 'POST',

@@ -1,5 +1,6 @@
 const path = require("path");
-const test_record_group_name = "cypress test record group"
+const test_record_group_name = "Illinois Test Project"
+const test_project_name = "ISGS Project"
 describe('End to end testing', () => {
   beforeEach(() => {
     cy.loginByGoogleApi()
@@ -22,12 +23,14 @@ describe('End to end testing', () => {
 
     // navigate to project page
     cy.findByRole('rowheader', {
-      name: /test project/i
+      name: test_project_name
     }).click()
+
+    cy.wait(5000)
 
     // test that project page loaded correctly
     cy.findByRole('button', {
-      name: /test project/i
+      name: test_project_name
     }).should('be.visible')
     cy.findByRole('columnheader', {
       name: /record group name/i
@@ -144,7 +147,7 @@ describe('End to end testing', () => {
 
   it('tests edit field, review status updates, mark as unreviewed', () => {
     // click on record
-    cy.visit('/#/record/6699518f8107c59f0b6c8c11');
+    cy.visit('/#/record/665647e58294448787521760');
     cy.wait(2000)
     cy.screenshot('navigated to record cypress test record')
 
@@ -152,7 +155,7 @@ describe('End to end testing', () => {
     cy.get('#fullscreen-table-button').click()
 
     // click on field
-    let field_name = "Dry_Hole"
+    let field_name = "ACIDIZED"
     cy.get('#'+field_name+'_confidence').contains(/not found/i)
     cy.findByText(field_name).click()
     cy.screenshot('clicked on '+field_name)
@@ -191,7 +194,7 @@ describe('End to end testing', () => {
   })
 
   it('tests export data', () => {
-    cy.visit('/#/record_group/6699515b8107c59f0b6c8c0e');
+    cy.visit('/#/record_group/6656476a448c4d1812645c07');
     cy.wait(1000)
     cy.screenshot('navigated to project test list')
 
