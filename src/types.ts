@@ -90,14 +90,20 @@ export interface Attribute {
 }
 
 export interface Processor {
-    id: string;
-    displayName: string;
-    img: string;
-    documentType: string;
-    state: string;
-    attributes: Attribute[];
-    processor_id: string;
-    name: string;
+    "Processor Type": string;
+    "Processor Name": string;
+    "Model Name": string;
+    "F1 Score": number;
+    "Primary Model in Processor": string;
+    "Training Documents": number;
+    "Testing Documents": number;
+    "Date Trained": number;
+    "Foundation Model": string;
+    "Processor ID": string;
+    "Model ID": string;
+    "documentType"?: string;
+    "displayName"?: string;
+    "attributes": Attribute[];
 }
 
 export interface FilterOption {

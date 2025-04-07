@@ -35,9 +35,9 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
     }, [open]);
 
     useEffect(() => {
-        if (recordGroupName !== "" && selectedProcessor.id && disableCreateButton) {
+        if (recordGroupName !== "" && selectedProcessor['Processor ID'] && disableCreateButton) {
             setDisableCreateButton(false);
-        } else if ((recordGroupName === "" || !selectedProcessor.id) && !disableCreateButton) {
+        } else if ((recordGroupName === "" || !selectedProcessor['Processor ID']) && !disableCreateButton) {
             setDisableCreateButton(true);
         }
     }, [recordGroupName, selectedProcessor]);
@@ -98,7 +98,7 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
     };
 
     const handleSelectProcessor = (processorData: Processor) => {
-        if (selectedProcessor.id === processorData.id) setSelectedProcessor({ } as Processor);
+        if (selectedProcessor['Processor ID'] === processorData['Processor ID']) setSelectedProcessor({ } as Processor);
         else {
             setSelectedProcessor(processorData);
         }
@@ -106,7 +106,7 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
 
     const getImageStyle = (processorId: string): React.CSSProperties => {
         let styling: React.CSSProperties = { ...styles.processorImage };
-        if (selectedProcessor.id === processorId) {
+        if (selectedProcessor['Processor ID'] === processorId) {
             styling["border"] = "1px solid #2196F3";
         }
         return styling;
@@ -116,10 +116,9 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
         let body = {
             name: recordGroupName,
             description: recordGroupDescription,
-            state: selectedProcessor.state,
             history: [],
             documentType: selectedProcessor.documentType,
-            processorId: selectedProcessor.id,
+            processorId: selectedProcessor['Processor ID'],
             project_id: project_id,
         };
         callAPI(
@@ -207,11 +206,11 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
                                 {processors.map((processorData, idx) => (
                                     <Grid key={idx} item xs={4} sx={styles.processorGridItem}>
                                         <p style={styles.processorTextBox}>
-                                            {idx + 1}. {processorData.displayName}
+                                            {idx + 1}. {processorData['Processor Name']}
                                         </p>
                                         <Box sx={styles.processorImageBox} onClick={() => handleSelectProcessor(processorData)}>
                                             <Tooltip title={processorData.documentType}>
-                                                <img id={`processor_${idx}`} src={processorData.img} style={getImageStyle(processorData.id)} />
+                                                <img id={`processor_${idx}`} src={`./img/${processorData['Processor Name']}.png`} style={getImageStyle(processorData['Processor ID'])} />
                                             </Tooltip>
                                         </Box>
                                     </Grid>
