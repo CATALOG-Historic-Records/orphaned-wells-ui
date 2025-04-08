@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Box, TextField, IconButton, Grid, Button, Tooltip } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -14,6 +15,7 @@ interface NewRecordGroupDialogProps {
 }
 
 const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialogProps) => {
+    const navigate = useNavigate();
     const [recordGroupName, setRecordGroupName] = useState("");
     const [recordGroupDescription, setRecordGroupDescription] = useState("");
     const [processors, setProcessors] = useState<Processor[]>([])
@@ -130,9 +132,9 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
         );
     };
 
-    const handleSuccessfulRecordGroupCreation = () => {
+    const handleSuccessfulRecordGroupCreation = (new_id: string) => {
         setTimeout(() => {
-            window.location.reload();
+            navigate('/record_group/'+new_id)
         }, 500);
     };
 

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import { TextField, IconButton, Grid, Button, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { addProject } from '../../services/app.service';
@@ -11,6 +12,8 @@ interface NewProjectDialogProps {
 }
 
 const NewProjectDialog = ({ open, onClose, setErrorMsg }: NewProjectDialogProps) => {
+    const navigate = useNavigate();
+    
     const [projectName, setProjectName] = useState("");
     const [projectDescription, setProjectDescription] = useState("");
     const [disableCreateButton, setDisableCreateButton] = useState(true);
@@ -60,9 +63,9 @@ const NewProjectDialog = ({ open, onClose, setErrorMsg }: NewProjectDialogProps)
         );
     };
 
-    const handleSuccessfulProjectCreation = () => {
+    const handleSuccessfulProjectCreation = (new_id: string) => {
         setTimeout(() => {
-            window.location.reload();
+            navigate('/project/' + new_id)
         }, 500);
     };
 

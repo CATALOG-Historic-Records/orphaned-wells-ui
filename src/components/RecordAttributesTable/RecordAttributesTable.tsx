@@ -92,7 +92,7 @@ const AttributeRow = (props: AttributeRowProps) => {
     } = childProps;
     
     const [ editMode, setEditMode ] = useState(false);
-    const [ openSubtable, setOpenSubtable ] = useState(false);
+    const [ openSubtable, setOpenSubtable ] = useState(true);
     const [ isSelected, setIsSelected ] = useState(false);
     const [ lastSavedValue, setLastSavedValue ] = useState(v.value)
 
@@ -100,8 +100,6 @@ const AttributeRow = (props: AttributeRowProps) => {
     //     let fieldSchema = recordSchema[k]
     //     checkFieldValidity(fieldSchema, v.value)
     // }, [v.value])
-
-    if (k === 'Conversion') console.log(v.uncleaned_value)
 
     useEffect(() => {
         if (idx === displayKeyIndex && (displayKeySubattributeIndex === null || displayKeySubattributeIndex === undefined)) setIsSelected(true);
@@ -112,6 +110,7 @@ const AttributeRow = (props: AttributeRowProps) => {
     }, [displayKeyIndex, displayKeySubattributeIndex]);
 
     const handleClickInside = (e: React.MouseEvent<HTMLTableRowElement>) => {
+        if (v.subattributes) setOpenSubtable(!openSubtable)
         e.stopPropagation();
         handleClickField(k, v.normalized_vertices, idx, false, null);
     }
@@ -197,7 +196,7 @@ const AttributeRow = (props: AttributeRowProps) => {
 
     return (
     <>
-        <TableRow id={`${k}::${idx}`} sx={isSelected ? {backgroundColor: "#EDEDED"} : {}} onClick={handleClickInside}>
+        <TableRow id={`${k}::${idx}`} sx={(isSelected && !v.subattributes) ? {backgroundColor: "#EDEDED"} : {}} onClick={handleClickInside}>
             <TableCell sx={styles.fieldKey}>
                 <span>
                     {k}
@@ -207,7 +206,7 @@ const AttributeRow = (props: AttributeRowProps) => {
                     <IconButton
                         aria-label="expand row"
                         size="small"
-                        onClick={() => setOpenSubtable(!openSubtable)}
+                        // onClick={() => setOpenSubtable(!openSubtable)}
                         sx={styles.rowIconButton}
                     >
                         {openSubtable ? <KeyboardArrowUpIcon sx={styles.rowIcon}/> : <KeyboardArrowDownIcon sx={styles.rowIcon}/>}
@@ -369,6 +368,7 @@ const SubattributesTable = (props: SubattributesTableProps) => {
     const { 
         attributesList,
         open,
+        topLevelKey,
         ...childProps
     } = props;
 
@@ -382,7 +382,7 @@ const SubattributesTable = (props: SubattributesTableProps) => {
             <Collapse in={open} timeout="auto" unmountOnExit>
                 <Box sx={{ margin: 1 }}>
                 <Typography variant="h6" gutterBottom component="div">
-                    Properties
+                    {topLevelKey} Properties
                 </Typography>
                 <Table size="small" aria-label="purchases" sx={styles.subattributesTable}>
                     <TableHead>
@@ -402,6 +402,7 @@ const SubattributesTable = (props: SubattributesTableProps) => {
                             k={v.key}
                             v={v}
                             idx={idx}
+                            topLevelKey={topLevelKey}
                             {...childProps}
                         />
                     ))}

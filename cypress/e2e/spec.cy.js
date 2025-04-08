@@ -95,8 +95,14 @@ describe('End to end testing', () => {
 
     cy.wait('@createProject', {timeout: 10000});
 
-    // click first processor available
-    cy.get('#cypresstestproject_project_row').should('be.visible')
+    // test that project page created correctly
+    cy.findByRole('button', {
+      name: 'cypress test project'
+    }).should('be.visible')
+    cy.findByRole('columnheader', {
+      name: /record group name/i
+    }).should('be.visible')
+
     cy.screenshot('end test create new project')
 
   })
