@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Tooltip } from '@mui/material';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { formatDate } from '../../assets/util';
+import { formatDate } from '../../util';
 import { RecordGroup } from "../../types";
-import { styles, ERROR_TEXT_COLOR } from "../../assets/styles";
+import { styles, ERROR_TEXT_COLOR } from "../../styles";
 import WarningIcon from '@mui/icons-material/Warning';
 
 interface RecordGroupsTableProps {

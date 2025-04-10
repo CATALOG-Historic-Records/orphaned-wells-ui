@@ -4,7 +4,7 @@ import { Box, TextField, IconButton, Grid, Button, Tooltip } from '@mui/material
 import { Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { addRecordGroup, getProcessors } from '../../services/app.service';
-import { callAPI } from '../../assets/util';
+import { callAPI } from '../../util';
 import { Processor } from '../../types';
 import ErrorBar from '../ErrorBar/ErrorBar';
 

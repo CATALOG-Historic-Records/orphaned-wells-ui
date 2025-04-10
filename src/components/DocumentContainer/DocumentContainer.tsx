@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
-import { Grid, Box, IconButton, Alert } from '@mui/material';
+import { Grid, Box, IconButton, Alert, Tooltip } from '@mui/material';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { ImageCropper } from '../ImageCropper/ImageCropper';
-import { useKeyDown } from '../../assets/util';
+import { useKeyDown } from '../../util';
 import AttributesTable from '../RecordAttributesTable/RecordAttributesTable';
 import { DocumentContainerProps } from '../../types';
-import { DocumentContainerStyles as styles } from '../../assets/styles';
+import { DocumentContainerStyles as styles } from '../../styles';
 import Switch from '@mui/material/Switch';
 
 const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, handleUpdateRecord, locked, recordSchema }: DocumentContainerProps) => {
@@ -23,13 +25,14 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
     const [imageHeight, setImageHeight] = useState(0);
     const [ showRawValues, setShowRawValues ] = useState(false)
     const [ autoCleanFields, setAutoCleanFields ] = useState(true)
+    const [ hasErrors, setHasErrors ] = useState(false)
+    const [ zoomOnToken, setZoomOnToken ] = useState(JSON.parse(localStorage.getItem('zoomOnToken') || 'false'))
+
     const imageDivStyle = {
         width: width,
         height: height,
     }
     const params = useParams(); 
-
-    const [ hasErrors, setHasErrors ] = useState(false)
     const checkForErrors = () => {
         try {
             if (attributesList) {
@@ -324,6 +327,12 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
         }
     }
 
+    const handleToggleZoom = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation();
+        setZoomOnToken(!zoomOnToken);
+        localStorage.setItem('zoomOnToken', JSON.stringify(!zoomOnToken))
+    }
+
     return (
         <Box style={styles.outerBox}>
             {
@@ -377,6 +386,12 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
                     <Grid item xs={gridWidths[0]}>
                         <Box sx={styles.gridContainer}>
                             <Box sx={styles.containerActions.right}>
+                                <Tooltip title='Zoom in on highlighted fields'>
+                                    <IconButton id='zoom-toggle-button' onClick={handleToggleZoom} sx={zoomOnToken ? styles.zoomToggleActive : {}}>
+                                        <ZoomInIcon/> 
+                                    </IconButton>
+                                </Tooltip>
+                                
                                 <IconButton id='fullscreen-image-button' onClick={() => handleSetFullscreen("image")}>
                                     { 
                                         fullscreen === "image" ? <FullscreenExitIcon/> : <FullscreenIcon/> 
@@ -395,6 +410,7 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
                                             displayPoints={displayPoints}
                                             disabled
                                             fullscreen={fullscreen}
+                                            zoomOnToken={zoomOnToken}
                                         />
                                     </div>
                                 ))

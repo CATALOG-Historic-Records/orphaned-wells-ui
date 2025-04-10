@@ -1,23 +1,40 @@
-import { useState, useRef, ChangeEvent } from 'react';
-import { Grid, Box, Modal, IconButton, Button } from '@mui/material';
+import { useState, useRef, ChangeEvent, useEffect } from 'react';
+import { useParams } from "react-router-dom";
+import { Grid, Box, Modal, IconButton, Button, Switch, FormControlLabel, Badge, CircularProgress, Stack, Tooltip } from '@mui/material';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import CloseIcon from '@mui/icons-material/Close';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { FileUploader } from "react-drag-drop-files";
 import { UploadDocumentsModalProps } from '../../types';
 import UploadDirectory from './UploadDirectory';
+import { checkProcessorStatus, deployProcessor, undeployProcessor } from '../../services/app.service';
+import { callAPI } from '../../util';
 
 const UploadDocumentsModal = (props: UploadDocumentsModalProps) => {
+    const params = useParams<{ id: string }>();
     const { setShowModal, handleUploadDocument } = props;
     const [ showWarning, setShowWarning ] = useState(false);
     const [ warningMessage, setWarningMessage ] = useState("");
     const [ file, setFile ] = useState<File | null>(null);
     const [uploadDirectory, setUploadDirectory] = useState<string>()
     const [uploadDirectoryFiles, setUploadDirectoryFiles ] = useState<any>([])
+    const [ runCleaningFunctions, setRunCleaningFunctions ] = useState(false)
+    const [ processorState, setProcessorState ] = useState(10)
+    const [ uploadingDirectory, setUploadingDirectory ] = useState(false)
     const maxFileSize = 10;
     const fileTypes: string[] = ["tiff", "tif", "pdf", "png", "jpg", "jpeg", "zip"];
     const validFileTypes = ['image/png', 'application/pdf', 'image/tiff', 'image/jpeg']
     const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        callAPI(
+            checkProcessorStatus,
+            [params.id],
+            (data) => handleCheckedProcessorStatus(data),
+            (e, status) => console.error(e)
+        );
+    }, [params.id])
 
     const styles = {
         modalStyle: {
@@ -68,7 +85,14 @@ const UploadDocumentsModal = (props: UploadDocumentsModalProps) => {
             display: 'flex', 
             justifyContent: 'center'
         },
+        processorDeploymentText: {
+            margin:'10px'
+        }
     };
+
+    const handleCheckedProcessorStatus = (state: number) => {
+        setProcessorState(state)
+    }
 
     const handleClose = () => {
         setShowModal(false);
@@ -82,7 +106,7 @@ const UploadDocumentsModal = (props: UploadDocumentsModalProps) => {
                 setShowWarning(false);
             }, 5000);
         } else {
-            handleUploadDocument(file);
+            handleUploadDocument(file, runCleaningFunctions, true);
             setShowWarning(false);
             setShowModal(false);
         }
@@ -99,7 +123,6 @@ const UploadDocumentsModal = (props: UploadDocumentsModalProps) => {
     };
 
     const handleChooseDirectory = (e: ChangeEvent<HTMLInputElement>) => {
-        // console.log(e.target.files)
         handleDirectoryInput(e.target.files)
         setShowWarning(false);
     }
@@ -128,6 +151,32 @@ const UploadDocumentsModal = (props: UploadDocumentsModalProps) => {
         }
         setUploadDirectory(directoryName)
         setUploadDirectoryFiles(validFiles)
+    }
+
+    const handleDeployProcessor = () => {
+        let apiFunc;
+        if (processorState === 1) {
+            apiFunc = undeployProcessor
+        }
+        else if (processorState === 3) {
+            apiFunc = deployProcessor
+        }
+        else return
+        callAPI(
+            apiFunc,
+            [params.id],
+            (data) => handleSuccessfulDeploy(data),
+            (data) => handleFailedDeploy(data),
+        )
+    }
+
+    const handleSuccessfulDeploy = (response: number) => {
+        if (response) setProcessorState(response)
+    }
+
+    const handleFailedDeploy = (response: any) => {
+        console.error('failed to deploy')
+        if (response) setProcessorState(response)
     }
 
     const fileUploaderContainer = () => {
@@ -182,6 +231,7 @@ const UploadDocumentsModal = (props: UploadDocumentsModalProps) => {
                 onTypeError={fileTypeError}
                 onSizeError={fileSizeError}
                 maxSize={maxFileSize}
+                disabled={processorState > 1}
             />
         );
     };
@@ -212,16 +262,75 @@ const UploadDocumentsModal = (props: UploadDocumentsModalProps) => {
                         <IconButton onClick={handleClose}><CloseIcon/></IconButton>
                     </Box>
                 </Grid>
+                <Grid item xs={12}>
+                    <Stack direction={'row'} justifyContent={'space-between'}>
+                        <span style={styles.processorDeploymentText}>
+                        Processor status: &nbsp; 
+                            {
+                                processorState > 3 ? (
+                                    <span>
+                                         <CircularProgress color='primary' size='16px'/>
+                                    </span>
+                                )
+                                : 
+                                processorState === 3 ? (
+                                    <span>
+                                         &nbsp;
+                                        <Badge color="error" variant="dot"/>
+                                        &nbsp;
+                                        undeployed
+                                    </span>
+                                )
+                                : 
+                                processorState === 2 ? (
+                                    <span>
+                                         &nbsp;
+                                        <Badge color="warning" variant="dot"/>
+                                        &nbsp;
+                                        deploying
+                                    </span>
+                                )
+                                : (
+                                    <span>
+                                         &nbsp;
+                                        <Badge color="secondary" variant="dot"/>
+                                        &nbsp;
+                                        deployed
+                                    </span>
+                                )
+                            }
+                        </span>
+                        <span>
+                            <Button 
+                                variant='outlined' 
+                                endIcon={<RocketLaunchIcon/>} 
+                                disabled={processorState > 3 || processorState === 2 || uploadingDirectory}
+                                onClick={handleDeployProcessor}    
+                            >
+                                {processorState === 1 ? 'Undeploy' : 'Deploy'} Processor
+                            </Button>
+                        </span>
+                    </Stack>
+                    
+                        
+                </Grid>
                 {uploadDirectory ? 
                     <UploadDirectory
                         setShowModal={setShowModal}
                         directoryName={uploadDirectory}
                         directoryFiles={uploadDirectoryFiles}
+                        runCleaningFunctions={runCleaningFunctions}
+                        setRunCleaningFunctions={setRunCleaningFunctions}
+                        uploading={uploadingDirectory}
+                        setUploading={setUploadingDirectory}
                     />  :
                     <>
-                        <Grid item xs={12}>
-                            {DragDrop()}
-                        </Grid>
+                        <Tooltip title={processorState > 1 && 'Processor must be deployed to upload files'}>
+                            <Grid item xs={12}>
+                                
+                                {DragDrop()}
+                            </Grid>
+                        </Tooltip>
                         <Grid item xs={12}>
                         <input
                             ref={inputRef}
@@ -236,12 +345,20 @@ const UploadDocumentsModal = (props: UploadDocumentsModalProps) => {
                             
                         </Grid>
                         <Grid item xs={12}>
-                            <Box style={{display: "flex", justifyContent: "space-around"}}>
+                            <Box sx={{display: "flex", justifyContent: "space-around", marginBottom: 1}}>
+                                <FormControlLabel 
+                                    control={<Switch/>} 
+                                    label="Run cleaning functions" 
+                                    onChange={(e: any) => setRunCleaningFunctions(e.target.checked)}
+                                    checked={runCleaningFunctions}
+                                />
+                            </Box>
+                            <Box sx={{display: "flex", justifyContent: "space-around"}}>
                                 <Button variant="contained" style={styles.button} onClick={handleClickUpload} disabled={file === null}>
                                     Upload File
                                 </Button>
                                 <p style={{display: 'flex', margin:0, alignItems: 'center'}}>or</p>
-                                <Button variant="outlined" style={styles.button} onClick={() => inputRef.current?.click()}>
+                                <Button variant="outlined" style={styles.button} onClick={() => inputRef.current?.click()} disabled={processorState > 1}>
                                     Choose Directory
                                 </Button>
                             </Box>

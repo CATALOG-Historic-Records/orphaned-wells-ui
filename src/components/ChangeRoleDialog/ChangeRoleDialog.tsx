@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { callAPI } from '../../assets/util';
+import { callAPI } from '../../util';
 import { fetchRoles, updateUserRoles } from '../../services/app.service';
 import { IconButton, Grid, Button, Chip } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';

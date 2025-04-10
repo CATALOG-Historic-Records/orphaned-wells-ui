@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import { formatDate } from '../../assets/util';
+import { formatDate } from '../../util';
 import { ProjectData } from "../../types";
-import { styles } from "../../assets/styles";
+import { styles } from "../../styles";
 
 interface ProjectsListTableProps {
   projects: ProjectData[];

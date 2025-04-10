@@ -5,7 +5,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import LockIcon from '@mui/icons-material/Lock';
 import { SubheaderProps } from '../../types';
-import { SubheaderStyles as styles } from '../../assets/styles';
+import { SubheaderStyles as styles } from '../../styles';
 
 const Subheader = (props: SubheaderProps) => {
     const navigate = useNavigate();

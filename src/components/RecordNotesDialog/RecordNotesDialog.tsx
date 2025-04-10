@@ -11,7 +11,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import { updateRecord, getRecordNotes } from '../../services/app.service';
-import { callAPI, formatDateTime } from '../../assets/util';
+import { callAPI, formatDateTime } from '../../util';
 import { RecordNote, RecordNotesDialogProps } from '../../types';
 import { useUserContext } from '../../usercontext';
 import PopupModal from '../PopupModal/PopupModal';

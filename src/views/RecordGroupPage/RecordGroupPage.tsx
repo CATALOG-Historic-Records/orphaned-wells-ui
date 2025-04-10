@@ -7,7 +7,7 @@ import Subheader from '../../components/Subheader/Subheader';
 import UploadDocumentsModal from '../../components/UploadDocumentsModal/UploadDocumentsModal';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import ErrorBar from '../../components/ErrorBar/ErrorBar';
-import { callAPI } from '../../assets/util';
+import { callAPI } from '../../util';
 import { RecordGroup, ProjectData, PreviousPages, SubheaderActions } from '../../types';
 import { useUserContext } from '../../usercontext';
 
@@ -80,12 +80,12 @@ const RecordGroupPage = () => {
         setProject(data.project)
     } 
 
-    const handleUploadDocument = (file: File, refresh: boolean = true) => {
+    const handleUploadDocument = (file: File, runCleaningFunctions: boolean = false, refresh: boolean = true) => {
         const formData = new FormData();
         formData.append('file', file, file.name);
         return callAPI(
             uploadDocument,
-            [formData, recordGroup._id, userEmail, false],
+            [formData, recordGroup._id, userEmail, false, false, runCleaningFunctions, false],
             () => handleSuccessfulDocumentUpload(refresh),
             handleAPIErrorResponse
         );

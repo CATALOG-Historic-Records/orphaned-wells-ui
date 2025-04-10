@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { TextField, IconButton, Grid, Button, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { addProject } from '../../services/app.service';
-import { callAPI } from '../../assets/util';
+import { callAPI } from '../../util';
 
 interface NewProjectDialogProps {
     open: boolean;

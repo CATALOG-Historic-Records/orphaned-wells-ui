@@ -3,7 +3,7 @@ import { Box, FormLabel, FormControl, IconButton, FormGroup, FormControlLabel, G
 import { Dialog, DialogTitle, DialogContent, DialogContentText, Button, Checkbox, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
-import { callAPI, convertFiltersToMongoFormat } from '../../assets/util';
+import { callAPI, convertFiltersToMongoFormat } from '../../util';
 import { downloadRecords, getColumnData } from '../../services/app.service';
 import { ColumnSelectDialogProps, CheckboxesGroupProps, ExportTypeSelectionProps } from '../../types';
 import CircularProgress from '@mui/material/CircularProgress';

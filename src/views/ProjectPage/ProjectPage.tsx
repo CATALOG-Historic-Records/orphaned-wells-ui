@@ -10,7 +10,7 @@ import RecordsTable from '../../components/RecordsTable/RecordsTable';
 import ErrorBar from '../../components/ErrorBar/ErrorBar';
 import { useUserContext } from '../../usercontext';
 import { getRecordGroups, updateProject, deleteProject } from '../../services/app.service';
-import { callAPI, DEFAULT_FILTER_OPTIONS } from '../../assets/util';
+import { callAPI, DEFAULT_FILTER_OPTIONS } from '../../util';
 import { ProjectData } from '../../types';
 
 const Project = () => {

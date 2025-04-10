@@ -1,11 +1,11 @@
 import './Header.css';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
-import { HeaderStyles as styles } from '../../assets/styles';
+import { HeaderStyles as styles } from '../../styles';
 import { useUserContext } from '../../usercontext';
 import { fetchTeams, updateDefaultTeam } from '../../services/app.service';
 import { Menu, MenuItem, IconButton, Avatar, Tabs, Tab, Divider, ListItemIcon, Button } from '@mui/material';
-import { logout, callAPI } from '../../assets/util';
+import { logout, callAPI } from '../../util';
 import Logout from '@mui/icons-material/Logout';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
@@ -33,7 +33,7 @@ const Header = (props: any) => {
   }, [props, userPermissions, location]);
 
   const handleNavigateHome = () => {
-    navigate("/", { replace: true });
+    navigate("/");
   }
 
   const handleShowProfileActions = (event: React.MouseEvent<HTMLElement>) => {

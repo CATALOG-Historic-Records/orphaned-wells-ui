@@ -9,7 +9,7 @@ import ErrorBar from '../../components/ErrorBar/ErrorBar';
 import ChangeRoleDialog from '../../components/ChangeRoleDialog/ChangeRoleDialog';
 import { getUsers, addUser, deleteUser } from '../../services/app.service';
 import { useUserContext } from '../../usercontext';
-import { callAPI } from '../../assets/util';
+import { callAPI } from '../../util';
 import { User } from '../../types';
 
 const AdminPage = () => {

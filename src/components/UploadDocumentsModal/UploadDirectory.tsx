@@ -4,16 +4,15 @@ import { useUserContext } from '../../usercontext';
 import { Grid, Box, Button, Stack, FormControlLabel, Switch, Tooltip, TextField } from '@mui/material';
 import { UploadDirectoryProps } from '../../types';
 import { uploadDocument, checkForDuplicateRecords } from '../../services/app.service';
-import { callAPI } from '../../assets/util';
+import { callAPI } from '../../util';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const UploadDirectory = (props: UploadDirectoryProps) => {
     const params = useParams<{ id: string }>();
     const { userEmail } = useUserContext();
-    const { directoryName, directoryFiles } = props;
+    const { directoryName, directoryFiles, runCleaningFunctions, setRunCleaningFunctions, uploading, setUploading } = props;
     const [ amountToUpload, setAmountToUpload ] = useState(directoryFiles.length)
-    const [ filesToUpload, setFilesToUpload ] = useState<File[]>([]) 
-    const [ uploading, setUploading ] = useState(false)
+    const [ filesToUpload, setFilesToUpload ] = useState<File[]>([])
     const [ finishedUploading, setFinishedUploading ] = useState(false)
     const [ progress, setProgress ] = useState(0)
     const [ preventDuplicates, setPreventDuplicates ] = useState(true)
@@ -96,7 +95,7 @@ const UploadDirectory = (props: UploadDirectoryProps) => {
             formData.append('file', file, file.name);
             callAPI(
                 uploadDocument,
-                [formData, params.id, userEmail, false, preventDuplicates],
+                [formData, params.id, userEmail, false, preventDuplicates, runCleaningFunctions, false],
                 () => handleSuccessfulDocumentUpload(file),
                 (e, status) => handleAPIErrorResponse(file, status)
             );
@@ -165,16 +164,8 @@ const UploadDirectory = (props: UploadDirectoryProps) => {
                 </Stack>
             </Grid>
             <Grid item xs={12}>
-                <Box sx={{display: "flex", justifyContent: "space-around", marginTop: 3}}>
-                    {!uploading && !finishedUploading && 
-                        <Button variant="contained" sx={styles.button} onClick={upload} disabled={disabled}>
-                            Upload
-                        </Button>
-                    }
-                    {uploading && 
-                        <CircularProgress variant="determinate" value={progress} />
-                    }
-                    <div>
+                <Box sx={{display: "flex", justifyContent: "space-around", marginTop: 1}}>
+                    <Stack direction={'row'}>
                         <Tooltip title={'When selected, filenames that are already present in database will not be uploaded.'}>
                             <FormControlLabel 
                                 disabled={uploading}
@@ -184,7 +175,23 @@ const UploadDirectory = (props: UploadDirectoryProps) => {
                                 checked={preventDuplicates}
                             />
                         </Tooltip>
-                    </div>
+                        <FormControlLabel 
+                            control={<Switch/>} 
+                            label="Run cleaning functions" 
+                            onChange={(e: any) => setRunCleaningFunctions(e.target.checked)}
+                            checked={runCleaningFunctions}
+                        />
+                    </Stack>
+                </Box>
+                <Box sx={{display: "flex", justifyContent: "space-around", marginTop: 1}}>
+                    {!uploading && !finishedUploading && 
+                        <Button variant="contained" sx={styles.button} onClick={upload} disabled={disabled}>
+                            Upload
+                        </Button>
+                    }
+                    {uploading && 
+                        <CircularProgress variant="determinate" value={progress} />
+                    }
                 </Box>
             </Grid>
         </Grid>

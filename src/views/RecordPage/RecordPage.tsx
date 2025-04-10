@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, redirect } from "react-router-dom";
 import { getRecordData, updateRecord, deleteRecord, cleanRecords } from '../../services/app.service';
-import { callAPI, useKeyDown } from '../../assets/util';
+import { callAPI, useKeyDown } from '../../util';
 import Subheader from '../../components/Subheader/Subheader';
 import Bottombar from '../../components/BottomBar/BottomBar';
 import DocumentContainer from '../../components/DocumentContainer/DocumentContainer';
@@ -17,7 +17,7 @@ const Record = () => {
     const [openCleanPrompt, setOpenCleanPrompt] = useState(false);
     const [openUpdateNameModal, setOpenUpdateNameModal] = useState(false);
     const [recordName, setRecordName] = useState("");
-    const [previousPages, setPreviousPages] = useState<PreviousPages>({ "Projects": () => navigate("/projects", { replace: true }) });
+    const [previousPages, setPreviousPages] = useState<PreviousPages>({ "Projects": () => navigate("/projects") });
     const [errorMsg, setErrorMsg] = useState<string | null>("");
     const [showResetPrompt, setShowResetPrompt] = useState(false);
     const [ lastUpdatedField, setLastUpdatedField ] = useState<any>()
@@ -100,12 +100,12 @@ const Record = () => {
         setRecordName(newRecordData.name);
         setRecordSchema(data.recordSchema);
         let tempPreviousPages: PreviousPages = {
-            "Projects": () => navigate("/projects", { replace: true }),
+            "Projects": () => navigate("/projects"),
         };
         tempPreviousPages[newRecordData.project_name] = 
-            () => navigate("/project/" + newRecordData.project_id, { replace: true });
+            () => navigate("/project/" + newRecordData.project_id);
         tempPreviousPages[newRecordData.rg_name] = 
-            () => navigate("/record_group/" + newRecordData.rg_id, { replace: true });
+            () => navigate("/record_group/" + newRecordData.rg_id);
         setPreviousPages(tempPreviousPages);
     }
 
@@ -191,9 +191,6 @@ const Record = () => {
         }
         setLastUpdatedField(tempLastUpdatedField)
         setRecordData(tempRecordData);
-        // let is_valid = true
-        // if (recordSchema) is_valid = checkFieldValidity(recordSchema[schemaKey], value)
-        // return is_valid
     }
 
     const handleDeleteRecord = () => {
@@ -207,7 +204,7 @@ const Record = () => {
     }
 
     const goToRecordGroup = () => {
-        navigate("/record_group/" + recordData.record_group_id, { replace: true })
+        navigate("/record_group/" + recordData.record_group_id)
     }
 
     const handleClickNext = () => {
@@ -229,9 +226,9 @@ const Record = () => {
     const navigateToRecord = (data: any) => {
         let record_data = data.recordData;
         if (record_data?._id) {
-            let newUrl = "/#/record/" + record_data._id;
+            let newUrl = "/record/" + record_data._id;
             if (record_data._id == recordData._id) window.location.reload()
-            else window.location.href = newUrl;
+            else navigate(newUrl)
         } else {
             console.error("error redirecting")
         }

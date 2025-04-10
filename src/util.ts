@@ -1,6 +1,6 @@
-import { refreshAuth, revokeToken } from "../services/app.service"
+import { refreshAuth, revokeToken } from "./services/app.service"
 import { useEffect, useRef } from 'react';
-import { FilterOption, TableColumns, RecordNote, SchemaField } from "../types";
+import { FilterOption, TableColumns, RecordNote, SchemaField } from "./types";
 
 export const DEFAULT_FILTER_OPTIONS: {
   [key: string]: FilterOption;
@@ -200,44 +200,13 @@ export function formatDateTime(timestamp?: number): string {
   return new Intl.DateTimeFormat("en-US", options).format(date);
 }
 
-export const checkFieldValidity = (fieldSchema: SchemaField, value: any) => {
-  /*
-    TODO: frontend validtion
-    we can look at databaseDataType, accepted_range to determine if the value is valid or not
-    return boolean value whether this is valid or not
-    optional: return reason why it is not valid
-  */
-  if (!fieldSchema || value === null || value === '') return true
-  try {
-    let databaseDataType = fieldSchema.database_data_type?.toLowerCase();
-    if (databaseDataType === 'str') {
-      // All values are valid for string type, but we should check if it can be converted to a string
-      return typeof value === 'string' || value !== null && value !== undefined;
-    } else if (databaseDataType === 'int') {
-      // Check if the value is an integer or can be parsed as an integer
-      return typeof value === 'number' && Number.isInteger(value) || typeof value === 'string' && !isNaN(parseInt(value));
-    } else if (databaseDataType === 'bool') {
-      // Check if the value is a boolean or a string that can be parsed as a boolean
-      return typeof value === 'boolean' || (typeof value === 'string' && (value.trim().toLowerCase() === 'true' || value.trim().toLowerCase() === 'false'));
-    } else if (databaseDataType === 'float') {
-      // Check if the value is a number or can be parsed as a float
-      return typeof value === 'number' || typeof value === 'string' && !isNaN(parseFloat(value));
-    } else if (databaseDataType === 'date') {
-      // Check if the value is a Date object or a string that can be parsed as a date
-      if (value instanceof Date) return true;
-      if (typeof value !== 'string') return false;
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      return dateRegex.test(value);
-    } else if (databaseDataType === 'table') {
-      return true
-    } else {
-      console.log('unsupported database data type: '+databaseDataType)
-    }
-  }
-  catch(e) {
-    console.error(e)
-  }
-  return true
+export const findCenter = (points: number[][]) => {
+  let center = []
+  if (points) {
+      center.push((points[0][0] + points[1][0]) / 2)
+      center.push((points[0][1] + points[2][1]) / 2)
+  } else center = [50,50]
+  return center
 }
 
 

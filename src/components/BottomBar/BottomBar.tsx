@@ -4,7 +4,7 @@ import { useUserContext } from '../../usercontext';
 import SplitButton from '../SplitButton/SplitButton';
 import DefectiveDialog from '../DefectiveDialog/DefectiveDialog';
 import { BottombarProps } from '../../types';
-import { BottomBarStyles as styles } from '../../assets/styles';
+import { BottomBarStyles as styles } from '../../styles';
 import { Grid, Box, Paper, Button, CssBaseline } from '@mui/material';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
@@ -33,7 +33,6 @@ const Bottombar = (props: BottombarProps) => {
   const [openNotesModal, setOpenNotesModal] = useState(false);
   const [openDefectiveDialog, setOpenDefectiveDialog] = useState(false);
   const [openVerificationConfirmation, setOpenVerificationConfirmation] = useState(false)
-  const [notesButtonText, setNotesButtonText ] = useState<string>()
   
   const getSplitButtonOptions = (review_status: string, verification_status?: string) => {
     let markAsUnreviewed = {

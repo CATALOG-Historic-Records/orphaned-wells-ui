@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
 import { Box, TextField, Collapse, Typography, IconButton, Badge, Tooltip, Stack } from '@mui/material';
-import { formatConfidence, useKeyDown, useOutsideClick, formatAttributeValue, formatDateTime } from '../../assets/util';
+import { formatConfidence, useKeyDown, useOutsideClick, formatAttributeValue, formatDateTime } from '../../util';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
 import { Attribute, RecordAttributesTableProps } from '../../types';
-import { styles } from '../../assets/styles';
+import { styles } from '../../styles';
 
 
 const LOW_CONFIDENCE: number = 0.01;
@@ -130,6 +130,7 @@ const AttributeRow = (props: AttributeRowProps) => {
                 }
                 setEditMode(false);
             }
+            handleClickField(k, v.normalized_vertices, idx, false, null);
         }
     }, undefined, undefined, undefined);
 
@@ -469,6 +470,7 @@ const SubattributeRow = (props: SubattributeRowProps) => {
                 }
                 setEditMode(false);
             }
+            handleClickField(k, v.normalized_vertices, topLevelIdx, true, idx);
         }
     }, undefined, undefined, undefined);
 

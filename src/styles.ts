@@ -326,5 +326,9 @@ export const DocumentContainerStyles = {
   errorAlert: {
     backgroundColor: '#FFECED',
     marginBottom: '16px'
+  },
+  zoomToggleActive: {
+    color: 'black',
+    backgroundColor: '#EBEBEB'
   }
 }

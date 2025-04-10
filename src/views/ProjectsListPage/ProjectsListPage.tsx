@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getProjects } from '../../services/app.service';
-import { callAPI } from '../../assets/util';
+import { callAPI } from '../../util';
 import { useUserContext } from '../../usercontext';
 import Subheader from '../../components/Subheader/Subheader';
 import ProjectsListTable from '../../components/ProjectsListTable/ProjectsListTable';

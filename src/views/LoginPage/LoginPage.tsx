@@ -3,7 +3,7 @@ import { Box, Button, Typography, Modal } from '@mui/material';
 import { useGoogleLogin } from '@react-oauth/google';
 import { authLogin } from '../../services/app.service';
 import GoogleIcon from '@mui/icons-material/Google';
-import { LoginPageStyles as styles } from '../../assets/styles';
+import { LoginPageStyles as styles } from '../../styles';
 
 interface LoginPageProps {
     handleSuccessfulAuthentication: (accessToken: string, refreshToken: string, idToken: string) => void;
