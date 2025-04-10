@@ -8,7 +8,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
 import { Attribute, RecordAttributesTableProps } from '../../types';
 import { styles } from '../../assets/styles';
-import { checkFieldValidity } from '../../assets/util';
 
 
 const LOW_CONFIDENCE: number = 0.01;
@@ -96,11 +95,6 @@ const AttributeRow = (props: AttributeRowProps) => {
     const [ isSelected, setIsSelected ] = useState(false);
     const [ lastSavedValue, setLastSavedValue ] = useState(v.value)
 
-    // useEffect(() => {
-    //     let fieldSchema = recordSchema[k]
-    //     checkFieldValidity(fieldSchema, v.value)
-    // }, [v.value])
-
     useEffect(() => {
         if (idx === displayKeyIndex && (displayKeySubattributeIndex === null || displayKeySubattributeIndex === undefined)) setIsSelected(true);
         else  {
@@ -181,7 +175,7 @@ const AttributeRow = (props: AttributeRowProps) => {
             // we can assume it was autocleaned (and not simply cleaned) if last updated and last cleaned times are within a couple seconds of eachother
             // this doesnt work ^. if a user updates it, waits a few seconds, then clicks enter, there is a wider gap :/
             const difference = Math.abs((v.lastUpdated / 1000) - v.last_cleaned);
-            if (difference <= 2) return true
+            if (difference <= 10) return true
         }
         return false
     }

@@ -306,7 +306,7 @@ const RecordsTable = (props: RecordsTableProps) => {
                 <TableCell sx={styles.headerCell} key={idx} align={idx > 0 ? "right" : "left"}>
                   <p style={getParagraphStyle(table_columns.keyNames[idx])} onClick={() => handleSort(table_columns.keyNames[idx])}>
                     {table_columns.keyNames[idx] === sortBy &&
-                      <IconButton onClick={() => setSortAscending((sortAscending || 1) * -1)}>
+                      <IconButton>
                         {
                           sortAscending === 1 ? 
                             <KeyboardArrowUpIcon /> :

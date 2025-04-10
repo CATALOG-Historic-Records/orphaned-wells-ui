@@ -128,6 +128,46 @@ const Project = () => {
         setErrorMsg(e)
     }
 
+    const sortRecordGroups = (sortBy: string, sortAscending: number) => {
+        try {
+            let tempRecordGroups = [...record_groups]
+            let sortFunction: (a: any, b: any) => number;
+            if (sortBy === 'progress') {
+                sortFunction = (a,b) => {
+                    let a_unreviewed_amt = a.total_amt - a.reviewed_amt
+                    let b_unreviewed_amt = b.total_amt - b.reviewed_amt
+                    if (sortAscending === 1) return b_unreviewed_amt - a_unreviewed_amt; 
+                    else return a_unreviewed_amt - b_unreviewed_amt;
+                }
+            }
+            else if (sortBy === 'dateCreated') {
+                sortFunction = (a,b) => {
+                    if (sortAscending === 1) return b[sortBy] - a[sortBy]; 
+                    else return a[sortBy] - b[sortBy]; 
+                }
+            }
+            else if (['name', 'description', 'documentType'].includes(sortBy)) {
+                sortFunction = (a,b) => {
+                    if ( a[sortBy] <= b[sortBy] ){
+                        return sortAscending;
+                    }
+                    if ( a[sortBy] > b[sortBy] ){
+                        return -1 * sortAscending;
+                    }
+                    return 0;
+                }
+            }
+            else return
+            tempRecordGroups.sort(sortFunction)
+            setRecordGroups(tempRecordGroups)
+        } catch (e) {
+            console.error('unable to sort:')
+            console.error(e)
+        }
+        
+        
+    }
+
     return (
         <Box sx={styles.outerBox}>
             <Subheader
@@ -154,7 +194,7 @@ const Project = () => {
                         <ProjectTabs options={tabs} value={currentTab} setValue={setCurrentTab}/>
                         {
                             tabs[currentTab] === "Record Groups" ? 
-                                <RecordGroupsTable record_groups={record_groups} />
+                                <RecordGroupsTable record_groups={record_groups} sortRecordGroups={sortRecordGroups} />
                             :
                             tabs[currentTab] === "All Records" &&
                                 <RecordsTable

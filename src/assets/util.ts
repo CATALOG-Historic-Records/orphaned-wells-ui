@@ -29,7 +29,18 @@ export const DEFAULT_FILTER_OPTIONS: {
         { name: "verified", checked: true, value: "verified" },
     ],
     selectedOptions: ["unverified", "awaiting verification", "verified"]
-},
+  },
+  error_status: {
+    key: 'error_status',
+    displayName: "Error Status",   
+    type: "checkbox",
+    operator: 'equals',
+    options: [
+        { name: "has cleaning errors", checked: true, value: 'true' },
+        { name: "no cleaning errors", checked: true, value: 'false' },
+    ],
+    selectedOptions: ["has cleaning errors", "no cleaning errors"]
+  },
   name: {
     key: "name",
     displayName: "Record Name",
@@ -319,7 +330,60 @@ export const convertFiltersToMongoFormat = (filters: FilterOption[]): object => 
   let filterBy: { [key: string]: any } = {};
   for (let filter of filters) {
       let nextFilter: any;
-      if (filter.type === 'checkbox') {
+      if (filter.key === 'error_status') {
+        if (filter.selectedOptions?.length == 2 || filter.selectedOptions?.length == 0) {
+        }
+        else if (filter.selectedOptions?.includes('has cleaning errors')) {
+          filterBy['$or'] = [
+            {
+                "attributesList": {
+                    "$elemMatch": {
+                        "$and": [
+                            {"cleaning_error": {"$ne": false}},
+                            {"cleaning_error": {"$exists": true}},
+                        ]
+                    }
+                }
+            },
+            {
+                "attributesList.subattributes": {
+                    "$elemMatch": {
+                        "$and": [
+                            {"cleaning_error": {"$ne": false}},
+                            {"cleaning_error": {"$exists": true}},
+                        ]
+                    }
+                }
+            },
+          ]
+        }
+        else if (filter.selectedOptions?.includes('no cleaning errors')) {
+          filterBy['$nor'] = [
+            {
+                "attributesList": {
+                    "$elemMatch": {
+                        "$and": [
+                            {"cleaning_error": {"$ne": false}},
+                            {"cleaning_error": {"$exists": true}},
+                        ]
+                    }
+                }
+            },
+            {
+                "attributesList.subattributes": {
+                    "$elemMatch": {
+                        "$and": [
+                            {"cleaning_error": {"$ne": false}},
+                            {"cleaning_error": {"$exists": true}},
+                        ]
+                    }
+                }
+            },
+          ]
+        }
+        continue
+      }
+      else if (filter.type === 'checkbox') {
           nextFilter = { "$in": [] };
           for (let each of filter.options || []) {
               if (each.checked) nextFilter["$in"].push(each.value);
