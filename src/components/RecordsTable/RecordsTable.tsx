@@ -39,17 +39,27 @@ const RecordsTable = (props: RecordsTableProps) => {
 
   const [ showNotes, setShowNotes ] = useState(false);
   const [ notesRecordId, setNotesRecordId ] = useState<string>();
-  const [ notes, setNotes ] = useState<RecordNote[]>();
   const [ openColumnSelect, setOpenColumnSelect ] = useState(false);
   const [records, setRecords] = useState<any[]>([]);
   const [recordCount, setRecordCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(100);
-  const [sortBy, setSortBy] = useState('dateCreated');
-  const [sortAscending, setSortAscending] = useState(1);
+  // const [sortBy, setSortBy] = useState(
+  //   JSON.parse(localStorage.getItem("sort") || '["dateCreated",1]')[0]
+  // );
+  // const [sortAscending, setSortAscending] = useState(
+  //   JSON.parse(localStorage.getItem("sort") || '["dateCreated",1]')[1]
+  // );
   const [filterBy, setFilterBy] = useState<any[]>(
     JSON.parse(localStorage.getItem("appliedFilters") || '{}')[params.id || ""] || []
   );
+  const [ sort, setSort ] = useState(
+    JSON.parse(localStorage.getItem("sort") || '{}')[params.id || ""] || ['dateCreated', 1]
+  )
+
+  const sortBy = sort[0]
+  const sortDirection = sort[1]
+  const sortAscending = sort[1]
   const table_columns = TABLE_ATTRIBUTES[location]
 
   useEffect(() => {
@@ -81,7 +91,7 @@ const RecordsTable = (props: RecordsTableProps) => {
   };
 
   const handleClickRecord = (record_id: string) => {
-    navigate("/record/" + record_id);
+    navigate("/record/" + record_id, {state: {filterBy: filterBy, sortBy: sortBy, sortAscending: sortAscending, id: params.id, level: location}});
   }
 
   const handleApplyFilters = (appliedFilters: any) => {
@@ -120,13 +130,11 @@ const RecordsTable = (props: RecordsTableProps) => {
     event.stopPropagation();
     setShowNotes(true);
     setNotesRecordId(row._id);
-    setNotes(row.record_notes);
   }
 
   const handleCloseNotesModal = (record_id?: string, newNotes?: RecordNote[]) => {
     setShowNotes(false);
     setNotesRecordId(undefined);
-    setNotes(undefined);
     if (record_id) {
       const rowIdx = records.findIndex(r => r._id === record_id);
       if (rowIdx > -1) {
@@ -150,11 +158,22 @@ const RecordsTable = (props: RecordsTableProps) => {
 
   const handleSort = (key: string) => {
     if (SORTABLE_COLUMNS.includes(key)) {
-      if (sortBy === key) setSortAscending((sortAscending || 1) * -1);
-      else {
-        setSortBy(key);
-        setSortAscending(1);
+      let newSortDirection;
+      if (sortBy === key) {
+        newSortDirection = (sortAscending || 1) * -1
       }
+      else {
+        newSortDirection = 1
+      }
+      setSort([key, newSortDirection])
+
+      // update local storage
+      let newSort;
+      let currentSort = localStorage.getItem("sort");
+      if (currentSort === null) newSort = {};
+      else newSort = JSON.parse(currentSort);
+      newSort[params.id || ""] = [key, newSortDirection]
+      localStorage.setItem("sort", JSON.stringify(newSort));
     }
   }
 
