@@ -138,8 +138,8 @@ const Record = () => {
     const handleSuccessfulDeletion = (data: any) => {}
 
     const handleSuccessfulAttributeUpdate = React.useCallback((data: any) => {
-        const { isSubattribute, topLevelIndex, subIndex, v } = data;
-        handleChangeAttribute(v, topLevelIndex, isSubattribute, subIndex)
+        const { isSubattribute, topLevelIndex, subIndex, v, review_status } = data;
+        handleChangeAttribute(v, topLevelIndex, review_status, isSubattribute, subIndex)
     }, [])
 
     const handleFailedUpdate = (data: any, response_status?: number) => {
@@ -274,7 +274,7 @@ const Record = () => {
         }
     }, [])
 
-    const handleChangeAttribute = (newAttribute: Attribute, topLevelIndex: number, isSubattribute?: boolean, subIndex?: number) => {
+    const handleChangeAttribute = (newAttribute: Attribute, topLevelIndex: number, reviewStatus: string, isSubattribute?: boolean, subIndex?: number) => {
         if (locked) return true
         // const rightNow = Date.now();
 
@@ -292,6 +292,7 @@ const Record = () => {
         if (!isSubattribute) {
             setRecordData(tempRecordData => ({
                 ...tempRecordData,
+                review_status: reviewStatus || tempRecordData.review_status,
                 attributesList: tempRecordData.attributesList.map((tempAttribute, idx) =>
                     topLevelIndex === idx ? { 
                         ...tempAttribute, 
@@ -311,6 +312,7 @@ const Record = () => {
         } else {
             setRecordData(tempRecordData => ({
                 ...tempRecordData,
+                review_status: reviewStatus || tempRecordData.review_status,
                 attributesList: tempRecordData.attributesList.map((tempAttribute, idx) =>
                     topLevelIndex === idx ? { 
                         ...tempAttribute,
@@ -511,6 +513,7 @@ const Record = () => {
                     forceEditMode={forceEditMode}
                     handleSuccessfulAttributeUpdate={handleSuccessfulAttributeUpdate}
                     showError={showError}
+                    reviewStatus={recordData.review_status || ''}
                 />
             </Box>
             <Bottombar

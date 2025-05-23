@@ -84,6 +84,7 @@ const AttributeRow = React.memo((props: AttributeRowProps) => {
         v, 
         idx, 
         forceOpenSubtable,
+        reviewStatus,
         ...childProps
     } = props;
 
@@ -133,6 +134,7 @@ const AttributeRow = React.memo((props: AttributeRowProps) => {
             topLevelIndex: idx,
             subIndex: null,
             v: newV,
+            review_status: resp?.review_status,
         }
         handleSuccessfulAttributeUpdate(data)
     }
@@ -148,10 +150,10 @@ const AttributeRow = React.memo((props: AttributeRowProps) => {
     const handleUpdateRecord = (cleanFields: boolean = true) => {
         if (locked) return
         const body: {
-            data: { key: string; idx: number; v: any };
-            type: "attribute";
+            data: { key: string; idx: number; v: any, review_status: string };
+            type: string;
             fieldToClean: any;
-          } = { data: { key: k, idx: idx, v: v}, type: "attribute", fieldToClean: null }
+          } = { data: { key: k, idx: idx, v: v, review_status: reviewStatus}, type: "attribute", fieldToClean: null }
         if (cleanFields) {
             const fieldToClean = {
                 topLevelIndex: idx,
@@ -464,6 +466,7 @@ const AttributeRow = React.memo((props: AttributeRowProps) => {
                 topLevelKey={k}
                 open={openSubtable}
                 record_id={record_id}
+                reviewStatus={reviewStatus}
                 {...childProps}
             />
         }
@@ -559,7 +562,8 @@ const SubattributeRow = React.memo((props: SubattributeRowProps) => {
         record_id,
         insertField,
         deleteField,
-        forceEditMode
+        forceEditMode,
+        reviewStatus
     } = props;
 
     const [ editMode, setEditMode ] = useState(false);
@@ -599,10 +603,10 @@ const SubattributeRow = React.memo((props: SubattributeRowProps) => {
     const handleUpdateRecord = (cleanFields: boolean = true) => {
         if (locked) return
         const body: {
-            data: { key: string; idx: number; v: any, isSubattribute?: boolean, subIndex?: number };
-            type: "attribute";
+            data: { key: string; idx: number; v: any, review_status?: string, isSubattribute?: boolean, subIndex?: number };
+            type: string;
             fieldToClean: any;
-          } = { data: { key: k, idx: topLevelIdx, v: v, isSubattribute: true, subIndex: idx}, type: "attribute", fieldToClean: null }
+          } = { data: { key: k, idx: topLevelIdx, v: v, review_status: reviewStatus, isSubattribute: true, subIndex: idx}, type: "attribute", fieldToClean: null }
         if (cleanFields) {
             const fieldToClean = {
                 topLevelIndex: topLevelIdx,
