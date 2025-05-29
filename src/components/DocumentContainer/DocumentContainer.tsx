@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import { Grid, Box, IconButton, Alert, Tooltip } from '@mui/material';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { ImageCropper } from '../ImageCropper/ImageCropper';
 import { useKeyDown } from '../../util';
 import AttributesTable from '../RecordAttributesTable/RecordAttributesTable';
@@ -12,7 +11,8 @@ import { DocumentContainerProps } from '../../types';
 import { DocumentContainerStyles as styles } from '../../styles';
 import Switch from '@mui/material/Switch';
 
-const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, handleUpdateRecord, locked, recordSchema }: DocumentContainerProps) => {
+const DocumentContainer = ({ imageFiles, attributesList, ...attributeTableProps }: DocumentContainerProps) => {
+
     const [imgIndex, setImgIndex] = useState(0);
     const [displayPoints, setDisplayPoints] = useState<number[][] | null>(null);
     const [displayKeyIndex, setDisplayKeyIndex] = useState(-1);
@@ -245,7 +245,7 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
     useKeyDown("ArrowUp", shiftTabCallback);
     useKeyDown("ArrowDown", tabCallback);
 
-    const handleClickField = (key: string, normalized_vertices: number[][] | null, primaryIndex: number, isSubattribute: boolean, subattributeIdx: number | null) => {
+    const handleClickField = React.useCallback((key: string, normalized_vertices: number[][] | null, primaryIndex: number, isSubattribute: boolean, subattributeIdx: number | null) => {
         if (!key || (!isSubattribute && primaryIndex === displayKeyIndex) || (isSubattribute && primaryIndex === displayKeyIndex && subattributeIdx === displayKeySubattributeIndex)) {
             setDisplayPoints(null);
             setDisplayKeyIndex(-1);
@@ -274,7 +274,7 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
                 setDisplayPoints(null);
             }
         }
-    }
+    }, [imageFiles])
 
     const scrollToAttribute = (boxId: string, heightId: string, top: number) => {
         try{
@@ -367,15 +367,12 @@ const DocumentContainer = ({ imageFiles, attributesList, handleChangeValue, hand
                                 <AttributesTable 
                                     attributesList={attributesList}
                                     handleClickField={handleClickField}
-                                    handleChangeValue={handleChangeValue}
                                     fullscreen={fullscreen}
                                     forceOpenSubtable={forceOpenSubtable}
                                     displayKeyIndex={displayKeyIndex}
                                     displayKeySubattributeIndex={displayKeySubattributeIndex}
-                                    handleUpdateRecord={() => handleUpdateRecord(autoCleanFields)}
-                                    locked={locked}
                                     showRawValues={showRawValues}
-                                    recordSchema={recordSchema || {}}
+                                    {...attributeTableProps}
                                 />
                             }
                         </Box>

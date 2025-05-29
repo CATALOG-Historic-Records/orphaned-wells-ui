@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
+import React, { useState, useEffect, MouseEvent } from 'react';
+import { useParams } from "react-router-dom";
+import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Menu, MenuItem } from '@mui/material';
 import { Box, TextField, Collapse, Typography, IconButton, Badge, Tooltip, Stack } from '@mui/material';
-import { formatConfidence, useKeyDown, useOutsideClick, formatAttributeValue, formatDateTime } from '../../util';
+
+import { updateRecord } from '../../services/app.service';
+import { formatConfidence, useKeyDown, useOutsideClick, formatAttributeValue, formatDateTime, callAPI } from '../../util';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Attribute, RecordAttributesTableProps } from '../../types';
 import { styles } from '../../styles';
 
@@ -32,6 +36,7 @@ const AttributesTable = (props: AttributesTableProps) => {
         handleClickField('', null, -1, false, null);
     }
     const ref = useOutsideClick(handleClickOutside);
+    const params = useParams<{ id: string }>();
 
     return (
         <TableContainer id="table-container" sx={styles.fieldsTable}>
@@ -44,6 +49,7 @@ const AttributesTable = (props: AttributesTableProps) => {
                             <TableCell sx={styles.headerRow}>Raw Value</TableCell>
                         }
                         <TableCell sx={styles.headerRow} align='right'>Confidence</TableCell>
+                        <TableCell sx={styles.headerRow} align='right'></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody ref={ref}>
@@ -53,6 +59,8 @@ const AttributesTable = (props: AttributesTableProps) => {
                             k={v.key}
                             v={v}
                             idx={idx}
+                            record_id={params.id}
+                            handleClickOutside={handleClickOutside}
                             {...childProps}
                         />
                     ))}
@@ -67,15 +75,19 @@ interface AttributeRowProps extends RecordAttributesTableProps {
     v: Attribute;
     idx: number;
     forceOpenSubtable: number | null;
+    record_id?: string;
+    handleClickOutside: () => void;
 }
 
 
-const AttributeRow = (props: AttributeRowProps) => { 
+const AttributeRow = React.memo((props: AttributeRowProps) => {
     const { 
         k, 
         v, 
         idx, 
         forceOpenSubtable,
+        reviewStatus,
+        handleClickOutside,
         ...childProps
     } = props;
 
@@ -83,17 +95,41 @@ const AttributeRow = (props: AttributeRowProps) => {
         handleClickField,
         handleChangeValue,
         displayKeyIndex,
-        handleUpdateRecord,
         displayKeySubattributeIndex,
         locked,
         showRawValues,
-        recordSchema
+        recordSchema,
+        insertField,
+        forceEditMode,
+        handleSuccessfulAttributeUpdate,
+        record_id,
+        showError,
+        deleteField
     } = childProps;
     
     const [ editMode, setEditMode ] = useState(false);
     const [ openSubtable, setOpenSubtable ] = useState(true);
     const [ isSelected, setIsSelected ] = useState(false);
-    const [ lastSavedValue, setLastSavedValue ] = useState(v.value)
+    const [ lastSavedValue, setLastSavedValue ] = useState(v.value);
+    const [ menuAnchor, setMenuAnchor ] = useState<null | HTMLElement>(null);
+    const [ showActions, setShowActions ] = useState(false);
+    const [ childFields, setChildFields ] = useState<string[]>([]);
+
+    const allowMultiple = recordSchema[k]?.occurrence?.toLowerCase().includes('multiple');
+    const isParent = recordSchema[k]?.google_data_type?.toLowerCase() === 'parent';
+
+    useEffect(() => {
+        const tempChildFields = [];
+        if (isParent) {
+            let recordKeys = Object.keys(recordSchema);
+            for (let each of recordKeys) {
+                if (each.includes(`${k}::`)) {
+                    tempChildFields.push(each);
+                }
+            }
+            setChildFields(tempChildFields);
+        }
+    }, [v])
 
     useEffect(() => {
         if (idx === displayKeyIndex && (displayKeySubattributeIndex === null || displayKeySubattributeIndex === undefined)) setIsSelected(true);
@@ -107,6 +143,49 @@ const AttributeRow = (props: AttributeRowProps) => {
         if (v.subattributes) setOpenSubtable(!openSubtable)
         e.stopPropagation();
         handleClickField(k, v.normalized_vertices, idx, false, null);
+    }
+
+    const handleSuccess = (resp: any) => {
+        const newV = resp?.["attributesList."+idx];
+        const data: any = {
+            isSubattribute: false,
+            topLevelIndex: idx,
+            subIndex: null,
+            v: newV,
+            review_status: resp?.review_status,
+        }
+        handleSuccessfulAttributeUpdate(data)
+    }
+
+    const handleFailedUpdate = (data: any, response_status?: number) => {
+        if (response_status === 403) {
+            showError(`${data}.`);
+        } else {
+            console.error(`error updating attribute ${k}: ${data}`);
+        }
+    }
+
+    const handleUpdateRecord = (cleanFields: boolean = true) => {
+        if (locked) return
+        const body: {
+            data: { key: string; idx: number; v: any, review_status: string };
+            type: string;
+            fieldToClean: any;
+          } = { data: { key: k, idx: idx, v: v, review_status: reviewStatus}, type: "attribute", fieldToClean: null }
+        if (cleanFields) {
+            const fieldToClean = {
+                topLevelIndex: idx,
+                isSubattribute: false,
+                subIndex: null
+            }
+            body['fieldToClean'] = fieldToClean;
+        }
+        callAPI(
+            updateRecord,
+            [record_id, body],
+            handleSuccess,
+            handleFailedUpdate
+        );
     }
 
     useKeyDown("Enter", () => {
@@ -138,6 +217,16 @@ const AttributeRow = (props: AttributeRowProps) => {
         if (forceOpenSubtable === idx) setOpenSubtable(true);
     }, [forceOpenSubtable]);
 
+    useEffect(() => {
+        if (forceEditMode[0] === idx && forceEditMode[1] === -1) {
+            makeEditable();
+            handleClickField(k, v.normalized_vertices, idx, false, null);
+        } else if (forceEditMode[0] !== -1) {
+            setIsSelected(false);
+            setEditMode(false);
+        }
+    }, [forceEditMode]);
+
     const handleDoubleClick = () => {
         makeEditable()
     }
@@ -164,7 +253,7 @@ const AttributeRow = (props: AttributeRowProps) => {
     const finishEditing = () => {
         if (v.value !== lastSavedValue) {
             handleUpdateRecord();
-            setLastSavedValue(v.value)
+            setLastSavedValue(v.value);
         }
         setEditMode(false);
     }
@@ -182,16 +271,46 @@ const AttributeRow = (props: AttributeRowProps) => {
     }
 
     const showEditedValue = () => {
-        if (v.cleaned && v.edited && v.lastUpdated && v.last_cleaned) {
-            // only show if it's been cleaned since last update
-            if ((v.lastUpdated/1000) < v.last_cleaned) return true
+        if (v.edited && v.uncleaned_value) {
+            return true
         }
         return false
     }
 
+    const handleClickShowActions = (event: MouseEvent<HTMLElement>) => {
+        event.stopPropagation();
+        setShowActions(!showActions);
+        setMenuAnchor(event.currentTarget);
+    }
+
+    const handleClickInsertField = () => {
+        setShowActions(false);
+        setMenuAnchor(null);
+        handleClickOutside();
+        insertField(k, idx, false);
+    }
+
+    const handleClickDeleteField = () => {
+        setShowActions(false);
+        setMenuAnchor(null);
+        handleClickOutside();
+        deleteField(idx, false);
+    }
+
+    const handleClickAddChildField = (childField: string) => {
+        // console.log(`add child field: ${childField}`)
+        const childKey = childField.replace(`${k}::`, '');
+        let subIdx = v.subattributes?.length || 0;
+        subIdx -= 1;
+        setMenuAnchor(null);
+        setShowActions(false);
+        handleClickOutside();
+        insertField(childKey, idx, true, subIdx, k);
+    }
+
     return (
     <>
-        <TableRow id={`${k}::${idx}`} sx={(isSelected && !v.subattributes) ? {backgroundColor: "#EDEDED"} : {}} onClick={handleClickInside}>
+        <TableRow id={`${k}::${idx}`} sx={(isSelected && !isParent) ? {backgroundColor: "#EDEDED"} : {}} onClick={handleClickInside}>
             <TableCell sx={styles.fieldKey}>
                 <span>
                     {k}
@@ -201,7 +320,6 @@ const AttributeRow = (props: AttributeRowProps) => {
                     <IconButton
                         aria-label="expand row"
                         size="small"
-                        // onClick={() => setOpenSubtable(!openSubtable)}
                         sx={styles.rowIconButton}
                     >
                         {openSubtable ? <KeyboardArrowUpIcon sx={styles.rowIcon}/> : <KeyboardArrowDownIcon sx={styles.rowIcon}/>}
@@ -209,7 +327,7 @@ const AttributeRow = (props: AttributeRowProps) => {
                 }
             </TableCell>
             { // TODO: add styling to parent attribute if subattributes have errors
-                v.subattributes ? 
+                isParent ? 
                 <TableCell></TableCell> 
                 :
                 <TableCell onKeyDown={handleKeyDown}>
@@ -274,7 +392,7 @@ const AttributeRow = (props: AttributeRowProps) => {
                                     </Typography>
                                 }
                                 {
-                                    (v.cleaned || v.cleaning_error) &&
+                                    (v.cleaned || v.cleaning_error) && (!v.user_added) &&
                                     <Typography noWrap component={'p'} sx={styles.ocrRawText} onClick={(e) => e.stopPropagation()}>
                                         OCR Raw Value: {v.raw_text}
                                     </Typography>
@@ -294,6 +412,22 @@ const AttributeRow = (props: AttributeRowProps) => {
             }
             <TableCell align="right" id={v.key+'_confidence'}>
                 {
+                    v.user_added ? (
+                        <Tooltip title={(v.lastUpdated) ? `Last updated ${formatDateTime(v.lastUpdated)} by ${v.lastUpdatedBy || 'unknown'}` : ''}>
+                            <p style={{padding:0, margin:0}}>
+                                <Badge
+                                    variant="dot"
+                                    sx={{
+                                    "& .MuiBadge-badge": {
+                                        color: "#2196F3",
+                                        backgroundColor: "#2196F3"
+                                    }
+                                    }}
+                                /> 
+                                &nbsp; Added
+                            </p> 
+                        </Tooltip>
+                    ) :
                     v.edited ? 
                     (
                         <Tooltip title={(v.lastUpdated) ? `Last updated ${formatDateTime(v.lastUpdated)} by ${v.lastUpdatedBy || 'unknown'}` : ''}>
@@ -337,6 +471,35 @@ const AttributeRow = (props: AttributeRowProps) => {
                     </p>
                 }
             </TableCell>
+            <TableCell>{(allowMultiple || isParent) ? (
+                <IconButton size='small' onClick={handleClickShowActions}>
+                    <MoreVertIcon/>
+                </IconButton>
+            ) : null}</TableCell> 
+            <Menu
+                id="actions"
+                anchorEl={menuAnchor}
+                open={showActions}
+                onClose={() => setShowActions(false)}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {allowMultiple && 
+                    <MenuItem onClick={handleClickInsertField}>Add another '{k}'</MenuItem>
+                }
+                {
+                    childFields.map((childField) => (
+                        <MenuItem 
+                            key={childField} 
+                            onClick={() => handleClickAddChildField(childField)}
+                        >
+                            Add child field '{childField.replace(`${k}::`, '')}'
+                        </MenuItem>
+                    ))
+                }
+                {v.user_added && 
+                    <MenuItem onClick={handleClickDeleteField}>Delete this '{k}'</MenuItem>
+                }
+            </Menu>
         </TableRow>
         {
             v.subattributes &&
@@ -345,18 +508,23 @@ const AttributeRow = (props: AttributeRowProps) => {
                 topLevelIdx={idx} 
                 topLevelKey={k}
                 open={openSubtable}
+                record_id={record_id}
+                reviewStatus={reviewStatus}
+                handleClickOutside={handleClickOutside}
                 {...childProps}
             />
         }
     </>
     )
-}
+})
 
 interface SubattributesTableProps extends RecordAttributesTableProps {
     attributesList: Attribute[];
     open: boolean;
     topLevelIdx: number;
     topLevelKey: string;
+    record_id?: string;
+    handleClickOutside: () => void;
 }
 
 const SubattributesTable = (props: SubattributesTableProps) => {
@@ -388,6 +556,7 @@ const SubattributesTable = (props: SubattributesTableProps) => {
                             <TableCell sx={styles.headerRow}>Raw Value</TableCell>
                         }
                         <TableCell sx={styles.headerRow}>Confidence</TableCell>
+                        <TableCell sx={styles.headerRow}></TableCell>
                     </TableRow>
                     </TableHead>
                     <TableBody>
@@ -416,9 +585,11 @@ interface SubattributeRowProps extends RecordAttributesTableProps {
     topLevelIdx: number;
     idx: number;
     topLevelKey: string;
+    record_id?: string;
+    handleClickOutside: () => void;
 }
 
-const SubattributeRow = (props: SubattributeRowProps) => { 
+const SubattributeRow = React.memo((props: SubattributeRowProps) => {
     const { 
         k, 
         v,
@@ -427,18 +598,87 @@ const SubattributeRow = (props: SubattributeRowProps) => {
         topLevelIdx,
         displayKeyIndex,
         displayKeySubattributeIndex,
-        handleUpdateRecord,
         idx,
         locked,
         showRawValues,
         recordSchema,
-        topLevelKey
+        topLevelKey,
+        showError,
+        handleSuccessfulAttributeUpdate,
+        record_id,
+        insertField,
+        deleteField,
+        forceEditMode,
+        reviewStatus,
+        handleClickOutside
     } = props;
 
     const [ editMode, setEditMode ] = useState(false);
     const [ isSelected, setIsSelected ] = useState(false);
     const [ lastSavedValue, setLastSavedValue ] = useState(v.value)
+    const [ menuAnchor, setMenuAnchor ] = useState<null | HTMLElement>(null);
+    const [showActions, setShowActions] = useState(false);
+
     const schemaKey = `${topLevelKey}::${k}`
+    const allowMultiple = recordSchema[schemaKey]?.occurrence?.toLowerCase().includes('multiple');
+
+    const handleSuccess = (resp: any) => {
+        const newV = resp?.[`attributesList.${topLevelIdx}.subattributes.${idx}`];
+        const data: any = {
+            isSubattribute: true,
+            topLevelIndex: topLevelIdx,
+            subIndex: idx,
+            v: newV,
+        }
+        handleSuccessfulAttributeUpdate(data)
+    }
+
+    const handleFailedUpdate = (data: any, response_status?: number) => {
+        if (response_status === 403) {
+            showError(`${data}.`);
+        } else {
+            console.error(`error updating attribute ${k}: ${data}`);
+        }
+    }
+
+    const handleClickShowActions = (event: MouseEvent<HTMLElement>) => {
+        event.stopPropagation();
+        setShowActions(!showActions);
+        setMenuAnchor(event.currentTarget);
+    }
+
+    const handleUpdateRecord = (cleanFields: boolean = true) => {
+        if (locked) return
+        const body: {
+            data: { key: string; idx: number; v: any, review_status?: string, isSubattribute?: boolean, subIndex?: number };
+            type: string;
+            fieldToClean: any;
+          } = { data: { key: k, idx: topLevelIdx, v: v, review_status: reviewStatus, isSubattribute: true, subIndex: idx}, type: "attribute", fieldToClean: null }
+        if (cleanFields) {
+            const fieldToClean = {
+                topLevelIndex: topLevelIdx,
+                isSubattribute: true,
+                subIndex: idx
+            }
+            body['fieldToClean'] = fieldToClean
+        }
+        callAPI(
+            updateRecord,
+            [record_id, body],
+            handleSuccess,
+            handleFailedUpdate
+        );
+    }
+
+    useEffect(() => {
+        if (forceEditMode[0] === topLevelIdx && forceEditMode[1] === idx) {
+            makeEditable();
+            handleClickField(k, v.normalized_vertices, topLevelIdx, true, idx);
+        } else if (forceEditMode[0] !== -1) {
+            finishEditing();
+            setIsSelected(false);
+        }
+    }, [forceEditMode]);
 
     useEffect(() => {
         if (displayKeyIndex === topLevelIdx && idx === displayKeySubattributeIndex) {
@@ -532,6 +772,20 @@ const SubattributeRow = (props: SubattributeRowProps) => {
         return false
     }
 
+    const handleClickInsertField = () => {
+        setShowActions(false);
+        setMenuAnchor(null);
+        handleClickOutside();
+        insertField(k, topLevelIdx, true, idx, topLevelKey);
+    }
+
+    const handleClickDeleteField = () => {
+        setShowActions(false);
+        setMenuAnchor(null);
+        handleClickOutside();
+        deleteField(topLevelIdx, true, idx);
+    }
+
     return (
         <TableRow 
             key={k} 
@@ -621,8 +875,25 @@ const SubattributeRow = (props: SubattributeRowProps) => {
                 </TableCell>
             }
             <TableCell>{formatConfidence(v.confidence)}</TableCell>
+            <TableCell>{allowMultiple ? (
+                <IconButton size='small' onClick={handleClickShowActions}>
+                    <MoreVertIcon/>
+                </IconButton>
+            ) : null}</TableCell> 
+            <Menu
+                id="actions"
+                anchorEl={menuAnchor}
+                open={showActions}
+                onClose={() => setShowActions(false)}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <MenuItem onClick={handleClickInsertField}>Add another '{k}'</MenuItem>
+                {v.user_added && 
+                    <MenuItem onClick={handleClickDeleteField}>Delete this '{k}'</MenuItem>
+                }
+            </Menu>
         </TableRow>
     )
-}
+})
 
 export default AttributesTable;

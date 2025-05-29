@@ -87,6 +87,8 @@ export interface Attribute {
     lastUpdated?: number; // timestamp in milliseconds
     lastUpdatedBy?: string;
     last_cleaned?: number; // timestamp in seconds
+    user_added?: boolean;
+    topLevelAttribute?: string;
 }
 
 export interface Processor {
@@ -163,10 +165,15 @@ export interface RecordAttributesTableProps {
     fullscreen: string | null;
     displayKeyIndex: number;
     displayKeySubattributeIndex: number | null;
-    handleUpdateRecord: (...args: any[]) => void;
     locked?: boolean;
     showRawValues?: boolean;
     recordSchema: RecordSchema;
+    forceEditMode: number[];
+    insertField: (k: string, topLevelIndex: number, isSubattribute: boolean, subIndex?: number, parentAttribute?: string) => void;
+    handleSuccessfulAttributeUpdate: (data: any) => void;
+    showError: (errorMessage: string) => void;
+    deleteField: (topLevelIndex: number, isSubattribute?: boolean, subIndex?: number) => void;
+    reviewStatus: string;
 }
 
 export interface RecordsTableProps {
@@ -252,9 +259,14 @@ export interface DocumentContainerProps {
     imageFiles: string[];
     attributesList: any[];
     handleChangeValue: handleChangeValueSignature;
-    handleUpdateRecord: (...args: any[]) => void;
     locked?: boolean;
     recordSchema: RecordSchema;
+    forceEditMode: number[];
+    insertField: (k: string, topLevelIndex: number, isSubattribute: boolean, subIndex?: number, parentAttribute?: string) => void;
+    handleSuccessfulAttributeUpdate: (data: any) => void;
+    showError: (errorMessage: string) => void;
+    deleteField: (topLevelIndex: number, isSubattribute?: boolean, subIndex?: number) => void;
+    reviewStatus: string;
 }
 
 export interface ColumnSelectDialogProps {
