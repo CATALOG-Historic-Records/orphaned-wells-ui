@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { useParams, useNavigate, redirect } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getRecordData, updateRecord, deleteRecord, cleanRecords } from '../../services/app.service';
 import { callAPI, useKeyDown } from '../../util';
 import Subheader from '../../components/Subheader/Subheader';
@@ -8,7 +8,7 @@ import Bottombar from '../../components/BottomBar/BottomBar';
 import DocumentContainer from '../../components/DocumentContainer/DocumentContainer';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import ErrorBar from '../../components/ErrorBar/ErrorBar';
-import { RecordData, handleChangeValueSignature, PreviousPages, SubheaderActions, RecordSchema } from '../../types';
+import { RecordData, handleChangeValueSignature, PreviousPages, SubheaderActions, RecordSchema, Attribute } from '../../types';
 import { useUserContext } from '../../usercontext';
 
 const Record = () => {
@@ -20,9 +20,9 @@ const Record = () => {
     const [previousPages, setPreviousPages] = useState<PreviousPages>({ "Projects": () => navigate("/projects") });
     const [errorMsg, setErrorMsg] = useState<string | null>("");
     const [showResetPrompt, setShowResetPrompt] = useState(false);
-    const [ lastUpdatedField, setLastUpdatedField ] = useState<any>()
     const [ subheaderActions, setSubheaderActions ] = useState<SubheaderActions>()
     const [ recordSchema, setRecordSchema ] = useState<RecordSchema>()
+    const [ forceEditMode, setForceEditMode ] = useState<number[]>([-1, -1])
     const [locked, setLocked] = useState(false)
     const params = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -113,6 +113,17 @@ const Record = () => {
         setRecordName(event.target.value);
     }
 
+    const handleUpdateRecord = (newRecordData: RecordData) => {
+        if (locked) return
+        let body = { data: newRecordData, type: "attributesList" }
+        callAPI(
+            updateRecord,
+            [params.id, body],
+            handleSuccessfulDeletion,
+            handleFailedUpdate
+        );
+    }
+
     const handleUpdateRecordName = () => {
         if (locked) return
         setOpenUpdateNameModal(false);
@@ -124,74 +135,263 @@ const Record = () => {
         );
     }
 
-    const handleUpdateRecord = (cleanFields: boolean = true) => {
-        if (locked) return
-        let body = { data: recordData, type: "attributesList", fieldToClean: null }
-        if (cleanFields) body['fieldToClean'] = lastUpdatedField
-        callAPI(
-            updateRecord,
-            [params.id, body],
-            handleSuccessfulAttributeUpdate,
-            handleFailedUpdate
-        );
-    }
+    const handleSuccessfulDeletion = (data: any) => {}
 
-    const handleSuccessfulAttributeUpdate = (data: any) => {
-        let tempRecordData = { ...recordData } as RecordData;
-        tempRecordData["attributesList"] = data["attributesList"]
-        if (data["review_status"]) tempRecordData["review_status"] = data["review_status"]
-        setLastUpdatedField(undefined)
-        setRecordData(tempRecordData);
-    }
+    const handleSuccessfulAttributeUpdate = React.useCallback((data: any) => {
+        const { isSubattribute, topLevelIndex, subIndex, v, review_status } = data;
+        handleChangeAttribute(v, topLevelIndex, review_status, isSubattribute, subIndex)
+    }, [])
 
     const handleFailedUpdate = (data: any, response_status?: number) => {
         if (response_status === 403) {
-            setErrorMsg(`${data}.`);
+            showError(`${data}.`);
         } else {
             console.error('error updating record data: ', data);
         }
     }
 
-    const handleChangeValue: handleChangeValueSignature = (event, topLevelIndex, isSubattribute, subIndex) => {
-        if (locked) return true
-        let tempRecordData = { ...recordData };
-        let tempAttributesList = [...tempRecordData.attributesList];
-        let tempAttribute: any;
-        let rightNow = Date.now();
-        let value;
-        if (isSubattribute) {
-            value = event.target.value;
-            tempAttribute = tempAttributesList[topLevelIndex];
-            let tempSubattributesList = [...tempAttribute["subattributes"]];
-            let tempSubattribute = tempSubattributesList[subIndex!];
-            tempSubattribute.value = value;
-            tempAttribute.edited = true;
-            tempAttribute.lastUpdated = rightNow;
-            tempAttribute.lastUpdatedBy = userEmail
-            tempSubattribute.edited = true;
-            tempSubattribute.lastUpdated = rightNow;
-            tempSubattribute.lastUpdatedBy = userEmail
-            tempAttribute["subattributes"] = tempSubattributesList;
+    const showError = React.useCallback((errorMessage: string) => {
+        setErrorMsg(errorMessage);
+    }, [])
+
+    const insertField = React.useCallback((k: string, topLevelIndex: number, isSubattribute?: boolean, subIndex?: number, parentAttribute?: string) => {
+        if (isSubattribute && subIndex !== undefined) {
+            const newSubIndex = subIndex + 1;
+            const newSubField = {
+                "key": k,
+                "ai_confidence": null,
+                "confidence": null,
+                "raw_text": null,
+                "text_value": null,
+                "value": "",
+                "normalized_vertices": null,
+                "normalized_value": null,
+                "subattributes": null,
+                "isSubattribute": true,
+                "edited": false,
+                "page": null,
+                "user_added": true,
+                "topLevelAttribute": parentAttribute,
+            }
+            setRecordData(tempRecordData => {
+                const newAttributesList = tempRecordData.attributesList.map((attribute, i) => {
+                    if (i !== topLevelIndex) return attribute;
+
+                    const currentSubattributes = attribute.subattributes;
+                    if (!attribute.subattributes) {
+                        return {
+                            ...attribute,
+                            subattributes: [newSubField],
+                        };
+                    } else {
+                        const newSubattributes = [
+                            ...currentSubattributes.slice(0, newSubIndex),
+                            newSubField,
+                            ...currentSubattributes.slice(newSubIndex),
+                          ];
+                          return {
+                            ...attribute,
+                            subattributes: newSubattributes,
+                          };
+                    }
+                });
+                let newRecordData: RecordData;
+                if (tempRecordData.review_status === 'unreviewed')
+                    newRecordData = { ...tempRecordData, review_status: 'incomplete', attributesList: newAttributesList };
+                 else
+                    newRecordData = { ...tempRecordData, attributesList: newAttributesList };
+
+                handleUpdateRecord(newRecordData);
+                return newRecordData;
+            })
+            setTimeout(() => {
+                setForceEditMode([topLevelIndex, newSubIndex]);
+                setTimeout(() => {
+                    setForceEditMode([-1, -1]);
+                }, 0)
+            }, 0)
         } else {
-            tempAttribute = tempAttributesList[topLevelIndex];
-            value = event.target.value;
-            tempAttribute.value = value;
-            tempAttribute.edited = true;
-            tempAttribute.lastUpdated = rightNow;
-            tempAttribute.lastUpdatedBy = userEmail
+            const newIndex = topLevelIndex+1;
+            const newField = {
+                "key": k,
+                "ai_confidence": null,
+                "confidence": null,
+                "raw_text": null,
+                "text_value": null,
+                "value": "",
+                "normalized_vertices": null,
+                "normalized_value": null,
+                "subattributes": null,
+                "isSubattribute": false,
+                "edited": false,
+                "page": null,
+                "user_added": true,
+            }
+            setRecordData(tempRecordData => {
+                const newRecordData = {
+                    ...tempRecordData,
+                    attributesList: [
+                        ...tempRecordData.attributesList.slice(0, newIndex),
+                        newField,
+                        ...tempRecordData.attributesList.slice(newIndex),
+                    ]
+                }
+                handleUpdateRecord(newRecordData);
+                return newRecordData;
+            })
+            // force new field to be in edit mode (open text field)
+            // is there a better way to do this?
+            setTimeout(() => {
+                setForceEditMode([newIndex, -1]);
+                setTimeout(() => {
+                    setForceEditMode([-1, -1]);
+                }, 0)
+            }, 0)
         }
-        tempAttributesList[topLevelIndex] = tempAttribute;
-        tempRecordData.attributesList = tempAttributesList;
-        tempRecordData.lastUpdated = rightNow;
-        tempRecordData.lastUpdatedBy = userEmail;
-        let tempLastUpdatedField = {
-            topLevelIndex: topLevelIndex,
-            'isSubattribute': isSubattribute,
-            'subIndex': subIndex
+        
+    }, [])
+
+    const deleteField = React.useCallback((topLevelIndex: number, isSubattribute?: boolean, subIndex?: number) => {
+        if (isSubattribute) {
+            setRecordData(tempRecordData => {
+                const newAttributesList = tempRecordData.attributesList.map((attribute, idx) => {
+                    if (idx !== topLevelIndex) return attribute;
+                    else {
+                        return {
+                            ...attribute,
+                            subattributes: attribute.subattributes.filter((_: any, subidx: number) => subidx !== subIndex)
+                        }
+                    }
+                });
+                const newRecordData = { ...tempRecordData, attributesList: newAttributesList };
+                handleUpdateRecord(newRecordData);
+                return newRecordData;
+            })
+        } else {
+            setRecordData(tempRecordData => {
+                const newRecordData = {
+                    ...tempRecordData,
+                    attributesList: tempRecordData.attributesList.filter((_, i) => i !== topLevelIndex),
+                }
+                handleUpdateRecord(newRecordData);
+                return newRecordData;
+            })
         }
-        setLastUpdatedField(tempLastUpdatedField)
-        setRecordData(tempRecordData);
+    }, [])
+
+    const handleChangeAttribute = (newAttribute: Attribute, topLevelIndex: number, reviewStatus: string, isSubattribute?: boolean, subIndex?: number) => {
+        if (locked) return true
+        // const rightNow = Date.now();
+
+        const newValue = newAttribute.value;
+        const newNormalizedValue = newAttribute.normalized_value;
+        const new_uncleaned_value = newAttribute.uncleaned_value;
+        const new_cleaned = newAttribute.cleaned;
+        const new_cleaning_error = newAttribute.cleaning_error;
+        const new_edited = newAttribute.edited;
+        const new_lastUpdated = newAttribute.lastUpdated;
+        const new_lastUpdatedBy = newAttribute.lastUpdatedBy;
+        const new_last_cleaned = newAttribute.last_cleaned;
+        const topLevelAttribute = newAttribute.topLevelAttribute;
+
+        if (!isSubattribute) {
+            setRecordData(tempRecordData => ({
+                ...tempRecordData,
+                review_status: reviewStatus || tempRecordData.review_status,
+                attributesList: tempRecordData.attributesList.map((tempAttribute, idx) =>
+                    topLevelIndex === idx ? { 
+                        ...tempAttribute, 
+                        value: newValue,
+                        normalized_value: newNormalizedValue,
+                        cleaned: new_cleaned,
+                        cleaning_error: new_cleaning_error,
+                        uncleaned_value: new_uncleaned_value,
+                        edited: new_edited,
+                        lastUpdated: new_lastUpdated,
+                        lastUpdatedBy: new_lastUpdatedBy,
+                        last_cleaned: new_last_cleaned,
+                        // user_added: new_user_added,
+                    } : tempAttribute
+                )
+            }))
+        } else {
+            setRecordData(tempRecordData => ({
+                ...tempRecordData,
+                review_status: reviewStatus || tempRecordData.review_status,
+                attributesList: tempRecordData.attributesList.map((tempAttribute, idx) =>
+                    topLevelIndex === idx ? { 
+                        ...tempAttribute,
+                        subattributes: tempAttribute.subattributes.map((tempSubattribute: Attribute, subidx: number) => {
+                            if (subIndex === subidx) {
+                                return {
+                                    ...tempSubattribute,
+                                    value: newValue,
+                                    normalized_value: newNormalizedValue,
+                                    cleaned: new_cleaned,
+                                    cleaning_error: new_cleaning_error,
+                                    uncleaned_value: new_uncleaned_value,
+                                    edited: new_edited,
+                                    lastUpdated: new_lastUpdated,
+                                    lastUpdatedBy: new_lastUpdatedBy,
+                                    last_cleaned: new_last_cleaned,
+                                    topLevelAttribute: topLevelAttribute,
+                                }
+                            } else return tempSubattribute
+                            }
+                        )
+                    } : tempAttribute
+                )
+            }))
+        }
     }
+
+    const handleChangeValue: handleChangeValueSignature = React.useCallback((event, topLevelIndex, isSubattribute, subIndex) => {
+        if (locked) return true
+        let value = event.target.value;
+        let rightNow = Date.now();
+        if (!isSubattribute) {
+            setRecordData(tempRecordData => ({
+                ...tempRecordData,
+                lastUpdated: rightNow,
+                lastUpdatedBy: userEmail,
+                attributesList: tempRecordData.attributesList.map((tempAttribute, idx) =>
+                    topLevelIndex === idx ? { 
+                        ...tempAttribute, 
+                        value: value,
+                        edited: true,
+                        lastUpdated: rightNow,
+                        lastUpdatedBy: userEmail,
+                    } : tempAttribute
+                )
+            }))
+        } else {
+            setRecordData(tempRecordData => ({
+                ...tempRecordData,
+                lastUpdated: rightNow,
+                lastUpdatedBy: userEmail,
+                attributesList: tempRecordData.attributesList.map((tempAttribute, idx) =>
+                    topLevelIndex === idx ? { 
+                        ...tempAttribute, 
+                        edited: true,
+                        lastUpdated: rightNow,
+                        lastUpdatedBy: userEmail,
+                        subattributes: tempAttribute.subattributes.map((tempSubattribute: Attribute, subidx: number) => {
+                                if (subIndex === subidx) {
+                                    return {
+                                        ...tempSubattribute,
+                                        value: value,
+                                        edited: true,
+                                        lastUpdated: rightNow,
+                                        lastUpdatedBy: userEmail,
+                                    }
+                                } else return tempSubattribute
+                            }
+                        )
+                    } : tempAttribute
+                )
+            }))
+        }
+    }, [])
 
     const handleDeleteRecord = () => {
         setOpenDeleteModal(false);
@@ -311,9 +511,14 @@ const Record = () => {
                     imageFiles={recordData.img_urls}
                     attributesList={recordData.attributesList}
                     handleChangeValue={handleChangeValue}
-                    handleUpdateRecord={handleUpdateRecord}
                     locked={locked}
                     recordSchema={recordSchema || {}}
+                    insertField={insertField}
+                    deleteField={deleteField}
+                    forceEditMode={forceEditMode}
+                    handleSuccessfulAttributeUpdate={handleSuccessfulAttributeUpdate}
+                    showError={showError}
+                    reviewStatus={recordData.review_status || ''}
                 />
             </Box>
             <Bottombar
