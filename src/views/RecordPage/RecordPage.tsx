@@ -420,7 +420,7 @@ const Record = () => {
         handleUpdateReviewStatus("reviewed")
     }
 
-    useKeyDown("ArrowLeft", undefined, undefined, handleClickPrevious, undefined, true);
+    useKeyDown("ArrowLeft", undefined, undefined, handleClickPrevious, undefined, false);
     useKeyDown("ArrowRight", undefined, undefined, handleClickNext, handleClickMarkReviewed, true);
 
     const navigateToRecord = (data: any) => {

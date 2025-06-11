@@ -1,37 +1,19 @@
 ---
-title: Usage Guide
-sidebar_position: 2
+title: OGRRE UI Usage
+description: OGRRE UI usage
 ---
 
-import {ProjectExportImg, ProjectListImg, ProjectReportsImg, ProjectReviewImg, ProjectViewImg} from "./screenshots.jsx";
+import {ProjectExportImg, ProjectListImg, ProjectReportsImg, ProjectReviewImg, ProjectViewImg} from "../screenshots.jsx";
 
-# OGRRE Usage Guide
+# Overview
 
-OGRRE is a web-based graphical user interface.
-It should function well in any modern web browser.
+OGRRE provides a web-based graphical user interface (which should function well in any modern web browser)
+for uploading, reviewing, and editing [processed documents](processing.mdx). Note: in this page,
+the term 'OGRRE' is sometimes used as shorthand for the OGRRE User Interface.
 
-:::note
+## Workflow
 
-This guide describes how to use the web interface to review and edit
-values provided by a *processor* (see Terminology, below) for a set
-of documents. It is assumed that the document [processing](docai) has 
-already occurred, and the combination of scanned images and extracted
-data have been uploaded into OGRRE -- all these steps are not
-part of the OGRRE tool itself, and are currently performed by the
-CATALOG team (see [Introduction](intro.md)). For an overview of that
-process, see the [DocAI Processors](docai) page.
-of documents. It is assumed that the document [processing](docai) has 
-already occurred, and the combination of scanned images and extracted
-data have been uploaded into OGRRE -- all these steps are not
-part of the OGRRE tool itself, and are currently performed by the
-CATALOG team (see [Introduction](intro.md)). For an overview of that
-process, see the [DocAI Processors](docai) page.
-
-:::
-
-## Overview
-
-Below is a summary of the basic workflow for using OGRRE.
+Below is a summary of the basic workflow for using the OGRRE UI.
 
 ```mermaid
 graph LR;
@@ -63,11 +45,17 @@ Below are the terms used in the tool and throughout this guide.
 |Attribute|One digitized name and value from the document|
 |Confidence|The degree of certainty the tool (or human, if set manually) has in the predicted digitized attribute values|
 
-## Login
+# Login to OGRRE
 
 Navigate to the URL of the OGRRE deployment you are using, then
 login using your Google credentials.
 You will need to have been added by an administrator as a valid user of this deployed instance.
+
+# Upload documents
+
+<!-- Michael: TODO -->
+
+# Review records
 
 ## Choose a project
 

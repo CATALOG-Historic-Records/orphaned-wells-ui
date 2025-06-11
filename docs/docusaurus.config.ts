@@ -101,11 +101,11 @@ const config: Config = {
           items: [
             {
               label: 'Introduction',
-              to: '/docs/intro',
+              to: '/docs/about',
             },
             {
-              label: 'Guide',
-              to: '/docs/guide',
+              label: 'Usage',
+              to: '/docs/usage',
             },
           ],
         },
