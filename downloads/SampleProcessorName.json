@@ -1,0 +1,92 @@
+[
+    {
+        "page_order_sort": 1.0,
+        "name": "Oil",
+        "google_data_type": "Checkbox",
+        "occurrence": "Optional once",
+        "grouping": "Type of Well",
+        "database_data_type": "bool",
+        "cleaning_function": "clean_bool",
+        "model_enabled": "Yes"
+    },
+    {
+        "page_order_sort": 2.0,
+        "name": "Well",
+        "google_data_type": "Checkbox",
+        "occurrence": "Optional once",
+        "grouping": "Type of Well",
+        "database_data_type": "bool",
+        "cleaning_function": "clean_bool",
+        "model_enabled": "Yes"
+    },
+    {
+        "page_order_sort": 3.0,
+        "name": "Complete",
+        "google_data_type": "Checkbox",
+        "occurrence": "Optional once",
+        "grouping": "Type of Well",
+        "database_data_type": "bool",
+        "cleaning_function": "clean_bool",
+        "model_enabled": "Yes"
+    },
+    {
+        "page_order_sort": 4.0,
+        "name": "County",
+        "google_data_type": "Plain text",
+        "occurrence": "Optional once",
+        "grouping": "",
+        "database_data_type": "str",
+        "cleaning_function": null,
+        "model_enabled": "Yes"
+    },
+    {
+        "page_order_sort": 5.0,
+        "name": "Detail_Of_Plugging",
+        "google_data_type": "Parent",
+        "occurrence": "Optional multiple",
+        "grouping": null,
+        "database_data_type": "Table",
+        "cleaning_function": null,
+        "model_enabled": "Yes"
+    },
+    {
+        "page_order_sort": 6.0,
+        "name": "Detail_Of_Plugging::Filled_With",
+        "google_data_type": "Plain text",
+        "occurrence": "Optional once",
+        "grouping": null,
+        "database_data_type": "str",
+        "cleaning_function": null,
+        "model_enabled": "Yes"
+    },
+    {
+        "page_order_sort": 7.0,
+        "name": "Detail_Of_Plugging::From",
+        "google_data_type": "Plain text",
+        "occurrence": "Optional once",
+        "grouping": null,
+        "database_data_type": "float",
+        "cleaning_function": "string_to_float",
+        "model_enabled": "Yes"
+    },
+    {
+        "page_order_sort": 8.0,
+        "name": "Comments",
+        "google_data_type": "Plain text",
+        "occurrence": "Optional multiple",
+        "grouping": null,
+        "database_data_type": "str",
+        "cleaning_function": null,
+        "model_enabled": "No"
+    },
+    {
+        "page_order_sort": 9.0,
+        "name": "Surface_Size",
+        "google_data_type": "Plain text",
+        "occurrence": "Optional once",
+        "grouping": null,
+        "database_data_type": "float",
+        "cleaning_function": "convert_hole_size_to_decimal",
+        "model_enabled": "Yes"
+    }
+]
