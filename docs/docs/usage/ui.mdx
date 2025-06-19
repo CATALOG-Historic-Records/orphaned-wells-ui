@@ -3,7 +3,15 @@ title: OGRRE UI Usage
 description: OGRRE UI usage
 ---
 
-import {ProjectExportImg, ProjectListImg, ProjectReportsImg, ProjectReviewImg, ProjectViewImg} from "../screenshots.jsx";
+import {
+  ProjectExportImg,
+  ProjectListImg,
+  ProjectReportsImg,
+  ProjectReviewImg,
+  ProjectViewImg,
+  UploadRecordsModalImg,
+  UploadDirectoryImg
+} from "../screenshots.jsx";
 
 # Overview
 
@@ -45,17 +53,27 @@ Below are the terms used in the tool and throughout this guide.
 |Attribute|One digitized name and value from the document|
 |Confidence|The degree of certainty the tool (or human, if set manually) has in the predicted digitized attribute values|
 
-# Login to OGRRE
+## Login to OGRRE
 
 Navigate to the URL of the OGRRE deployment you are using, then
 login using your Google credentials.
 You will need to have been added by an administrator as a valid user of this deployed instance.
 
-# Upload documents
+## Upload documents
 
-<!-- Michael: TODO -->
+*To upload records, a user must have **team_lead** or **sys_admin** role.* \
+Navigate to the record group that you would like to upload documents to. Click on `Upload New Record(s)`. You will see a modal with the processor status and an upload box:
 
-# Review records
+<UploadRecordsModalImg/>
+
+If the processor is not deployed, click on `Deploy Processor`. It may take a couple minutes for the processor to deploy. \
+Once the processor is deployed, you will have the option to upload individual files or a directory of files. You can choose to run the cleaning functions defined in your processor schema when uploading the document(s) by clicking on the switch available. When uploading a directory, you also have the options to choose the amount of files to upload, and to prevent duplicates if you wish (this will query your database and remove any files already found in that record group from the upload list):
+
+<UploadDirectoryImg/>
+
+When ready, click `Upload` and the document processing will begin.
+
+## Review records
 
 ## Choose a project
 
@@ -139,8 +157,7 @@ A record can be in one of the following review statuses:
 
 ## Export records
 
-You can export all the record data in a project with the `Export Project` button
-on the **project view** page.
+You can export all the record data in a project with the `Export Project` button from any view containing the records table, including the **project** and **record group** page.
 
 <ProjectExportImg />
 
@@ -149,7 +166,7 @@ You can select attributes to include in the exported data.
 The *CSV* option will export the values from each record as a comma-separated values table, whereas
 the *JSON* option will export the values along with additional metadata about confidence
 as a JSON (JavaScript Object Notation) object. Either of these formats can be read easily
-using Python, and of course CSV is easily imported in Excel, Google Sheets, etc.
+using Python, and of course CSV is easily imported in Excel, Google Sheets, etc. Additionally, you can choose to export the document image files along with the extracted values.
 
 ## Exit / Sign out
 

@@ -24,7 +24,6 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
     const [errorMsg, setErrorMsg] = useState<string | null>(null)
     const dialogHeight = '85vh';
     const dialogWidth = '60vw';
-    const state = process.env.REACT_APP_STATE || "illinois";
 
     const descriptionElementRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
@@ -46,17 +45,9 @@ const NewRecordGroupDialog = ({ open, onClose, project_id }: NewRecordGroupDialo
 
     useEffect(() => {
         if (open) {
-            let state_code;
-            /*
-                TODO: create state code dictionary rather than using if statements here
-            */
-            if (state === "illinois") state_code = "IL"
-            else if (state === "colorado") state_code = "CO"
-            else if (state === "california") state_code = "CA"
-            else state_code = "IL"
             callAPI(
                 getProcessors,
-                [state_code],
+                [],
                 handleSuccessGetProcessors,
                 (e: Error) => console.error('error on getting processors ', e)
             );

@@ -39,7 +39,7 @@ export default function Home(): JSX.Element {
       <HomepageHeader />
       <main>
         <HomepageFeatures />
-        <div className={styles.buttons}>
+        <div className={styles.buttons} style={{marginBottom: 8}}>
         <Link className="button button--primary button--lg"
         to="/docs/about">Documentation</Link>
         </div>

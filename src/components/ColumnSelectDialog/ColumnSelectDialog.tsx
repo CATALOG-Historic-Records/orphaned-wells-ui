@@ -155,7 +155,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
                 sx: styles.dialogPaper
             }}
         >
-            <DialogTitle id="export-dialog-title">Export {location}</DialogTitle>
+            <DialogTitle id="export-dialog-title">Export {location.replace("_"," ")}</DialogTitle>
             <IconButton
                 aria-label="close"
                 onClick={handleClose}

@@ -14,8 +14,8 @@ export const getRecordGroups = (project_id: string) => {
     });
 };
 
-export const getProcessors = (state: string) => {
-    return fetch(BACKEND_URL + '/get_processors/'+state, {
+export const getProcessors = () => {
+    return fetch(BACKEND_URL + '/get_processors', {
         mode: 'cors',
         headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
     });
