@@ -54,6 +54,7 @@ const AttributesTable = (props: AttributesTableProps) => {
                 </TableHead>
                 <TableBody ref={ref}>
                     {attributesList.map((v: Attribute, idx: number) => (
+                        v &&
                         <AttributeRow 
                             key={`${v.key} ${idx}`}
                             k={v.key}
@@ -277,6 +278,12 @@ const AttributeRow = React.memo((props: AttributeRowProps) => {
         return false
     }
 
+    const showOCRRawValue = () => {
+        if (v.user_added) return false
+        else if (v.edited || v.cleaned) return true
+        return false
+    }
+
     const handleClickShowActions = (event: MouseEvent<HTMLElement>) => {
         event.stopPropagation();
         setShowActions(!showActions);
@@ -392,7 +399,7 @@ const AttributeRow = React.memo((props: AttributeRowProps) => {
                                     </Typography>
                                 }
                                 {
-                                    (v.cleaned || v.cleaning_error) && (!v.user_added) &&
+                                    showOCRRawValue() &&
                                     <Typography noWrap component={'p'} sx={styles.ocrRawText} onClick={(e) => e.stopPropagation()}>
                                         OCR Raw Value: {v.raw_text}
                                     </Typography>
@@ -765,9 +772,8 @@ const SubattributeRow = React.memo((props: SubattributeRowProps) => {
     }
 
     const showEditedValue = () => {
-        if (v.cleaned && v.edited && v.lastUpdated && v.last_cleaned) {
-            // only show if it's been cleaned since last update
-            if ((v.lastUpdated/1000) < v.last_cleaned) return true
+        if (v.edited && v.uncleaned_value) {
+            return true
         }
         return false
     }
