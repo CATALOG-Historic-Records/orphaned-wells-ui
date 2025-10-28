@@ -7,7 +7,7 @@ export const DEFAULT_FILTER_OPTIONS: {
 } = {
   review_status: {
       key: 'review_status',
-      displayName: "Review Status",   
+      displayName: "Review Status",
       type: "checkbox",
       operator: 'equals',
       options: [
@@ -20,7 +20,7 @@ export const DEFAULT_FILTER_OPTIONS: {
   },
   verification_status: {
     key: 'verification_status',
-    displayName: "Verification Status",   
+    displayName: "Verification Status",
     type: "checkbox",
     operator: 'equals',
     options: [
@@ -30,9 +30,21 @@ export const DEFAULT_FILTER_OPTIONS: {
     ],
     selectedOptions: ["unverified", "awaiting verification", "verified"]
   },
+  status: {
+    key: 'status',
+    displayName: "Digitization Status",
+    type: "checkbox",
+    operator: 'equals',
+    options: [
+        { name: "digitized", checked: true, value: "digitized" },
+        { name: "processing", checked: true, value: "processing" },
+        { name: "error", checked: true, value: "error" },
+    ],
+    selectedOptions: ["digitized", "processing", "error"]
+  },
   error_status: {
     key: 'error_status',
-    displayName: "Error Status",   
+    displayName: "Error Status",
     type: "checkbox",
     operator: 'equals',
     options: [
@@ -71,6 +83,40 @@ export const TABLE_ATTRIBUTES: {
   team: {
     displayNames: ["Record Name", "Date Uploaded", "API Number", "Notes", "Digitization Status", "Review Status"],
     keyNames: ["name", "dateCreated", "api_number", "notes", "status", "review_status"],
+  }
+}
+
+export const ISGS_TABLE_ATTRIBUTES: {
+  [key: string]: TableColumns;
+} = {
+  record_group: {
+      displayNames: ["Record Name", "Date Uploaded", "API Number", "Mean Confidence", "Lowest Confidence", "Notes", "Digitization Status", "Review Status"],
+      keyNames: ["name", "dateCreated", "api_number", "confidence_median", "confidence_lowest", "notes", "status", "review_status"],
+  },
+  project: {
+    displayNames: ["Record Name", "Record Group", "Date Uploaded", "API Number", "Notes", "Digitization Status", "Review Status"],
+    keyNames: ["name", "record_group", "dateCreated", "api_number", "notes", "status", "review_status"],
+  },
+  team: {
+    displayNames: ["Record Name", "Date Uploaded", "API Number", "Notes", "Digitization Status", "Review Status"],
+    keyNames: ["name", "dateCreated", "api_number", "notes", "status", "review_status"],
+  }
+}
+
+export const OSAGE_TABLE_ATTRIBUTES: {
+  [key: string]: TableColumns;
+} = {
+  record_group: {
+      displayNames: ["Record Name", "Date Uploaded", "Section", "Township", "Mean Confidence", "Lowest Confidence", "Notes", "Digitization Status", "Review Status"],
+      keyNames: ["name", "dateCreated", "Sec", "T", "confidence_median", "confidence_lowest", "notes", "status", "review_status"],
+  },
+  project: {
+    displayNames: ["Record Name", "Record Group", "Date Uploaded", "Section", "Township", "Notes", "Digitization Status", "Review Status"],
+    keyNames: ["name", "record_group", "dateCreated", "Sec", "T", "notes", "status", "review_status"],
+  },
+  team: {
+    displayNames: ["Record Name", "Date Uploaded", "Section", "Township", "Notes", "Digitization Status", "Review Status"],
+    keyNames: ["name", "dateCreated", "Sec", "T", "notes", "status", "review_status"],
   }
 }
 
