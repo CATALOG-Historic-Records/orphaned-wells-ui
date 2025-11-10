@@ -26,6 +26,8 @@ import { getRecords } from '../../services/app.service';
 import ColumnSelectDialog from '../ColumnSelectDialog/ColumnSelectDialog';
 import EmptyTable from '../EmptyTable/EmptyTable';
 import TableLoading from '../TableLoading/TableLoading';
+import PopupModal from '../PopupModal/PopupModal';
+import { useDownload } from '../../context/DownloadContext';
 
 const SORTABLE_COLUMNS = {
   dateCreated: "toplevel",
@@ -54,11 +56,23 @@ const RecordsTable = (props: RecordsTableProps) => {
   const [recordCount, setRecordCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(100);
+  const [showDownloadMessage, setShowDownloadMessage] = useState(false);
   const [filterBy, _setFilterBy] = useState<any[]>(
     JSON.parse(localStorage.getItem("appliedFilters") || '{}')[params.id || ""] || []
   );
   const [sorted, _setSorted] = useState(JSON.parse(localStorage.getItem("sorted") || '{}')[params.id || ""] || ['dateCreated', 1]
   );
+  const { isDownloading, estimatedTotalBytes, progress } = useDownload();
+
+  useEffect(() => {
+    if (isDownloading) {
+      setOpenColumnSelect(false);
+      // If downloda is bigger than 10mb
+      if ((estimatedTotalBytes || 0) > 10000000 && (progress || 0) < 0.01) setShowDownloadMessage(true);
+    } else {
+      setShowDownloadMessage(false);
+    }
+  }, [isDownloading])
 
   const setFilterBy = (newFilterBy: any) => {
     _setFilterBy(newFilterBy);
@@ -333,7 +347,7 @@ const RecordsTable = (props: RecordsTableProps) => {
           <Grid container>
             <Grid item sx={styles.topSectionLeft} xs={6}>
               <TableFilters applyFilters={handleApplyFilters} appliedFilters={filterBy} filter_options={filter_options} />
-              <Button onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon />}>
+              <Button onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon />} disabled={isDownloading}>
                 Export
               </Button>
             </Grid>
@@ -378,7 +392,7 @@ const RecordsTable = (props: RecordsTableProps) => {
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  rowsPerPageOptions={[10, 25, 50, 100, { label: 'All', value: -1 }]}
+                  rowsPerPageOptions={[10, 25, 50, 100, 250]}
                   colSpan={3}
                   count={recordCount}
                   rowsPerPage={pageSize}
@@ -404,16 +418,33 @@ const RecordsTable = (props: RecordsTableProps) => {
             open={showNotes}
             onClose={handleCloseNotesModal}
         />
-        <ColumnSelectDialog
-            open={openColumnSelect}
-            onClose={() => setOpenColumnSelect(false)}
-            location={location}
-            handleUpdate={handleUpdate}
-            _id={params.id}
-            appliedFilters={filterBy}
-            sortBy={sorted[0]}
-            sortAscending={sorted[1]}
-        />
+        {
+          openColumnSelect && !isDownloading && (
+            <ColumnSelectDialog
+              open={openColumnSelect}
+              onClose={() => setOpenColumnSelect(false)}
+              location={location}
+              handleUpdate={handleUpdate}
+              _id={params.id}
+              appliedFilters={filterBy}
+              sortBy={sorted[0]}
+              sortAscending={sorted[1]}
+          /> 
+        )}
+        {
+          <PopupModal
+            open={showDownloadMessage}
+            handleClose={() => setShowDownloadMessage(false)}
+            text="Your download is in progress — you can continue using the app while it completes. Please note: refreshing the page or closing this tab will cancel the download."
+            handleSave={() => setShowDownloadMessage(false)}
+            buttonText='Close'
+            buttonColor='primary'
+            buttonVariant='contained'
+            width={500}
+          />
+        }
+          
+        
       </TableContainer>
       {
         loading ? <TableLoading/> :
