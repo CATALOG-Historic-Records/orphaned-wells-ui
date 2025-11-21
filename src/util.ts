@@ -120,6 +120,60 @@ export const OSAGE_TABLE_ATTRIBUTES: {
   }
 }
 
+export const schemaOverviewColumns = [
+  {
+    key: "name",
+    displayName: "Processor Name",
+  },
+  {
+    key: "displayName",
+    displayName: "Display Name",
+  },
+  {
+    key: "processorId",
+    displayName: "Processor ID",
+  },
+  {
+    key: "modelId",
+    displayName: "Model ID",
+  },
+  {
+    key: "documentType",
+    displayName: "Document Type",
+  },
+  {
+    key: "img",
+    displayName: "Sample Image",
+  },
+]
+
+export const schemaProcessorColumns  = [
+    {
+      key: "name",
+      displayName: "Field Name",
+    },
+    {
+      key: "alias",
+      displayName: "Display Name",
+    },
+    {
+      key: "cleaning_function",
+      displayName: "Cleaning function",
+    },
+    {
+      key: "data_type",
+      displayName: "Data Type",
+    },
+    {
+      key: "database_data_type",
+      displayName: "Database DataType",
+    },
+    {
+      key: "page_order_sort",
+      displayName: "Page Order",
+    },
+  ]
+
 export const deleteCommentFromNotes = (recordNotes: RecordNote[], deleteIdx?: number) => {
   let tempNotes = structuredClone(recordNotes)
   if (deleteIdx === undefined) {
