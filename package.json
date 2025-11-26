@@ -38,13 +38,19 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "lint": "eslint . --fix",
     "gcp-build": ""
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "semi": ["warn", "always"],
+      "indent": ["warn", 2],
+      "quotes": ["warn", "double"]
+    }
   },
   "browserslist": {
     "production": [

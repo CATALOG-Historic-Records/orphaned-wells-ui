@@ -63,6 +63,11 @@ export interface SchemaMeta {
     AIRTABLE_IFRAME_VIEW_ID?: string;
 }
 
+export interface SchemaOverview {
+    processors: MongoProcessor[];
+    name?: number;
+    last_updated?: number;
+}
 
 export interface SchemaField {
     name: string;
@@ -103,21 +108,27 @@ export interface Attribute {
     user_provided_coordinates?: number[][];
 }
 
-export interface Processor {
-    "Processor Type": string;
+export interface RepoProcessor {
     "Processor Name": string;
     "Model Name": string;
-    "F1 Score": number;
-    "Primary Model in Processor": string;
-    "Training Documents": number;
-    "Testing Documents": number;
-    "Date Trained": number;
-    "Foundation Model": string;
     "Processor ID": string;
     "Model ID": string;
+    "lastUpdated": string;
+    "img"?: string;
     "documentType"?: string;
     "displayName"?: string;
-    "attributes": Attribute[];
+    "attributes"?: Attribute[];
+}
+
+export interface MongoProcessor {
+    "name": string;
+    "processorId": string;
+    "modelId": string;
+    "lastUpdated": string;
+    "img"?: string;
+    "documentType"?: string;
+    "displayName"?: string;
+    "attributes"?: SchemaField[];
 }
 
 export interface FilterOption {
@@ -182,6 +193,16 @@ export interface SchemaRecord {
   createdTime: string;
 }
 
+export interface Hotkey {
+  key: string;
+  action: string;
+}
+
+export interface HotkeySection {
+  label: string;
+  hotkeys: Hotkey[];
+}
+
 /*
 props interfaces
 */
@@ -219,7 +240,7 @@ export interface PopupModalProps {
     text: string | null | undefined;
     handleEditText?: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleSave: () => void;
-    buttonVariant: 'text' | 'outlined' | 'contained';
+    buttonVariant: "text" | "outlined" | "contained";
     buttonColor: "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning";
     buttonText: string;
     input?: boolean;
@@ -229,7 +250,7 @@ export interface PopupModalProps {
     iconTwo?: React.ReactNode;
     hasTwoButtons?: boolean;
     handleButtonTwoClick?: () => void;
-    buttonTwoVariant?: 'text' | 'outlined' | 'contained';
+    buttonTwoVariant?: "text" | "outlined" | "contained";
     buttonTwoColor?: "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning";
     buttonTwoText?: string;
     disableSubmit?: boolean;
@@ -259,6 +280,19 @@ export interface TableFiltersProps {
 export interface UploadDocumentsModalProps {
     setShowModal: (show: boolean) => void;
     handleUploadDocument: (file: File, runCleaningFunctions: boolean, refresh?: boolean) => void;
+}
+
+export interface UploadProcessorProps {
+    onClose: () => void;
+    updatingProcessor?: MongoProcessor;
+    handleUploadDocument: (
+        file: File,
+        name: string,
+        displayName: string,
+        processorId: string,
+        modelId: string,
+        documentType: string
+    ) => void;
 }
 
 export interface UploadDirectoryProps {
@@ -320,6 +354,7 @@ export interface ExportTypeSelectionProps {
     exportTypes: { [key: string]: boolean };
     updateExportTypes: (exportType: string) => void;
     disabled?: boolean;
+    location?: string;
 }
 
 export interface ErrorBarProps {
@@ -389,4 +424,9 @@ export interface deleteFieldSignature {
     (
         fieldID: FieldID,
     ): void;
+}
+
+export interface HotkeyInfoProps {
+  anchorEl: HTMLElement | undefined;
+  onClose: () => void;
 }
