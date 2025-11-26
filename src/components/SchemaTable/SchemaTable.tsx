@@ -1,115 +1,125 @@
-import {
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableContainer,
-  Paper,
-} from "@mui/material";
-import { SchemaTableProps } from "../../types";
+import { useState } from "react";
+import { Box, Paper, Tabs, Tab, TableContainer } from "@mui/material";
+import SchemaSheet from "./SchemaSheet";
+import SchemaOverViewSheet from "./SchemaOverviewSheet";
+import { MongoProcessor, SchemaOverview } from "../../types";
+import TableLoading from "../TableLoading/TableLoading";
+import EditProcessorDialog from "../EditProcessorDialog/EditProcessorDialog";
+import { SxProps } from "@mui/material";
 
-const fontFamily =
-  `"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`;
+interface SchemaTableProps {
+  loading: boolean;
+  updating?: boolean;
+  schema?: SchemaOverview;
+  setErrorMessage: (v: string | null) => void;
+  clickUpdateFields: (v: MongoProcessor) => void;
+}
 
-const AirtableGrid = ({ records }: SchemaTableProps) => {
-  if (!records || records.length === 0) {
-    return (
-      <Paper
-        sx={{
-          padding: 2,
-          textAlign: "center",
-          color: "#888",
-          fontSize: 14,
-          fontFamily,
-        }}
-      >
-        No records found
-      </Paper>
-    );
+const styles = {
+  tabs: {
+    minHeight: 36,
+    "& .MuiTab-root": {
+      textTransform: "none",
+      fontSize: 14,
+      fontWeight: 500,
+      minHeight: 32,
+      px: 2,
+      mr: 1.5,
+      borderTopLeftRadius: 6,
+      borderTopRightRadius: 6,
+    },
+    "& .Mui-selected": {
+      background: "#fff",
+      boxShadow: "0px 2px 6px rgba(0,0,0,0.15)",
+      fontWeight: "bold",
+    },
+    "& .MuiTabs-indicator": {
+      display: "none",
+    },
+  },
+  tableContainer: {
+    maxHeight: 600, paddingBottom: 2
+  }
+};
+
+const SchemaTable = (props: SchemaTableProps) => {
+  const [tabValue, setTabValue] = useState(0);
+  const [editingProcessor, setEditingProcessor] = useState<number>();
+  const {
+    schema,
+    loading,
+    setErrorMessage,
+    clickUpdateFields,
+    updating,
+  } = props;
+  const {
+    processors
+  } = schema || {};
+
+  const tableContainerStyle: SxProps = {...styles.tableContainer};
+  if (updating) {
+    tableContainerStyle["opacity"] = 0.5;
+    tableContainerStyle["pointerEvents"] = "none";
   }
 
-  const fieldNames = Array.from(
-    new Set(records.flatMap((record) => Object.keys(record.fields)))
-  );
-
   return (
-    <TableContainer
-      component={Paper}
+    <Paper
+      elevation={2}
       sx={{
-        borderRadius: "8px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-        border: "1px solid #e0e0e0",
-        overflowX: "auto",
-        backgroundColor: "#fff",
+        width: "100%",
+        borderRadius: 3,
+        overflow: "hidden",
       }}
     >
-      <Table sx={{ tableLayout: "fixed", minWidth: 650 }}>
-        <TableHead>
-          <TableRow>
-            {fieldNames.map((field) => (
-              <TableCell
-                key={field}
-                sx={{
-                  backgroundColor: "#eceff1",
-                  fontWeight: 600,
-                  color: "#333",
-                  borderBottom: "1px solid #dcdcdc",
-                  fontSize: 13,
-                  fontFamily,
-                  padding: "10px 12px",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {field}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {records.map((record, rowIndex) => (
-            <TableRow
-              key={record.id}
-              sx={{
-                backgroundColor: rowIndex % 2 === 0 ? "#fafafa" : "#ffffff",
-                "&:hover": {
-                  backgroundColor: "#f0f0f0",
-                },
-              }}
-            >
-              {fieldNames.map((field) => (
-                <TableCell
-                  key={field}
-                  tabIndex={0}
-                  sx={{
-                    fontSize: 14,
-                    fontFamily,
-                    padding: "8px 12px",
-                    borderBottom: "1px solid #eaeaea",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    cursor: "default",
-                    "&:focus": {
-                      outline: "2px solid #4c9aff",
-                      outlineOffset: "-2px",
-                      backgroundColor: "#f0f8ff",
-                    },
-                  }}
-                >
-                  {record.fields[field] !== undefined
-                    ? record.fields[field].toString()
-                    : ""}
-                </TableCell>
-              ))}
-            </TableRow>
+      
+      <Box
+        sx={{
+          borderBottom: "1px solid #e0e0e0",
+          background: "#fafafa",
+        }}
+      >
+        <Tabs
+          value={tabValue}
+          onChange={(_, v) => setTabValue(v)}
+          variant="scrollable"
+          scrollButtons={false}
+          sx={styles.tabs}
+        >
+          <Tab label="Overview"/>
+          {processors?.map((processor, idx) => (
+            <Tab key={`${idx}-${processor.name}`} label={processor.name} />
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </Tabs>
+      </Box>
+      <TableContainer sx={tableContainerStyle}>
+        {loading ? (
+          <TableLoading/>
+        ) : 
+          tabValue === 0 ? (
+            <SchemaOverViewSheet
+              processors={processors || []}
+              setTabValue={setTabValue}
+              setEditingProcessor={setEditingProcessor}
+              setErrorMessage={setErrorMessage}
+            />
+          ) : (
+            <SchemaSheet processor={processors?.[tabValue-1]} />
+          )
+        }
+       
+        
+      </TableContainer>
+      {editingProcessor !== undefined && processors && (
+        <EditProcessorDialog
+          open={editingProcessor !== undefined}
+          onClose={() => setEditingProcessor(undefined)}
+          setErrorMsg={(e) => setErrorMessage(e)}
+          processorData={processors[editingProcessor]}
+          clickUpdateFields={clickUpdateFields}
+        />
+      )}
+    </Paper>
   );
 };
 
-export default AirtableGrid;
+export default SchemaTable;
