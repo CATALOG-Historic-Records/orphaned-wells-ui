@@ -201,10 +201,11 @@ const AttributeRow = React.memo((props: AttributeRowProps) => {
   const [ menuAnchor, setMenuAnchor ] = useState<null | HTMLElement>(null);
   const [ showActions, setShowActions ] = useState(false);
   const [ childFields, setChildFields ] = useState<string[]>([]);
-  const { userPermissions } = useUserContext();
+  const { hasPermission } = useUserContext();
 
   const allowMultiple = recordSchema[schemaKey]?.occurrence?.toLowerCase().includes("multiple");
-  const isParent = recordSchema[schemaKey]?.google_data_type?.toLowerCase() === "parent";
+  const schemaDataType = recordSchema[schemaKey]?.google_data_type ?? recordSchema[schemaKey]?.data_type;
+  const isParent = schemaDataType?.toLowerCase() === "parent";
 
   useEffect(() => {
     const tempChildFields = [];
@@ -437,7 +438,7 @@ const AttributeRow = React.memo((props: AttributeRowProps) => {
   };
 
   const getRowOptionsIcon = () => {
-    const showUpdateCoordinatesOption = userPermissions?.includes("update_coordinates");
+    const showUpdateCoordinatesOption = hasPermission("update_coordinates");
     return (
       <TableCell>
         {
