@@ -14,7 +14,7 @@ import { useDownload } from "../../context/DownloadContext";
 
 const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   const { open, onClose, location, handleUpdate, _id, appliedFilters, sortBy, sortAscending } = props;
-  const { userPermissions } = useUserContext();
+  const { hasPermission } = useUserContext();
 
   const [columns, setColumns] = useState<string[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -22,8 +22,11 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   const [objSettings, setObjSettings] = useState<any>();
   const [errorMsg, setErrorMsg] = useState<string | null>("");
   const [ exportTypes, setExportTypes ] = useState<{ [key: string]: boolean }>(
-    {
+    location === "record_group" ? {
       "csv": false,
+      "json": true,
+      "image_files": false
+    } : {
       "json": true,
       "image_files": false
     }
