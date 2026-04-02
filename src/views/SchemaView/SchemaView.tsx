@@ -4,9 +4,14 @@ import { Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Subheader from "../../components/Subheader/Subheader";
 import { callAPI } from "../../util";
-import { getSchema, uploadProcessorSchema } from "../../services/app.service";
+import {
+  getCleaningFunctions,
+  getSchema,
+  updateProcessorAttribute,
+  uploadProcessorSchema,
+} from "../../services/app.service";
 import SchemaTable from "../../components/SchemaTable/SchemaTable";
-import { SchemaOverview, MongoProcessor } from "../../types";
+import { SchemaOverview, MongoProcessor, SchemaField } from "../../types";
 import UploadProcessorDialog from "../../components/UploadProcessorDialog/UploadProcessorDialog";
 import ErrorBar from "../../components/ErrorBar/ErrorBar";
 
@@ -19,19 +24,29 @@ const SchemaView = () => {
   const [updating, setUpdating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [updateProcessorCSV, setUpdateProcessorCSV] = useState<MongoProcessor>();
+  const [cleaningFunctions, setCleaningFunctions] = useState<string[]>([]);
 
 
   useEffect(() => {
     const hasAccess = hasPermission("manage_schema");
-    if (!hasAccess) navigate("/");
+    if (!hasAccess) {
+      navigate("/");
+      return;
+    }
     callAPI(
       getSchema,
       [],
       fetchedSchema,
       handleError
     );
+    callAPI(
+      getCleaningFunctions,
+      [],
+      fetchedCleaningFunctions,
+      handleError
+    );
         
-  }, [hasPermission]);
+  }, [hasPermission, navigate]);
 
   const fetchedSchema = (processors: MongoProcessor[]) => {
     setSchemaData({
@@ -40,9 +55,141 @@ const SchemaView = () => {
     setLoading(false);
   };
 
+  const fetchedCleaningFunctions = (
+    data: { cleaning_functions?: string[] }
+  ) => {
+    setCleaningFunctions(data.cleaning_functions || []);
+  };
+
   const handleError = (e: string) => {
     setErrorMsg(`Error: ${e}`);
     setLoading(false);
+  };
+
+  const updateProcessorAttributeInState = (
+    processorName: string,
+    fieldName: string,
+    updates: Record<string, string | number | null>,
+    operation: "update" | "add" | "delete" = "update"
+  ) => {
+    setSchemaData((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        processors: prev.processors.map((processor) => {
+          if (processor.name !== processorName) return processor;
+
+          if (operation === "add") {
+            const newAttribute = Object.entries(updates).reduce<SchemaField>(
+              (acc, [key, value]) => {
+                if (value !== null && value !== "") {
+                  (acc as unknown as Record<string, string | number | undefined>)[key] = value;
+                }
+                return acc;
+              },
+              {} as SchemaField
+            );
+
+            return {
+              ...processor,
+              attributes: [...(processor.attributes || []), newAttribute],
+            };
+          }
+
+          if (operation === "delete") {
+            return {
+              ...processor,
+              attributes: processor.attributes?.filter(
+                (attribute) => attribute.name !== fieldName
+              ),
+            };
+          }
+
+          return {
+            ...processor,
+            attributes: processor.attributes?.map((attribute) => {
+              if (attribute.name !== fieldName) return attribute;
+              const nextAttribute = { ...attribute } as SchemaField;
+              const mutableAttribute = nextAttribute as unknown as Record<string, string | number | undefined>;
+
+              Object.entries(updates).forEach(([key, value]) => {
+                if (value === null || value === "") {
+                  delete nextAttribute[key as keyof typeof nextAttribute];
+                } else {
+                  mutableAttribute[key] = value;
+                }
+              });
+
+              return nextAttribute;
+            }),
+          };
+        }),
+      };
+    });
+  };
+
+  const handleAttributeChange = (
+    processorName: string,
+    fieldName: string,
+    updates: Record<string, string | number | null>,
+    operation: "update" | "add" | "delete" = "update"
+  ) => {
+    const previousAttribute = schemaData?.processors
+      ?.find((processor) => processor.name === processorName)
+      ?.attributes?.find((attribute) => attribute.name === fieldName);
+
+    if (operation === "update" && !previousAttribute) return;
+
+    const previousAttributeRecord = previousAttribute as unknown as
+      | Record<string, string | number | undefined>
+      | undefined;
+    const previousValues =
+      operation === "update"
+        ? Object.keys(updates).reduce<Record<string, string | number | null>>(
+            (acc, key) => {
+              const value = previousAttributeRecord?.[key];
+              acc[key] = value ?? null;
+              return acc;
+            },
+            {}
+          )
+        : {};
+
+    updateProcessorAttributeInState(processorName, fieldName, updates, operation);
+    setUpdating(true);
+    callAPI(
+      updateProcessorAttribute,
+      [
+        processorName,
+        fieldName,
+        updates,
+        operation,
+      ],
+      () => {
+        setUpdating(false);
+      },
+      (e: string) => {
+        if (operation === "add" || operation === "delete") {
+          callAPI(
+            getSchema,
+            [],
+            (processors: MongoProcessor[]) => {
+              fetchedSchema(processors);
+              setUpdating(false);
+            },
+            (schemaError: string) => {
+              setUpdating(false);
+              handleError(schemaError);
+            }
+          );
+        } else {
+          updateProcessorAttributeInState(processorName, fieldName, previousValues);
+          setUpdating(false);
+        }
+        setErrorMsg(`Failed to update schema field: ${e}`);
+      }
+    );
   };
 
   const styles = {
@@ -113,6 +260,8 @@ const SchemaView = () => {
         <SchemaTable 
           schema={schemaData} 
           loading={loading}
+          cleaningFunctions={cleaningFunctions}
+          onAttributeChange={handleAttributeChange}
           setErrorMessage={setErrorMsg}
           clickUpdateFields={clickUpdateFields}
           updating={updating}
@@ -120,11 +269,11 @@ const SchemaView = () => {
       </Box>
       {
         showUploadProcessor && 
-                <UploadProcessorDialog
-                  handleUploadDocument={handleUploadDocument}
-                  onClose={handleCloseUploadDialog}
-                  updatingProcessor={updateProcessorCSV}
-                />
+          <UploadProcessorDialog
+            handleUploadDocument={handleUploadDocument}
+            onClose={handleCloseUploadDialog}
+            updatingProcessor={updateProcessorCSV}
+          />
       }
       <ErrorBar
         errorMessage={errorMsg}

@@ -349,6 +349,13 @@ export const getSchema = () => {
   });
 };
 
+export const getCleaningFunctions = () => {
+  return fetch(BACKEND_URL + "/get_cleaning_functions", {
+    mode: "cors",
+    headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+  });
+};
+
 export const uploadProcessorSchema = (
   data: FormData,
   name: string,
@@ -388,6 +395,25 @@ export const updateProcessor = (updated_processor: MongoProcessor) => {
     method: "POST",
     mode: "cors",
     body: JSON.stringify(updated_processor),
+    headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
+  });
+};
+
+export const updateProcessorAttribute = (
+  processorName: string,
+  fieldName: string,
+  updates: Record<string, string | number | null>,
+  operation: "update" | "add" | "delete" = "update"
+) => {
+  return fetch(BACKEND_URL + "/update_processor_attribute", {
+    method: "POST",
+    mode: "cors",
+    body: JSON.stringify({
+      processor_name: processorName,
+      field_name: fieldName,
+      updates,
+      operation,
+    }),
     headers: { "Authorization": "Bearer " + localStorage.getItem("id_token") }
   });
 };
