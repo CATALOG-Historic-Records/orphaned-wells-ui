@@ -72,6 +72,7 @@ export interface SchemaOverview {
 
 export interface SchemaField {
     name: string;
+    alias?: string;
     data_type?: string;
     google_data_type?: string;
     database_data_type?: string;
@@ -175,6 +176,8 @@ export interface RecordHistoryItem {
     record_id?: string | null;
     notes?: string | null;
     query?: Record<string, any> | null;
+    attributesList_before?: HistoryAttribute[] | Record<string, any> | null;
+    attributesList_after?: HistoryAttribute[] | Record<string, any> | null;
     previous_state?: Record<string, any> | null;
     calling_function?: string | null;
     timestamp?: number;
@@ -183,14 +186,19 @@ export interface RecordHistoryItem {
 export interface HistoryAttribute {
     key?: unknown;
     value?: unknown;
+    value_numeric_type?: "int" | "float" | null;
     normalized_value?: unknown;
     text_value?: unknown;
     raw_text?: unknown;
+    subattributes?: HistoryAttribute[] | null;
 }
 
 export interface QuerySummaryLine {
     key: string;
+    previousValue?: unknown;
+    previousValueNumericType?: "int" | "float" | null;
     currentValue?: unknown;
+    currentValueNumericType?: "int" | "float" | null;
 }
 
 export interface QuerySummary {
@@ -452,6 +460,7 @@ export interface updateFieldCoordinatesSignature {
         fieldId: FieldID,
         new_coordinates: number[][],
         pageNumber: number,
+        callbackFunction?: () => void,
     ): void;
 }
 
@@ -472,3 +481,5 @@ export interface HotkeyInfoProps {
   anchorEl: HTMLElement | undefined;
   onClose: () => void;
 }
+
+export type AttributesListUpdateTypes = "insertField" | "deleteField" | "updateFieldCoordinates"
