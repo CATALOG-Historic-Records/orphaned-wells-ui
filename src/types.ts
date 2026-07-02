@@ -405,6 +405,7 @@ export interface ColumnSelectDialogProps {
     appliedFilters: FilterOption[];
     sortBy: string;
     sortAscending: number;
+    documentTypes?: string[];
 }
 
 export interface CheckboxesGroupProps {
