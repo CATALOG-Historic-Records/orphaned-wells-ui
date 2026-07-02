@@ -13,7 +13,7 @@ import { useDownload } from "../../context/DownloadContext";
 
 
 const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
-  const { open, onClose, location, handleUpdate, _id, appliedFilters, sortBy, sortAscending } = props;
+  const { open, onClose, location, handleUpdate, _id, appliedFilters, sortBy, sortAscending, documentTypes } = props;
   const { hasPermission } = useUserContext();
 
   const [columns, setColumns] = useState<string[]>([]);
@@ -110,6 +110,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         columns: selectedColumns,
         sort: [sortBy, sortAscending],
         filter: convertFiltersToMongoFormat(appliedFilters),
+        document_types: documentTypes || [],
       };
       setLoadingFileSize(true);
       callAPI(
@@ -134,6 +135,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
       columns: selectedColumns,
       sort: [sortBy, sortAscending],
       filter: convertFiltersToMongoFormat(appliedFilters),
+      document_types: documentTypes || [],
     };
     downloadWithProgress(downloadRecords, [location, _id, exportTypes, name, body], `${name}.zip`, totalBytes);
 
