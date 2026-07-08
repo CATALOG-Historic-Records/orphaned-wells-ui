@@ -3,12 +3,73 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HeaderStyles as styles } from "../../styles";
 import { useUserContext } from "../../usercontext";
-import { fetchTeams, updateDefaultTeam } from "../../services/app.service";
-import { Menu, MenuItem, IconButton, Avatar, Tabs, Tab, Divider, ListItemIcon, Button } from "@mui/material";
+import { fetchTeams, getOgrreVersion, updateDefaultTeam } from "../../services/app.service";
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { logout, callAPI } from "../../util";
+import CloseIcon from "@mui/icons-material/Close";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import Logout from "@mui/icons-material/Logout";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
+interface PackageVersionInfo {
+  name: string;
+  version?: string;
+  commit?: string;
+  source_url?: string;
+  requested_revision?: string;
+}
+
+interface OgrreVersionInfo {
+  packages: PackageVersionInfo[];
+}
+
+const formatPackageName = (packageName: string) => {
+  if (packageName === "ogrre_data_cleaning") return "ogrre_data_cleaning";
+  if (packageName === "orphaned-wells-ui-server") return "orphaned-wells-ui-server";
+  return packageName;
+};
+
+const VersionMetadataLine = ({ label, value }: { label: string; value?: string }) => {
+  if (!value) return null;
+  return (
+    <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
+      <Typography sx={{ color: "#6B7280", fontSize: "13px", minWidth: "92px" }}>
+        {label}
+      </Typography>
+      <Box
+        component="span"
+        sx={{
+          color: "#111827",
+          fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+          fontSize: "12px",
+          lineHeight: 1.6,
+          overflowWrap: "anywhere",
+        }}
+      >
+        {value}
+      </Box>
+    </Stack>
+  );
+};
 
 const Header = (props: any) => {
   const navigate = useNavigate();
@@ -18,6 +79,10 @@ const Header = (props: any) => {
   const [profileActions, setProfileActions] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [teams, setTeams] = useState<string[]>([]);
+  const [versionDialogOpen, setVersionDialogOpen] = useState(false);
+  const [versionInfo, setVersionInfo] = useState<OgrreVersionInfo | null>(null);
+  const [versionLoading, setVersionLoading] = useState(false);
+  const [versionError, setVersionError] = useState("");
 
   useEffect(() => {
     if (window.location.href.includes("project")) {
@@ -70,6 +135,29 @@ const Header = (props: any) => {
 
   const failedFetchTeams = () => {
 
+  };
+
+  const handleViewOgrreVersion = () => {
+    setProfileActions(false);
+    setVersionDialogOpen(true);
+    setVersionInfo(null);
+    setVersionError("");
+    setVersionLoading(true);
+    callAPI(getOgrreVersion, [], handleFetchedVersion, handleFailedFetchVersion);
+  };
+
+  const handleFetchedVersion = (data: OgrreVersionInfo) => {
+    setVersionInfo(data);
+    setVersionLoading(false);
+  };
+
+  const handleFailedFetchVersion = (error: any) => {
+    setVersionLoading(false);
+    if (typeof error === "string") {
+      setVersionError(error);
+      return;
+    }
+    setVersionError(error?.message || error?.detail || "Unable to load OGRRE version.");
   };
 
   return (
@@ -137,6 +225,14 @@ const Header = (props: any) => {
               </span>
             )
             }
+            {hasPermission("manage_schema") && (
+              <MenuItem onClick={handleViewOgrreVersion}>
+                <ListItemIcon>
+                  <InfoOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                OGRRE Version
+              </MenuItem>
+            )}
             <MenuItem onClick={logout}>
               <ListItemIcon>
                 <Logout fontSize="small" />
@@ -146,6 +242,85 @@ const Header = (props: any) => {
           </Menu>
         </div>
       </div>
+      <Dialog
+        open={versionDialogOpen}
+        onClose={() => setVersionDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            border: "1px solid #E5E7EB",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            borderBottom: "1px solid #EEF2F7",
+            pr: 6,
+          }}
+        >
+          <Typography component="div" variant="h6" sx={{ fontWeight: 700 }}>
+            OGRRE Version
+          </Typography>
+          <Typography component="div" sx={{ color: "#6B7280", fontSize: "13px", mt: 0.5 }}>
+            Backend package metadata currently reported by the server.
+          </Typography>
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={() => setVersionDialogOpen(false)}
+          sx={{ position: "absolute", right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent dividers sx={{ p: 2.5 }}>
+          {versionLoading ? (
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <CircularProgress size={22} />
+              <Typography sx={{ color: "#4B5563", fontSize: "14px" }}>
+                Loading version information...
+              </Typography>
+            </Stack>
+          ) : versionError ? (
+            <Alert severity="error">{versionError}</Alert>
+          ) : versionInfo?.packages?.length ? (
+            <Stack spacing={1.5}>
+              {versionInfo.packages.map((packageInfo) => (
+                <Box
+                  key={packageInfo.name}
+                  sx={{
+                    border: "1px solid #E5E7EB",
+                    borderRadius: "8px",
+                    backgroundColor: "#FFFFFF",
+                    p: 1.5,
+                  }}
+                >
+                  <Typography sx={{ fontWeight: 700, color: "#111827", mb: 1 }}>
+                    {formatPackageName(packageInfo.name)}
+                  </Typography>
+                  <Stack spacing={0.75}>
+                    <VersionMetadataLine label="Version" value={packageInfo.version || "Unknown"} />
+                    <VersionMetadataLine label="Commit" value={packageInfo.commit} />
+                    <VersionMetadataLine
+                      label="Requested"
+                      value={packageInfo.requested_revision !== packageInfo.commit ? packageInfo.requested_revision : undefined}
+                    />
+                    <VersionMetadataLine label="Source" value={packageInfo.source_url} />
+                  </Stack>
+                </Box>
+              ))}
+            </Stack>
+          ) : (
+            <Typography sx={{ color: "#4B5563", fontSize: "14px" }}>
+              No version information was returned.
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 2, py: 1.5 }}>
+          <Button onClick={() => setVersionDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
