@@ -349,6 +349,12 @@ export const getCleaningFunctions = () => {
   });
 };
 
+export const getOgrreVersion = () => {
+  return fetch(BACKEND_URL + "/get_ogrre_version", {
+    mode: CORS_MODE,
+  });
+};
+
 export const uploadProcessorSchema = (
   data: FormData,
   name: string,
