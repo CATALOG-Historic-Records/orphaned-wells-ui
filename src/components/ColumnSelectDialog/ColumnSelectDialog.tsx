@@ -13,7 +13,7 @@ import { useDownload } from "../../context/DownloadContext";
 
 
 const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
-  const { open, onClose, location, handleUpdate, _id, appliedFilters, sortBy, sortAscending, documentTypes } = props;
+  const { open, onClose, location, handleUpdate, _id, appliedFilters, sortBy, sortAscending, documentTypes, selectedRecordGroups} = props;
   const { hasPermission } = useUserContext();
 
   const [columns, setColumns] = useState<string[]>([]);
@@ -45,7 +45,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
     if (open) {
       callAPI(
         getColumnData,
-        [location, _id],
+        [location, _id, selectedRecordGroups],
         setDefaultColumns,
         handleFailedGetColumnData
       );

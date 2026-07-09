@@ -406,6 +406,7 @@ export interface ColumnSelectDialogProps {
     sortBy: string;
     sortAscending: number;
     documentTypes?: string[];
+    selectedRecordGroups: string[];
 }
 
 export interface CheckboxesGroupProps {
