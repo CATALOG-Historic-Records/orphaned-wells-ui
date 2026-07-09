@@ -51,6 +51,7 @@ const RecordsTable = (props: RecordsTableProps) => {
     filter_options,
     handleUpdate,
     recordGroups,
+    onFiltersChange,
   } = props;
 
   const { hasPermission} = useUserContext();
@@ -78,6 +79,10 @@ const RecordsTable = (props: RecordsTableProps) => {
   const [sorted, _setSorted] = useState(JSON.parse(localStorage.getItem("sorted") || "{}")[params.id || ""] || ["dateCreated", 1]
   );
   const { isDownloading, estimatedTotalBytes, progress } = useDownload();
+
+  useEffect(() => {
+    onFiltersChange?.(filterBy);
+  }, [filterBy, onFiltersChange]);
 
   useEffect(() => {
     if (isDownloading) {

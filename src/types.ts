@@ -288,6 +288,7 @@ export interface RecordsTableProps {
     handleUpdate: (update: any) => void;
     filter_options?: {[key: string]: FilterOption};
     recordGroups?: RecordGroup[];
+    onFiltersChange?: (filters: FilterOption[]) => void;
 }
 
 export interface PopupModalProps {
