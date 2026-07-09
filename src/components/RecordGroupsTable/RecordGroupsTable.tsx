@@ -229,6 +229,7 @@ const RecordGroupsTable = ({ record_groups, sortRecordGroups, projectId, handleU
               sortBy={sortBy}
               sortAscending={sortAscending}
               documentTypes={selectedDocumentTypes}
+              selectedRecordGroups={selectedRecordGroupIds}
             />
           )
         }
