@@ -212,6 +212,15 @@ export const deleteRecordGroup = (rg_id: string) => {
   });
 };
 
+export const deleteRecordGroupRecords = (rg_id: string, data: any) => {
+  return fetch(BACKEND_URL + "/delete_record_group_records/" + rg_id, {
+    method: "POST",
+    mode: CORS_MODE,
+    body: JSON.stringify(data),
+    headers: JSON_HEADERS,
+  });
+};
+
 export const deleteRecord = (record_id: string) => {
   return fetch(BACKEND_URL + "/delete_record/" + record_id, {
     method: "POST",

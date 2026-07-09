@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecordGroup, uploadDocument, deleteRecordGroup, updateRecordGroup, cleanRecords } from "../../services/app.service";
+import { getRecordGroup, uploadDocument, deleteRecordGroup, deleteRecordGroupRecords, updateRecordGroup, cleanRecords } from "../../services/app.service";
 import RecordsTable from "../../components/RecordsTable/RecordsTable";
 import Subheader from "../../components/Subheader/Subheader";
 import UploadDocumentsModal from "../../components/UploadDocumentsModal/UploadDocumentsModal";
 import PopupModal from "../../components/PopupModal/PopupModal";
 import ErrorBar from "../../components/ErrorBar/ErrorBar";
-import { callAPI } from "../../util";
-import { RecordGroup, ProjectData, PreviousPages, SubheaderActions } from "../../types";
+import DeleteRecordGroupRecordsDialog from "./DeleteRecordGroupRecordsDialog";
+import { callAPI, convertFiltersToMongoFormat } from "../../util";
+import { RecordGroup, ProjectData, PreviousPages, SubheaderActions, FilterOption } from "../../types";
 import { useUserContext } from "../../usercontext";
 
 const RecordGroupPage = () => {
@@ -19,9 +20,11 @@ const RecordGroupPage = () => {
   const [recordGroup, setRecordGroup] = useState<RecordGroup>({ } as RecordGroup);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openDeleteRecordsModal, setOpenDeleteRecordsModal] = useState(false);
   const [openCleanPrompt, setOpenCleanPrompt] = useState(false);
   const [openUpdateNameModal, setOpenUpdateNameModal] = useState(false);
   const [recordGroupName, setRecordGroupName] = useState("");
+  const [recordFilters, setRecordFilters] = useState<FilterOption[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>("");
   const [ subheaderActions, setSubheaderActions ] = useState<SubheaderActions>();
   const [navigation, setNavigation] = useState<PreviousPages>({"Projects": () => navigate("/projects", { replace: true })});
@@ -50,6 +53,7 @@ const RecordGroupPage = () => {
       tempActions["Clean records"] = () => setOpenCleanPrompt(true);
     }
     if (hasPermission("delete")) {
+      tempActions["Delete Records"] = () => setOpenDeleteRecordsModal(true);
       tempActions["Delete record group"] = () => setOpenDeleteModal(true);
     }
     setSubheaderActions(tempActions);
@@ -116,6 +120,28 @@ const RecordGroupPage = () => {
     );
   };
 
+  const handleDeleteRecordGroupRecords = (filter: object) => {
+    const recordGroupId = recordGroup._id || params.id;
+    if (!recordGroupId) return;
+
+    setOpenDeleteRecordsModal(false);
+    setLoading(true);
+    callAPI(
+      deleteRecordGroupRecords,
+      [recordGroupId, { filter }],
+      () => window.location.reload(),
+      handleAPIErrorResponse
+    );
+  };
+
+  const handleDeleteAllRecords = () => {
+    handleDeleteRecordGroupRecords({});
+  };
+
+  const handleDeleteFilteredRecords = () => {
+    handleDeleteRecordGroupRecords(convertFiltersToMongoFormat(recordFilters));
+  };
+
   const handleChangeRecordGroupName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRecordGroupName(event.target.value);
   };
@@ -172,6 +198,7 @@ const RecordGroupPage = () => {
           location="record_group"
           params={params}
           handleUpdate={handleUpdateRecordGroup}
+          onFiltersChange={setRecordFilters}
         />
       </Box>
       {showDocumentModal && 
@@ -199,6 +226,12 @@ const RecordGroupPage = () => {
         buttonColor='primary'
         buttonVariant='contained'
         width={400}
+      />
+      <DeleteRecordGroupRecordsDialog
+        open={openDeleteRecordsModal}
+        onClose={() => setOpenDeleteRecordsModal(false)}
+        onDeleteAll={handleDeleteAllRecords}
+        onDeleteFiltered={handleDeleteFilteredRecords}
       />
       <PopupModal
         input
