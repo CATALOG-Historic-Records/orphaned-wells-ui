@@ -28,8 +28,16 @@ export const getProcessorData = (google_id: string) => {
   });
 };
 
-export const getColumnData = (location: string, _id: string) => {
-  return fetch(BACKEND_URL + "/get_column_data/"+location+"/"+_id, {
+export const getColumnData = (location: string, _id: string, selectedRecordGroups?: string[]) => {
+  let url = BACKEND_URL + "/get_column_data/" + location + "/" + _id;
+  if (selectedRecordGroups && selectedRecordGroups.length > 0) {
+    const params = new URLSearchParams();
+    selectedRecordGroups.forEach((group) => {
+      params.append("selected_record_groups", group);
+    });
+    url += "?" + params.toString();
+  }
+  return fetch(url, {
     mode: CORS_MODE,
   });
 };
