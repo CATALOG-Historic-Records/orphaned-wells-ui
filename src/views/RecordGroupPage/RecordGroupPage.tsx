@@ -28,7 +28,7 @@ const RecordGroupPage = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>("");
   const [ subheaderActions, setSubheaderActions ] = useState<SubheaderActions>();
   const [navigation, setNavigation] = useState<PreviousPages>({"Projects": () => navigate("/projects", { replace: true })});
-  const [loading, setLoading] = useState(true);
+  const [deletingRecords, setDeletingRecords] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -83,7 +83,6 @@ const RecordGroupPage = () => {
     setRecordGroup(data.rg_data);
     setRecordGroupName(data.rg_data.name);
     setProject(data.project);
-    setLoading(false);
   }; 
 
   const handleUploadDocument = (file: File, runCleaningFunctions: boolean = false, refresh: boolean = true) => {
@@ -125,7 +124,7 @@ const RecordGroupPage = () => {
     if (!recordGroupId) return;
 
     setOpenDeleteRecordsModal(false);
-    setLoading(true);
+    setDeletingRecords(true);
     callAPI(
       deleteRecordGroupRecords,
       [recordGroupId, { filter }],
@@ -166,7 +165,7 @@ const RecordGroupPage = () => {
   };
 
   const handleAPIErrorResponse = (e: string) => {
-    setLoading(false);
+    setDeletingRecords(false);
     setErrorMsg(e);
   };
 
@@ -199,6 +198,8 @@ const RecordGroupPage = () => {
           params={params}
           handleUpdate={handleUpdateRecordGroup}
           onFiltersChange={setRecordFilters}
+          disabled={deletingRecords}
+          disabledMessage="Deleting records..."
         />
       </Box>
       {showDocumentModal && 

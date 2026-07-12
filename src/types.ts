@@ -289,6 +289,8 @@ export interface RecordsTableProps {
     filter_options?: {[key: string]: FilterOption};
     recordGroups?: RecordGroup[];
     onFiltersChange?: (filters: FilterOption[]) => void;
+    disabled?: boolean;
+    disabledMessage?: string;
 }
 
 export interface PopupModalProps {

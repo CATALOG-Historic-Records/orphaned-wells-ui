@@ -27,6 +27,7 @@ import { getRecords, deleteRecords } from "../../services/app.service";
 import ColumnSelectDialog from "../ColumnSelectDialog/ColumnSelectDialog";
 import EmptyTable from "../EmptyTable/EmptyTable";
 import TableLoading from "../TableLoading/TableLoading";
+import RecordsTableOverlay from "./RecordsTableOverlay";
 import PopupModal from "../PopupModal/PopupModal";
 import { useDownload } from "../../context/DownloadContext";
 import { useUserContext } from "../../usercontext";
@@ -52,6 +53,8 @@ const RecordsTable = (props: RecordsTableProps) => {
     handleUpdate,
     recordGroups,
     onFiltersChange,
+    disabled,
+    disabledMessage,
   } = props;
 
   const { hasPermission} = useUserContext();
@@ -71,6 +74,7 @@ const RecordsTable = (props: RecordsTableProps) => {
   });
   const [showDownloadMessage, setShowDownloadMessage] = useState(false);
   const [openDeleteRecordsModal, setOpenDeleteRecordsModal] = useState(false);
+  const [deletingDisplayedRecords, setDeletingDisplayedRecords] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [ menuAnchor, setMenuAnchor ] = useState<HTMLElement>();
   const [filterBy, _setFilterBy] = useState<any[]>(
@@ -79,6 +83,8 @@ const RecordsTable = (props: RecordsTableProps) => {
   const [sorted, _setSorted] = useState(JSON.parse(localStorage.getItem("sorted") || "{}")[params.id || ""] || ["dateCreated", 1]
   );
   const { isDownloading, estimatedTotalBytes, progress } = useDownload();
+  const tableDisabled = disabled || deletingDisplayedRecords;
+  const tableDisabledMessage = disabledMessage || "Deleting records...";
 
   useEffect(() => {
     onFiltersChange?.(filterBy);
@@ -163,6 +169,7 @@ const RecordsTable = (props: RecordsTableProps) => {
   };
 
   const handleClickRecord = (record_id: string) => {
+    if (tableDisabled) return;
     const state: any = { group_id: params.id, location: location, sourceRecordGroupId: params.id };
     state.currentPage = currentPage;
     state.pageSize = pageSize;
@@ -170,6 +177,7 @@ const RecordsTable = (props: RecordsTableProps) => {
   };
 
   const handleApplyFilters = (appliedFilters: any) => {
+    if (tableDisabled) return;
     setFilterBy(appliedFilters);
     let newAppliedFilters;
     let currentAppliedFilters = localStorage.getItem("appliedFilters");
@@ -225,15 +233,18 @@ const RecordsTable = (props: RecordsTableProps) => {
   };
 
   const handleChangePage = (newPage: any) => {
+    if (tableDisabled) return;
     setCurrentPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (tableDisabled) return;
     let newSize = parseInt(event.target.value);
     setPageSize(newSize);
   };
 
   const handleClickShowActions = (event: React.MouseEvent<HTMLElement>) => {
+    if (tableDisabled) return;
     event.stopPropagation();
     setShowActions(!showActions);
     setMenuAnchor(event.currentTarget);
@@ -241,22 +252,23 @@ const RecordsTable = (props: RecordsTableProps) => {
 
   const handleDeleteRecords = () => {
     setOpenDeleteRecordsModal(false);
+    setDeletingDisplayedRecords(true);
     const body = {
       record_ids: records.map((r) => r._id)
     };
-    // TODO: 
-    // 1) set loader
-    // 2) replace error call back function in callAPI with a function that displays an error using the ErrorBar component
     callAPI(
       deleteRecords,
       [body],
       () => window.location.reload(),
-      (e) => console.error(e)
+      (e) => {
+        setDeletingDisplayedRecords(false);
+        console.error(e);
+      }
     );
   };
 
   const handleSort = (key: SortableColumnKey) => {
-    if (Object.keys(SORTABLE_COLUMNS).includes(key)) {
+    if (!tableDisabled && Object.keys(SORTABLE_COLUMNS).includes(key)) {
       let new_sort_key = `${key}`;
       const sort_by_key = sorted[0];
       const sort_direction = sorted[1];
@@ -408,12 +420,16 @@ const RecordsTable = (props: RecordsTableProps) => {
 
   return (
     <React.Fragment>
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{ position: "relative" }}
+        aria-busy={tableDisabled || loading}
+      >
         <Box sx={styles.topSection}>
           <Grid container>
             <Grid item sx={styles.topSectionLeft} xs={6}>
               <TableFilters applyFilters={handleApplyFilters} appliedFilters={filterBy} filter_options={filter_options} />
-              <Button onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon />} disabled={isDownloading}>
+              <Button onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon />} disabled={isDownloading || tableDisabled}>
                 Export
               </Button>
             </Grid>
@@ -422,7 +438,7 @@ const RecordsTable = (props: RecordsTableProps) => {
               {
                 hasPermission("delete") ? (
                   <>
-                    <IconButton onClick={handleClickShowActions}>
+                    <IconButton onClick={handleClickShowActions} disabled={tableDisabled}>
                       <MoreVertIcon/>
                     </IconButton>
                     <Menu
@@ -547,6 +563,7 @@ const RecordsTable = (props: RecordsTableProps) => {
           buttonVariant='contained'
           width={400}
         />
+        {tableDisabled && <RecordsTableOverlay message={tableDisabledMessage} />}
           
         
       </TableContainer>
