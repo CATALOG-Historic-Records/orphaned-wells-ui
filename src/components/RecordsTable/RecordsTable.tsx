@@ -438,7 +438,7 @@ const RecordsTable = (props: RecordsTableProps) => {
                           setShowActions(false);
                         }}
                       >
-                          Delete Records
+                          Delete records
                       </MenuItem>
                     </Menu>
                   </>

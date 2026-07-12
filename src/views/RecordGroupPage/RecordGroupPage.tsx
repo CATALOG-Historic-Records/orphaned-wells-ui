@@ -53,7 +53,7 @@ const RecordGroupPage = () => {
       tempActions["Clean records"] = () => setOpenCleanPrompt(true);
     }
     if (hasPermission("delete")) {
-      tempActions["Delete Records"] = () => setOpenDeleteRecordsModal(true);
+      tempActions["Delete records"] = () => setOpenDeleteRecordsModal(true);
       tempActions["Delete record group"] = () => setOpenDeleteModal(true);
     }
     setSubheaderActions(tempActions);
