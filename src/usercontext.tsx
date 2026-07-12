@@ -27,6 +27,7 @@ const anonymousDisabledPermissions = new Set([
   "manage_team",
   "manage_system",
   "system_administration",
+  "developer",
 ]);
 
 const UserContext = createContext({} as UserContextObject);

@@ -1,0 +1,4 @@
+interface:
+  display_name: "OGRRE Frontend API"
+  short_description: "Connect React views to OGRRE backend APIs"
+  default_prompt: "Use $ogrre-frontend-api-connection to wire a React view or component to an OGRRE backend route."
