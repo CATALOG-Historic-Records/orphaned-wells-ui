@@ -25,9 +25,6 @@ interface AuthResponse {
 const anonymousDisabledPermissions = new Set([
   "add_user",
   "manage_team",
-  "manage_system",
-  "system_administration",
-  "developer",
 ]);
 
 const UserContext = createContext({} as UserContextObject);
