@@ -11,7 +11,7 @@ const DeleteRecordGroupRecordsDialog = (props: DeleteRecordGroupRecordsDialogPro
   const { open, onClose, onDeleteAll, onDeleteFiltered } = props;
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open={open} onClose={onClose} fullWidth>
       <DialogTitle>Delete Records</DialogTitle>
       <DialogContent dividers>
         <DialogContentText>
