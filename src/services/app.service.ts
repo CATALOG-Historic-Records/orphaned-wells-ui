@@ -1,4 +1,4 @@
-import { MongoProcessor } from "../types";
+import { ChangeTeamRequest, MongoProcessor } from "../types";
 
 let BACKEND_URL = process.env.REACT_APP_BACKEND_URL as string;
 const CORS_MODE: RequestMode = "cors";
@@ -290,8 +290,8 @@ export const updateUserRoles = (data: any) => {
   });
 };
 
-export const updateDefaultTeam = (data: any) => {
-  return fetch(BACKEND_URL + "/update_default_team", {
+export const changeTeam = (data: ChangeTeamRequest) => {
+  return fetch(BACKEND_URL + "/change_team", {
     method: "POST",
     mode: CORS_MODE,
     body: JSON.stringify(data),
