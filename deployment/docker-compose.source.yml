@@ -1,6 +1,7 @@
 services:
   backend:
     image: ${BACKEND_DEV_IMAGE:-orphaned-wells-ui-server-dev}
+    working_dir: /code
     build:
       context: ${BACKEND_DIR:-../../orphaned-wells-ui-server}
       dockerfile: deployment/dockerfile

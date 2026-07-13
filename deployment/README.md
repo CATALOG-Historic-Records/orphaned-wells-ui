@@ -13,7 +13,7 @@ npm run docker:start
 The Node script creates `deployment/.env` from `.env.example` if needed.
 These Node-backed commands are the cross-platform path for macOS, Linux, and Windows.
 
-By default, `BACKEND_MODE=auto` uses a sibling backend checkout at `../orphaned-wells-ui-server` when it exists. If the backend repo is not present, it pulls `BACKEND_IMAGE` instead. In both cases, Compose overrides the backend environment so it connects to local Docker MongoDB at `mongodb://mongodb:27017`.
+By default, `BACKEND_MODE=auto` uses local backend source at `../orphaned-wells-ui-server` when that source directory exists. If the backend source is not present, it pulls `BACKEND_IMAGE` instead. Source mode bind-mounts the backend into the container and runs Uvicorn with `--reload`, so normal Python code edits are picked up by the running backend. Dependency, packaging, Dockerfile, and startup-command changes still require `npm run docker:start` so Compose can rebuild and recreate the backend container.
 
 For frontend-only CI, set `BACKEND_MODE=image` and make sure the workflow can pull `BACKEND_IMAGE`.
 
@@ -70,6 +70,19 @@ The app runs at `http://localhost:3000`, and the backend health endpoint is `htt
 Published ports are bound to `127.0.0.1` by default through `DEV_HOST_BIND`, so the dev stack is reachable from the local machine without exposing MongoDB, the backend, or the frontend on all host interfaces. Inside Docker, services bind to their Compose hostnames so the containers can still communicate with each other.
 
 When `STORAGE_BACKEND=local`, uploaded files are stored in the backend `backend_data` volume under `/data/uploads` and served by the backend at `LOCAL_STORAGE_URL_BASE`. If you change `BACKEND_HOST_PORT`, update `LOCAL_STORAGE_URL_BASE` in `deployment/.env` to match.
+
+## Database Settings
+
+The backend receives database settings from `deployment/.env`, with Docker-local defaults:
+
+```dotenv
+DB_CONNECTION=mongodb://mongodb:27017
+DB_NAME=isgs
+DB_USERNAME=
+DB_PASSWORD=
+```
+
+Set these values in `deployment/.env` to point the backend at a different MongoDB instance. Existing `.env` files are not regenerated from `.env.example`, so add any missing keys manually after pulling deployment changes.
 
 ## MongoDB Seed Data
 

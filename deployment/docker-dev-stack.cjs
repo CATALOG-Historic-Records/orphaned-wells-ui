@@ -59,7 +59,7 @@ const backendPath = path.isAbsolute(backendDir)
   ? backendDir
   : path.resolve(scriptDir, backendDir);
 
-if (backendAutoClone === "true" && !hasGitCheckout(backendPath)) {
+if (backendAutoClone === "true" && !hasBackendSource(backendPath)) {
   console.log(`Cloning backend repository into ${backendPath}...`);
   fs.mkdirSync(path.dirname(backendPath), { recursive: true });
   runCommand("git", ["clone", backendGitUrl, backendPath], childEnv);
@@ -69,8 +69,8 @@ const composeFiles = [path.join(scriptDir, "docker-compose.dev.yml")];
 
 switch (backendMode) {
   case "source":
-    if (!hasGitCheckout(backendPath)) {
-      console.error(`BACKEND_MODE=source requires a backend checkout at ${backendPath}`);
+    if (!hasBackendSource(backendPath)) {
+      console.error(`BACKEND_MODE=source requires backend source at ${backendPath}`);
       process.exit(1);
     }
     composeFiles.push(path.join(scriptDir, "docker-compose.source.yml"));
@@ -80,7 +80,7 @@ switch (backendMode) {
     console.log("Using backend image from BACKEND_IMAGE");
     break;
   case "auto":
-    if (hasGitCheckout(backendPath)) {
+    if (hasBackendSource(backendPath)) {
       composeFiles.push(path.join(scriptDir, "docker-compose.source.yml"));
       console.log(`Using local backend source at ${backendPath}`);
     } else {
@@ -154,8 +154,11 @@ function parseEnvFile(filePath) {
   return env;
 }
 
-function hasGitCheckout(directory) {
-  return fs.existsSync(path.join(directory, ".git"));
+function hasBackendSource(directory) {
+  return (
+    fs.existsSync(path.join(directory, "deployment", "dockerfile")) &&
+    fs.existsSync(path.join(directory, "ogrre", "main.py"))
+  );
 }
 
 function runCommand(command, args, env) {
