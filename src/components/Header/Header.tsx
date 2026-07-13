@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HeaderStyles as styles } from "../../styles";
 import { useUserContext } from "../../usercontext";
-import { fetchTeams, getOgrreVersion, updateDefaultTeam } from "../../services/app.service";
+import { changeTeam, fetchTeams, getOgrreVersion } from "../../services/app.service";
+import { ChangeTeamResponse } from "../../types";
+import ChangeTeamDialog from "./ChangeTeamDialog";
 import {
   Alert,
   Avatar,
@@ -29,6 +31,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import Logout from "@mui/icons-material/Logout";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 
 interface PackageVersionInfo {
   name: string;
@@ -46,6 +49,11 @@ const formatPackageName = (packageName: string) => {
   if (packageName === "ogrre_data_cleaning") return "ogrre_data_cleaning";
   if (packageName === "orphaned-wells-ui-server") return "orphaned-wells-ui-server";
   return packageName;
+};
+
+const getApiErrorMessage = (error: any, fallback: string) => {
+  if (typeof error === "string") return error;
+  return error?.message || error?.detail || fallback;
 };
 
 const VersionMetadataLine = ({ label, value }: { label: string; value?: string }) => {
@@ -74,11 +82,14 @@ const VersionMetadataLine = ({ label, value }: { label: string; value?: string }
 const Header = (props: any) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userName, userPhoto, hasPermission} = useUserContext();
+  const { user, userName, userPhoto, hasPermission, handleSuccessfulAuthentication } = useUserContext();
   const [anchorAr, setAnchorAr] = useState<null | HTMLElement>(null);
   const [profileActions, setProfileActions] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [teams, setTeams] = useState<string[]>([]);
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
+  const [teamChangeLoading, setTeamChangeLoading] = useState(false);
+  const [teamChangeError, setTeamChangeError] = useState("");
   const [versionDialogOpen, setVersionDialogOpen] = useState(false);
   const [versionInfo, setVersionInfo] = useState<OgrreVersionInfo | null>(null);
   const [versionLoading, setVersionLoading] = useState(false);
@@ -121,20 +132,54 @@ const Header = (props: any) => {
     }
   };
 
-  const changeTeam = (team: string) => {
-    let data = {
-      new_team: team
-    };
+  const handleOpenTeamDialog = () => {
     setProfileActions(false);
-    callAPI(updateDefaultTeam, [data], (data) => navigate("/", { replace: true }), (e)=> console.error(e.detail));
+    setTeamChangeError("");
+    setTeamDialogOpen(true);
+    callAPI(fetchTeams, [], fetchedTeams, failedFetchTeams);
+  };
+
+  const handleCloseTeamDialog = () => {
+    if (teamChangeLoading) return;
+    setTeamDialogOpen(false);
+    setTeamChangeError("");
+  };
+
+  const handleChangeTeam = (team: string) => {
+    setTeamChangeLoading(true);
+    setTeamChangeError("");
+    callAPI(
+      changeTeam,
+      [{ new_team: team }],
+      handleChangedTeam,
+      handleFailedChangeTeam
+    );
+  };
+
+  const handleChangedTeam = (data: ChangeTeamResponse) => {
+    setTeamChangeLoading(false);
+    setTeamDialogOpen(false);
+    if (data?.team) {
+      setTeams((prevTeams) => {
+        if (prevTeams.includes(data.team)) return prevTeams;
+        return [...prevTeams, data.team].sort((a, b) => a.localeCompare(b));
+      });
+    }
+    handleSuccessfulAuthentication();
+    navigate("/", { replace: true });
+  };
+
+  const handleFailedChangeTeam = (error: any) => {
+    setTeamChangeLoading(false);
+    setTeamChangeError(getApiErrorMessage(error, "Unable to change team."));
   };
 
   const fetchedTeams = (data: string[]) => {
     setTeams(data);
   };
 
-  const failedFetchTeams = () => {
-
+  const failedFetchTeams = (error: any) => {
+    setTeamChangeError(getApiErrorMessage(error, "Unable to load teams."));
   };
 
   const handleViewOgrreVersion = () => {
@@ -153,11 +198,7 @@ const Header = (props: any) => {
 
   const handleFailedFetchVersion = (error: any) => {
     setVersionLoading(false);
-    if (typeof error === "string") {
-      setVersionError(error);
-      return;
-    }
-    setVersionError(error?.message || error?.detail || "Unable to load OGRRE version.");
+    setVersionError(getApiErrorMessage(error, "Unable to load OGRRE version."));
   };
 
   return (
@@ -216,11 +257,12 @@ const Header = (props: any) => {
           >
             {hasPermission("manage_system") && (
               <span>
-                {teams.map((team) => (
-                  <MenuItem key={team} onClick={() => changeTeam(team)}>
-                  Change to {team}
-                  </MenuItem>
-                ))}
+                <MenuItem onClick={handleOpenTeamDialog}>
+                  <ListItemIcon>
+                    <GroupsOutlinedIcon fontSize="small" />
+                  </ListItemIcon>
+                  Change team
+                </MenuItem>
                 <Divider />
               </span>
             )
@@ -242,6 +284,16 @@ const Header = (props: any) => {
           </Menu>
         </div>
       </div>
+      <ChangeTeamDialog
+        open={teamDialogOpen}
+        teams={teams}
+        currentTeam={user?.default_team}
+        allowCustomTeam={!user?.anonymous}
+        loading={teamChangeLoading}
+        error={teamChangeError}
+        onClose={handleCloseTeamDialog}
+        onChangeTeam={handleChangeTeam}
+      />
       <Dialog
         open={versionDialogOpen}
         onClose={() => setVersionDialogOpen(false)}

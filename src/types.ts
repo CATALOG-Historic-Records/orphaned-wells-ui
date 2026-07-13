@@ -170,6 +170,16 @@ export interface User {
     default_team: string;
 }
 
+export interface ChangeTeamRequest {
+    new_team: string;
+}
+
+export interface ChangeTeamResponse {
+    team: string;
+    created_team: boolean;
+    added_to_team: boolean;
+}
+
 export interface RecordNote {
     text: string;
     record_id: string;
