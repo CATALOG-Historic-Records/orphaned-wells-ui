@@ -13,7 +13,7 @@ npm run docker:start
 The Node script creates `deployment/.env` from `.env.example` if needed.
 These Node-backed commands are the cross-platform path for macOS, Linux, and Windows.
 
-By default, `BACKEND_MODE=auto` uses local backend source at `../orphaned-wells-ui-server` when that source directory exists. If the backend source is not present, it pulls `BACKEND_IMAGE` instead. Source mode bind-mounts the backend into the container and runs Uvicorn with `--reload`, so normal Python code edits are picked up by the running backend. Dependency, packaging, Dockerfile, and startup-command changes still require `npm run docker:start` so Compose can rebuild and recreate the backend container.
+By default, `BACKEND_MODE=auto` uses local backend source at `../orphaned-wells-ui-server` when that source directory exists. If the backend source is not present, it pulls `BACKEND_IMAGE` instead. Source mode bind-mounts the backend into the container and runs Uvicorn with `--reload`, scoped to `/code/ogrre` with a short reload delay and Python bytecode writes disabled so Docker Desktop file-sync timing is less likely to serve stale imports. Normal Python code edits are picked up by the running backend. Dependency, packaging, Dockerfile, and startup-command changes still require `npm run docker:start` so Compose can rebuild and recreate the backend container.
 
 For frontend-only CI, set `BACKEND_MODE=image` and make sure the workflow can pull `BACKEND_IMAGE`.
 
