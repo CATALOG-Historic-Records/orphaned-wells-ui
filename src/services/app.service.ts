@@ -291,7 +291,7 @@ export const updateUserRoles = (data: any) => {
 };
 
 export const changeTeam = (data: ChangeTeamRequest) => {
-  return fetch(BACKEND_URL + "/change_team", {
+  return fetch(BACKEND_URL + "/update_default_team", {
     method: "POST",
     mode: CORS_MODE,
     body: JSON.stringify(data),

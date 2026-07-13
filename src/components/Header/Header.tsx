@@ -288,6 +288,7 @@ const Header = (props: any) => {
         open={teamDialogOpen}
         teams={teams}
         currentTeam={user?.default_team}
+        allowCustomTeam={!user?.anonymous}
         loading={teamChangeLoading}
         error={teamChangeError}
         onClose={handleCloseTeamDialog}

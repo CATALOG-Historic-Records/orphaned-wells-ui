@@ -22,6 +22,7 @@ interface ChangeTeamDialogProps {
   open: boolean;
   teams: string[];
   currentTeam?: string;
+  allowCustomTeam?: boolean;
   loading: boolean;
   error: string;
   onClose: () => void;
@@ -32,6 +33,7 @@ const ChangeTeamDialog = ({
   open,
   teams,
   currentTeam,
+  allowCustomTeam = true,
   loading,
   error,
   onClose,
@@ -40,10 +42,11 @@ const ChangeTeamDialog = ({
   const [selectedTeam, setSelectedTeam] = useState("");
   const [customTeam, setCustomTeam] = useState("");
 
-  const sortedTeams = useMemo(
-    () => Array.from(new Set(teams)).sort((a, b) => a.localeCompare(b)),
-    [teams]
-  );
+  const sortedTeams = useMemo(() => {
+    const teamSet = new Set(teams);
+    if (currentTeam) teamSet.add(currentTeam);
+    return Array.from(teamSet).sort((a, b) => a.localeCompare(b));
+  }, [teams, currentTeam]);
 
   useEffect(() => {
     if (!open) return;
@@ -59,6 +62,7 @@ const ChangeTeamDialog = ({
   };
 
   const handleCustomTeamChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!allowCustomTeam) return;
     setCustomTeam(event.target.value);
     if (event.target.value !== "") setSelectedTeam("");
   };
@@ -116,18 +120,20 @@ const ChangeTeamDialog = ({
               ))}
             </Select>
           </FormControl>
-          <Box>
-            <Typography sx={{ color: "#6B7280", fontSize: "13px", mb: 1 }}>
-              Or create a team
-            </Typography>
-            <TextField
-              fullWidth
-              label="New Team Name"
-              value={customTeam}
-              onChange={handleCustomTeamChange}
-              disabled={loading}
-            />
-          </Box>
+          {allowCustomTeam && (
+            <Box>
+              <Typography sx={{ color: "#6B7280", fontSize: "13px", mb: 1 }}>
+                Or create a team
+              </Typography>
+              <TextField
+                fullWidth
+                label="New Team Name"
+                value={customTeam}
+                onChange={handleCustomTeamChange}
+                disabled={loading}
+              />
+            </Box>
+          )}
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 2, py: 1.5 }}>
