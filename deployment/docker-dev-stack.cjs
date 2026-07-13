@@ -47,14 +47,14 @@ console.log(`${action.description}...`);
 
 const activeEnvFile = prepareEnvFile(action.createEnvFile);
 const parsedEnv = parseEnvFile(activeEnvFile);
-const childEnv = { ...process.env, ...parsedEnv };
+const childEnv = { ...parsedEnv, ...process.env };
 
-const backendDir = parsedEnv.BACKEND_DIR || "../../orphaned-wells-ui-server";
-const backendMode = parsedEnv.BACKEND_MODE || "auto";
+const backendDir = childEnv.BACKEND_DIR || "../../orphaned-wells-ui-server";
+const backendMode = childEnv.BACKEND_MODE || "auto";
 const backendGitUrl =
-  parsedEnv.BACKEND_GIT_URL ||
+  childEnv.BACKEND_GIT_URL ||
   "https://github.com/CATALOG-Historic-Records/orphaned-wells-ui-server.git";
-const backendAutoClone = parsedEnv.BACKEND_AUTO_CLONE || "false";
+const backendAutoClone = childEnv.BACKEND_AUTO_CLONE || "false";
 const backendPath = path.isAbsolute(backendDir)
   ? backendDir
   : path.resolve(scriptDir, backendDir);

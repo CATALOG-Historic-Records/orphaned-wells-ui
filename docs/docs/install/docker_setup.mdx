@@ -32,6 +32,7 @@ npm run docker:start
 ```
 
 The startup script creates `deployment/.env` from `deployment/.env.example` if the file does not already exist.
+Shell environment variables override matching values from `deployment/.env` for the Node-backed npm commands.
 
 When startup finishes, open:
 
