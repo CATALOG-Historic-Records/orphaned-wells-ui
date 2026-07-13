@@ -1,4 +1,4 @@
-import { MongoProcessor } from "../types";
+import { ChangeTeamRequest, MongoProcessor } from "../types";
 
 let BACKEND_URL = process.env.REACT_APP_BACKEND_URL as string;
 const CORS_MODE: RequestMode = "cors";
@@ -212,6 +212,15 @@ export const deleteRecordGroup = (rg_id: string) => {
   });
 };
 
+export const deleteRecordGroupRecords = (rg_id: string, data: any) => {
+  return fetch(BACKEND_URL + "/delete_record_group_records/" + rg_id, {
+    method: "POST",
+    mode: CORS_MODE,
+    body: JSON.stringify(data),
+    headers: JSON_HEADERS,
+  });
+};
+
 export const deleteRecord = (record_id: string) => {
   return fetch(BACKEND_URL + "/delete_record/" + record_id, {
     method: "POST",
@@ -281,7 +290,7 @@ export const updateUserRoles = (data: any) => {
   });
 };
 
-export const updateDefaultTeam = (data: any) => {
+export const changeTeam = (data: ChangeTeamRequest) => {
   return fetch(BACKEND_URL + "/update_default_team", {
     method: "POST",
     mode: CORS_MODE,
