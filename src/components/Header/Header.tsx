@@ -3,82 +3,43 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HeaderStyles as styles } from "../../styles";
 import { useUserContext } from "../../usercontext";
-import { fetchTeams, getOgrreVersion, updateDefaultTeam } from "../../services/app.service";
+import { changeTeam, fetchTeams, getOgrreVersion } from "../../services/app.service";
+import { ChangeTeamResponse } from "../../types";
+import ChangeTeamDialog from "./ChangeTeamDialog";
+import OgrreVersionDialog, { OgrreVersionInfo } from "./OgrreVersionDialog";
 import {
-  Alert,
   Avatar,
-  Box,
   Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
   IconButton,
   ListItemIcon,
   Menu,
   MenuItem,
-  Stack,
   Tab,
   Tabs,
-  Typography,
 } from "@mui/material";
 import { logout, callAPI } from "../../util";
-import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import Logout from "@mui/icons-material/Logout";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 
-interface PackageVersionInfo {
-  name: string;
-  version?: string;
-  commit?: string;
-  source_url?: string;
-  requested_revision?: string;
-}
-
-interface OgrreVersionInfo {
-  packages: PackageVersionInfo[];
-}
-
-const formatPackageName = (packageName: string) => {
-  if (packageName === "ogrre_data_cleaning") return "ogrre_data_cleaning";
-  if (packageName === "orphaned-wells-ui-server") return "orphaned-wells-ui-server";
-  return packageName;
-};
-
-const VersionMetadataLine = ({ label, value }: { label: string; value?: string }) => {
-  if (!value) return null;
-  return (
-    <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
-      <Typography sx={{ color: "#6B7280", fontSize: "13px", minWidth: "92px" }}>
-        {label}
-      </Typography>
-      <Box
-        component="span"
-        sx={{
-          color: "#111827",
-          fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
-          fontSize: "12px",
-          lineHeight: 1.6,
-          overflowWrap: "anywhere",
-        }}
-      >
-        {value}
-      </Box>
-    </Stack>
-  );
+const getApiErrorMessage = (error: any, fallback: string) => {
+  if (typeof error === "string") return error;
+  return error?.message || error?.detail || fallback;
 };
 
 const Header = (props: any) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userName, userPhoto, hasPermission} = useUserContext();
+  const { user, userName, userPhoto, hasPermission, handleSuccessfulAuthentication } = useUserContext();
   const [anchorAr, setAnchorAr] = useState<null | HTMLElement>(null);
   const [profileActions, setProfileActions] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [teams, setTeams] = useState<string[]>([]);
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
+  const [teamChangeLoading, setTeamChangeLoading] = useState(false);
+  const [teamChangeError, setTeamChangeError] = useState("");
   const [versionDialogOpen, setVersionDialogOpen] = useState(false);
   const [versionInfo, setVersionInfo] = useState<OgrreVersionInfo | null>(null);
   const [versionLoading, setVersionLoading] = useState(false);
@@ -121,20 +82,54 @@ const Header = (props: any) => {
     }
   };
 
-  const changeTeam = (team: string) => {
-    let data = {
-      new_team: team
-    };
+  const handleOpenTeamDialog = () => {
     setProfileActions(false);
-    callAPI(updateDefaultTeam, [data], (data) => navigate("/", { replace: true }), (e)=> console.error(e.detail));
+    setTeamChangeError("");
+    setTeamDialogOpen(true);
+    callAPI(fetchTeams, [], fetchedTeams, failedFetchTeams);
+  };
+
+  const handleCloseTeamDialog = () => {
+    if (teamChangeLoading) return;
+    setTeamDialogOpen(false);
+    setTeamChangeError("");
+  };
+
+  const handleChangeTeam = (team: string) => {
+    setTeamChangeLoading(true);
+    setTeamChangeError("");
+    callAPI(
+      changeTeam,
+      [{ new_team: team }],
+      handleChangedTeam,
+      handleFailedChangeTeam
+    );
+  };
+
+  const handleChangedTeam = (data: ChangeTeamResponse) => {
+    setTeamChangeLoading(false);
+    setTeamDialogOpen(false);
+    if (data?.team) {
+      setTeams((prevTeams) => {
+        if (prevTeams.includes(data.team)) return prevTeams;
+        return [...prevTeams, data.team].sort((a, b) => a.localeCompare(b));
+      });
+    }
+    handleSuccessfulAuthentication();
+    navigate("/", { replace: true });
+  };
+
+  const handleFailedChangeTeam = (error: any) => {
+    setTeamChangeLoading(false);
+    setTeamChangeError(getApiErrorMessage(error, "Unable to change team."));
   };
 
   const fetchedTeams = (data: string[]) => {
     setTeams(data);
   };
 
-  const failedFetchTeams = () => {
-
+  const failedFetchTeams = (error: any) => {
+    setTeamChangeError(getApiErrorMessage(error, "Unable to load teams."));
   };
 
   const handleViewOgrreVersion = () => {
@@ -153,11 +148,7 @@ const Header = (props: any) => {
 
   const handleFailedFetchVersion = (error: any) => {
     setVersionLoading(false);
-    if (typeof error === "string") {
-      setVersionError(error);
-      return;
-    }
-    setVersionError(error?.message || error?.detail || "Unable to load OGRRE version.");
+    setVersionError(getApiErrorMessage(error, "Unable to load OGRRE version."));
   };
 
   return (
@@ -216,11 +207,12 @@ const Header = (props: any) => {
           >
             {hasPermission("manage_system") && (
               <span>
-                {teams.map((team) => (
-                  <MenuItem key={team} onClick={() => changeTeam(team)}>
-                  Change to {team}
-                  </MenuItem>
-                ))}
+                <MenuItem onClick={handleOpenTeamDialog}>
+                  <ListItemIcon>
+                    <GroupsOutlinedIcon fontSize="small" />
+                  </ListItemIcon>
+                  Change team
+                </MenuItem>
                 <Divider />
               </span>
             )
@@ -242,85 +234,23 @@ const Header = (props: any) => {
           </Menu>
         </div>
       </div>
-      <Dialog
+      <ChangeTeamDialog
+        open={teamDialogOpen}
+        teams={teams}
+        currentTeam={user?.default_team}
+        allowCustomTeam={!user?.anonymous}
+        loading={teamChangeLoading}
+        error={teamChangeError}
+        onClose={handleCloseTeamDialog}
+        onChangeTeam={handleChangeTeam}
+      />
+      <OgrreVersionDialog
         open={versionDialogOpen}
+        versionInfo={versionInfo}
+        loading={versionLoading}
+        error={versionError}
         onClose={() => setVersionDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: "12px",
-            border: "1px solid #E5E7EB",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            borderBottom: "1px solid #EEF2F7",
-            pr: 6,
-          }}
-        >
-          <Typography component="div" variant="h6" sx={{ fontWeight: 700 }}>
-            OGRRE Version
-          </Typography>
-          <Typography component="div" sx={{ color: "#6B7280", fontSize: "13px", mt: 0.5 }}>
-            Backend package metadata currently reported by the server.
-          </Typography>
-        </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={() => setVersionDialogOpen(false)}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
-          <CloseIcon />
-        </IconButton>
-        <DialogContent dividers sx={{ p: 2.5 }}>
-          {versionLoading ? (
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <CircularProgress size={22} />
-              <Typography sx={{ color: "#4B5563", fontSize: "14px" }}>
-                Loading version information...
-              </Typography>
-            </Stack>
-          ) : versionError ? (
-            <Alert severity="error">{versionError}</Alert>
-          ) : versionInfo?.packages?.length ? (
-            <Stack spacing={1.5}>
-              {versionInfo.packages.map((packageInfo) => (
-                <Box
-                  key={packageInfo.name}
-                  sx={{
-                    border: "1px solid #E5E7EB",
-                    borderRadius: "8px",
-                    backgroundColor: "#FFFFFF",
-                    p: 1.5,
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 700, color: "#111827", mb: 1 }}>
-                    {formatPackageName(packageInfo.name)}
-                  </Typography>
-                  <Stack spacing={0.75}>
-                    <VersionMetadataLine label="Version" value={packageInfo.version || "Unknown"} />
-                    <VersionMetadataLine label="Commit" value={packageInfo.commit} />
-                    <VersionMetadataLine
-                      label="Requested"
-                      value={packageInfo.requested_revision !== packageInfo.commit ? packageInfo.requested_revision : undefined}
-                    />
-                    <VersionMetadataLine label="Source" value={packageInfo.source_url} />
-                  </Stack>
-                </Box>
-              ))}
-            </Stack>
-          ) : (
-            <Typography sx={{ color: "#4B5563", fontSize: "14px" }}>
-              No version information was returned.
-            </Typography>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ px: 2, py: 1.5 }}>
-          <Button onClick={() => setVersionDialogOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      />
     </div>
   );
 };
