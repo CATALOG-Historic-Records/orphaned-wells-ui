@@ -50,7 +50,7 @@ In auto mode, the Docker script checks for a sibling backend repository at `../o
 - If the backend source exists, Docker builds and runs the backend from local source.
 - If the backend source does not exist, Docker pulls and runs the backend image configured by `BACKEND_IMAGE`.
 
-In source mode, Docker bind-mounts the backend source into the container and starts Uvicorn with `--reload`. Normal Python code edits are picked up by the running backend. Dependency, packaging, Dockerfile, and startup-command changes require `npm run docker:start` so Compose can rebuild and recreate the backend container.
+In source mode, Docker bind-mounts the backend source into the container and starts Uvicorn with `--reload`, scoped to `/code/ogrre` with a short reload delay and Python bytecode writes disabled so Docker Desktop file-sync timing is less likely to serve stale imports. Normal Python code edits are picked up by the running backend. Dependency, packaging, Dockerfile, and startup-command changes require `npm run docker:start` so Compose can rebuild and recreate the backend container.
 
 For backend development, clone the backend repository next to the frontend repository:
 
