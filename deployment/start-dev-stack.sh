@@ -23,7 +23,11 @@ case "${backend_dir}" in
   *) backend_path="${script_dir}/${backend_dir}" ;;
 esac
 
-if [ "${backend_auto_clone}" = "true" ] && [ ! -d "${backend_path}/.git" ]; then
+has_backend_source() {
+  [ -f "$1/deployment/dockerfile" ] && [ -f "$1/ogrre/main.py" ]
+}
+
+if [ "${backend_auto_clone}" = "true" ] && ! has_backend_source "${backend_path}"; then
   mkdir -p "$(dirname "${backend_path}")"
   git clone "${backend_url}" "${backend_path}"
 fi
@@ -32,8 +36,8 @@ compose_files="-f ${script_dir}/docker-compose.dev.yml"
 
 case "${backend_mode}" in
   source)
-    if [ ! -d "${backend_path}/.git" ]; then
-      echo "BACKEND_MODE=source requires a backend checkout at ${backend_path}" >&2
+    if ! has_backend_source "${backend_path}"; then
+      echo "BACKEND_MODE=source requires backend source at ${backend_path}" >&2
       exit 1
     fi
     compose_files="${compose_files} -f ${script_dir}/docker-compose.source.yml"
@@ -41,7 +45,7 @@ case "${backend_mode}" in
   image)
     ;;
   auto)
-    if [ -d "${backend_path}/.git" ]; then
+    if has_backend_source "${backend_path}"; then
       compose_files="${compose_files} -f ${script_dir}/docker-compose.source.yml"
     fi
     ;;

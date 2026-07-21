@@ -23,6 +23,11 @@ const UploadDirectory = (props: UploadDirectoryProps) => {
   const [ disabled, setDisabled ] = useState(true);
   const MAX_UPLOAD_AMT = 1000;
 
+  const getFileBaseName = (filename: string) => {
+    const lastDotIndex = filename.lastIndexOf(".");
+    return lastDotIndex > 0 ? filename.slice(0, lastDotIndex) : filename;
+  };
+
   useEffect(() => {
     let uploadedAmt = uploadedFiles.length;
     if (uploading && uploadedAmt === filesToUpload.length) {
@@ -103,7 +108,7 @@ const UploadDirectory = (props: UploadDirectoryProps) => {
 
   const fetchedDuplicateRecords = (r: string[]) => {
     setDuplicateFiles(r);
-    const temp_unduplicateFiles = directoryFiles.filter((f) => !r.includes(f.name.split(".")[0]));
+    const temp_unduplicateFiles = directoryFiles.filter((f) => !r.includes(getFileBaseName(f.name)));
     // console.log(r.length)
     // console.log(temp_unduplicateFiles.length)
     // console.log(directoryFiles.length)
