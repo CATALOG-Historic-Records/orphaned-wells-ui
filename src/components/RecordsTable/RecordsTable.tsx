@@ -57,7 +57,7 @@ const RecordsTable = (props: RecordsTableProps) => {
     disabledMessage,
   } = props;
 
-  const { hasPermission} = useUserContext();
+  const { hasPermission, user } = useUserContext();
   const [loading, setLoading] = useState(true);
   const [ showNotes, setShowNotes ] = useState(false);
   const [ notesRecordId, setNotesRecordId ] = useState<string>();
@@ -131,9 +131,10 @@ const RecordsTable = (props: RecordsTableProps) => {
     setCurrentPage(0);
   };
 
+  const collaborator = (user?.collaborator || process.env.REACT_APP_COLLABORATOR || "").toLowerCase();
   const table_columns = 
-    process.env.REACT_APP_COLLABORATOR === "isgs" ? ISGS_TABLE_ATTRIBUTES[location] : 
-      process.env.REACT_APP_COLLABORATOR === "osage" ? OSAGE_TABLE_ATTRIBUTES[location] :
+    collaborator === "isgs" ? ISGS_TABLE_ATTRIBUTES[location] : 
+      collaborator === "osage" ? OSAGE_TABLE_ATTRIBUTES[location] :
         TABLE_ATTRIBUTES[location];
 
   useEffect(() => {
