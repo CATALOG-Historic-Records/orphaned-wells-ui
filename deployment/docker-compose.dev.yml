@@ -64,10 +64,10 @@ services:
       BACKEND_CONTAINER_HOST: ${BACKEND_CONTAINER_HOST:-backend}
       BACKEND_URL: http://backend:8001
       LOCATION: ${LOCATION:-us}
-      DB_CONNECTION: mongodb://mongodb:27017
+      DB_CONNECTION: ${DB_CONNECTION:-mongodb://mongodb:27017}
       DB_NAME: ${DB_NAME:-isgs}
-      DB_USERNAME: ""
-      DB_PASSWORD: ""
+      DB_USERNAME: ${DB_USERNAME:-}
+      DB_PASSWORD: ${DB_PASSWORD:-}
       REQUIRE_AUTH: ${REQUIRE_AUTH:-false}
       AUTH_PROVIDER: ${AUTH_PROVIDER:-google}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
