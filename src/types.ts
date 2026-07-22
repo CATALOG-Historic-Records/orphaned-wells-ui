@@ -168,6 +168,25 @@ export interface User {
     user_info?: any;
     permissions?: any;
     default_team: string;
+    collaborator?: string;
+}
+
+export interface ChangeTeamRequest {
+    new_team: string;
+}
+
+export interface ChangeTeamResponse {
+    team: string;
+    created_team: boolean;
+    added_to_team: boolean;
+}
+
+export interface ChangeCollaboratorRequest {
+    new_collaborator: string;
+}
+
+export interface ChangeCollaboratorResponse {
+    collaborator: string;
 }
 
 export interface RecordNote {
@@ -288,6 +307,9 @@ export interface RecordsTableProps {
     handleUpdate: (update: any) => void;
     filter_options?: {[key: string]: FilterOption};
     recordGroups?: RecordGroup[];
+    onFiltersChange?: (filters: FilterOption[]) => void;
+    disabled?: boolean;
+    disabledMessage?: string;
 }
 
 export interface PopupModalProps {

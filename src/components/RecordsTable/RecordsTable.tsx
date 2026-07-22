@@ -1,7 +1,7 @@
 import React, { useEffect, Fragment, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, TablePagination } from "@mui/material";
-import { Button, Box, Paper, IconButton, Grid, Typography, Menu, MenuItem } from "@mui/material";
+import { Button, Box, Paper, IconButton, Grid, Typography, Menu, MenuItem, Tooltip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import ErrorIcon from "@mui/icons-material/Error";
@@ -18,6 +18,8 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import PublishedWithChangesOutlinedIcon from "@mui/icons-material/PublishedWithChangesOutlined";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckIcon from "@mui/icons-material/Check";
 import { formatDate, average, formatConfidence, callAPI, convertFiltersToMongoFormat, TABLE_ATTRIBUTES, ISGS_TABLE_ATTRIBUTES, OSAGE_TABLE_ATTRIBUTES, DEFAULT_RECORDS_TABLE_PAGE_SIZE } from "../../util";
 import { styles } from "../../styles";
 import RecordNotesDialog from "../RecordNotesDialog/RecordNotesDialog";
@@ -27,6 +29,7 @@ import { getRecords, deleteRecords } from "../../services/app.service";
 import ColumnSelectDialog from "../ColumnSelectDialog/ColumnSelectDialog";
 import EmptyTable from "../EmptyTable/EmptyTable";
 import TableLoading from "../TableLoading/TableLoading";
+import RecordsTableOverlay from "./RecordsTableOverlay";
 import PopupModal from "../PopupModal/PopupModal";
 import { useDownload } from "../../context/DownloadContext";
 import { useUserContext } from "../../usercontext";
@@ -51,9 +54,12 @@ const RecordsTable = (props: RecordsTableProps) => {
     filter_options,
     handleUpdate,
     recordGroups,
+    onFiltersChange,
+    disabled,
+    disabledMessage,
   } = props;
 
-  const { hasPermission} = useUserContext();
+  const { hasPermission, user } = useUserContext();
   const [loading, setLoading] = useState(true);
   const [ showNotes, setShowNotes ] = useState(false);
   const [ notesRecordId, setNotesRecordId ] = useState<string>();
@@ -70,6 +76,7 @@ const RecordsTable = (props: RecordsTableProps) => {
   });
   const [showDownloadMessage, setShowDownloadMessage] = useState(false);
   const [openDeleteRecordsModal, setOpenDeleteRecordsModal] = useState(false);
+  const [deletingDisplayedRecords, setDeletingDisplayedRecords] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [ menuAnchor, setMenuAnchor ] = useState<HTMLElement>();
   const [filterBy, _setFilterBy] = useState<any[]>(
@@ -78,6 +85,13 @@ const RecordsTable = (props: RecordsTableProps) => {
   const [sorted, _setSorted] = useState(JSON.parse(localStorage.getItem("sorted") || "{}")[params.id || ""] || ["dateCreated", 1]
   );
   const { isDownloading, estimatedTotalBytes, progress } = useDownload();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const tableDisabled = disabled || deletingDisplayedRecords;
+  const tableDisabledMessage = disabledMessage || "Deleting records...";
+
+  useEffect(() => {
+    onFiltersChange?.(filterBy);
+  }, [filterBy, onFiltersChange]);
 
   useEffect(() => {
     if (isDownloading) {
@@ -120,9 +134,10 @@ const RecordsTable = (props: RecordsTableProps) => {
     setCurrentPage(0);
   };
 
+  const collaborator = (user?.collaborator || process.env.REACT_APP_COLLABORATOR || "").toLowerCase();
   const table_columns = 
-    process.env.REACT_APP_COLLABORATOR === "isgs" ? ISGS_TABLE_ATTRIBUTES[location] : 
-      process.env.REACT_APP_COLLABORATOR === "osage" ? OSAGE_TABLE_ATTRIBUTES[location] :
+    collaborator === "isgs" ? ISGS_TABLE_ATTRIBUTES[location] : 
+      collaborator === "osage" ? OSAGE_TABLE_ATTRIBUTES[location] :
         TABLE_ATTRIBUTES[location];
 
   useEffect(() => {
@@ -130,6 +145,18 @@ const RecordsTable = (props: RecordsTableProps) => {
     setLoading(true);
     loadData();
   }, [params.id, pageSize, currentPage, filterBy, sorted]);
+
+  const handleCopyName = (e: React.MouseEvent, recordId: string, name: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(name).then(() => {
+      setCopiedId(recordId);
+      setTimeout(() => {
+        setCopiedId((prev) => (prev === recordId ? null : prev));
+      }, 2000);
+    }).catch((err) => {
+      console.error("Failed to copy text: ", err);
+    });
+  };
 
   const loadData = () => {
     const body = {
@@ -158,6 +185,7 @@ const RecordsTable = (props: RecordsTableProps) => {
   };
 
   const handleClickRecord = (record_id: string) => {
+    if (tableDisabled) return;
     const state: any = { group_id: params.id, location: location, sourceRecordGroupId: params.id };
     state.currentPage = currentPage;
     state.pageSize = pageSize;
@@ -165,6 +193,7 @@ const RecordsTable = (props: RecordsTableProps) => {
   };
 
   const handleApplyFilters = (appliedFilters: any) => {
+    if (tableDisabled) return;
     setFilterBy(appliedFilters);
     let newAppliedFilters;
     let currentAppliedFilters = localStorage.getItem("appliedFilters");
@@ -220,15 +249,18 @@ const RecordsTable = (props: RecordsTableProps) => {
   };
 
   const handleChangePage = (newPage: any) => {
+    if (tableDisabled) return;
     setCurrentPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (tableDisabled) return;
     let newSize = parseInt(event.target.value);
     setPageSize(newSize);
   };
 
   const handleClickShowActions = (event: React.MouseEvent<HTMLElement>) => {
+    if (tableDisabled) return;
     event.stopPropagation();
     setShowActions(!showActions);
     setMenuAnchor(event.currentTarget);
@@ -236,22 +268,23 @@ const RecordsTable = (props: RecordsTableProps) => {
 
   const handleDeleteRecords = () => {
     setOpenDeleteRecordsModal(false);
+    setDeletingDisplayedRecords(true);
     const body = {
       record_ids: records.map((r) => r._id)
     };
-    // TODO: 
-    // 1) set loader
-    // 2) replace error call back function in callAPI with a function that displays an error using the ErrorBar component
     callAPI(
       deleteRecords,
       [body],
       () => window.location.reload(),
-      (e) => console.error(e)
+      (e) => {
+        setDeletingDisplayedRecords(false);
+        console.error(e);
+      }
     );
   };
 
   const handleSort = (key: SortableColumnKey) => {
-    if (Object.keys(SORTABLE_COLUMNS).includes(key)) {
+    if (!tableDisabled && Object.keys(SORTABLE_COLUMNS).includes(key)) {
       let new_sort_key = `${key}`;
       const sort_by_key = sorted[0];
       const sort_direction = sorted[1];
@@ -304,7 +337,33 @@ const RecordsTable = (props: RecordsTableProps) => {
     else if (row.review_status === "defective") reviewStatusIconColor = "#9F0100";
     else if (row.review_status === "unreviewed") reviewStatusIconColor = "grey";
     
-    if (key === "name") return <TableCell key={key}>{row.name}</TableCell>;
+    if (key === "name") return (
+      <TableCell key={key}>
+        <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
+          <span>{row.name}</span>
+          <Tooltip title={copiedId === row._id ? "Copied!" : "Copy name"}>
+            <IconButton
+              size="small"
+              onClick={(e) => handleCopyName(e, row._id, row.name)}
+              sx={{
+                padding: "2px",
+                color: copiedId === row._id ? "success.main" : "text.secondary",
+                "&:hover": {
+                  color: copiedId === row._id ? "success.main" : "primary.main",
+                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                },
+              }}
+            >
+              {copiedId === row._id ? (
+                <CheckIcon fontSize="small" />
+              ) : (
+                <ContentCopyIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </TableCell>
+    );
     else if (key === "dateCreated") return <TableCell key={key} align="right">{formatDate(row.dateCreated)}</TableCell>;
     else if (key === "api_number") return <TableCell key={key} align="right">{row.api_number}</TableCell>;
     else if (key === "confidence_median") return <TableCell key={key} align="right">{(row.status === "digitized" || row.status === "redigitized") && calculateAverageConfidence(row.attributesList)}</TableCell>;
@@ -393,7 +452,6 @@ const RecordsTable = (props: RecordsTableProps) => {
         id={row.name+"_record_row"}
         className="record_row"
       >
-        <TableCell align="right">{row?.rank}.</TableCell>
         {table_columns.keyNames.map((v,i) => (
           tableCell(row, v)
         ))}
@@ -403,12 +461,16 @@ const RecordsTable = (props: RecordsTableProps) => {
 
   return (
     <React.Fragment>
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{ position: "relative" }}
+        aria-busy={tableDisabled || loading}
+      >
         <Box sx={styles.topSection}>
           <Grid container>
             <Grid item sx={styles.topSectionLeft} xs={6}>
               <TableFilters applyFilters={handleApplyFilters} appliedFilters={filterBy} filter_options={filter_options} />
-              <Button onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon />} disabled={isDownloading}>
+              <Button onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon />} disabled={isDownloading || tableDisabled}>
                 Export
               </Button>
             </Grid>
@@ -417,7 +479,7 @@ const RecordsTable = (props: RecordsTableProps) => {
               {
                 hasPermission("delete") ? (
                   <>
-                    <IconButton onClick={handleClickShowActions}>
+                    <IconButton onClick={handleClickShowActions} disabled={tableDisabled}>
                       <MoreVertIcon/>
                     </IconButton>
                     <Menu
@@ -433,7 +495,7 @@ const RecordsTable = (props: RecordsTableProps) => {
                           setShowActions(false);
                         }}
                       >
-                          Delete Records
+                          Delete records
                       </MenuItem>
                     </Menu>
                   </>
@@ -447,7 +509,6 @@ const RecordsTable = (props: RecordsTableProps) => {
         <Table sx={{ minWidth: 650, marginTop: 1 }} aria-label="records table" size="small">
           <TableHead>
             <TableRow>
-              <TableCell></TableCell>
               {
                 table_columns.displayNames.map((attribute, idx) => (
                   <TableCell sx={styles.headerCell} key={idx} align={idx > 0 ? "right" : "left"}>
@@ -542,6 +603,7 @@ const RecordsTable = (props: RecordsTableProps) => {
           buttonVariant='contained'
           width={400}
         />
+        {tableDisabled && <RecordsTableOverlay message={tableDisabledMessage} />}
           
         
       </TableContainer>
