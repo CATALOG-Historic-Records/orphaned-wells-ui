@@ -195,6 +195,8 @@ const Project = () => {
                 <RecordGroupsTable
                   record_groups={record_groups}
                   sortRecordGroups={sortRecordGroups}
+                  projectId={params.id || ""}
+                  handleUpdate={handleUpdateProject}
                   loading={loading}
                 />
               )
