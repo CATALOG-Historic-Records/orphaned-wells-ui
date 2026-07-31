@@ -117,6 +117,10 @@ Use <CollaboratorInline /> for the short deployment key, such as `rrc`, `ca`, `i
 
 Some existing backend workflow fields are still named `DEPLOY_ENV`. In this checklist, their value should be the collaborator key unless the existing workflow has a documented exception.
 
+## 0. Prerequisites
+
+Refer to the Prerequisites section of the [Backend on GKE](./backend-gke) for details of prerequisite permissions/software needed.
+
 ## 1. Choose names
 
 Confirm the names before changing code:
@@ -164,27 +168,43 @@ Keep branch names, workflow names, secrets, App Engine service names, and DNS na
 
 ## 2. Update Terraform
 
-In `orphaned-wells-ui-server/deployment/terraform/terraform.tfvars`, add the collaborator to the GKE backend list:
+In `orphaned-wells-ui-server/deployment/terraform/variables.tf`, add the collaborator to the `gke_backends` default map for a shared, long-lived deployment:
 
 <CollaboratorCodeBlock language="hcl">{`
-gke_backend_names = [
-  # existing names...
-  "__COLLABORATOR__",
-]
-`}</CollaboratorCodeBlock>
+variable "gke_backends" {
+  # existing type declaration...
 
-Add its canonical backend hostname:
-
-<CollaboratorCodeBlock language="hcl">{`
-gke_backend_hostnames = {
-  __COLLABORATOR__ = "__COLLABORATOR__-server.uow-carbon.org"
+  default = {
+    # existing collaborators...
+    "__COLLABORATOR__" = {}
+  }
 }
 `}</CollaboratorCodeBlock>
 
-If the primary backend DNS record should point to GKE, include it in:
+Use `terraform.tfvars` only for uncommitted local overrides or testing. For example:
 
 <CollaboratorCodeBlock language="hcl">{`
-primary_dns_to_gke_backends = ["__COLLABORATOR__"]
+gke_backend_overrides = {
+  "__COLLABORATOR__" = {}
+}
+`}</CollaboratorCodeBlock>
+
+Default naming creates the backend namespace, GKE static IP, primary DNS record, and test DNS record from the collaborator key. Add optional settings in the same map only when defaults are not enough:
+
+<CollaboratorCodeBlock language="hcl">{`
+variable "gke_backends" {
+  # existing type declaration...
+
+  default = {
+    # existing collaborators...
+    "__COLLABORATOR__" = {
+      replicas             = 1
+      memory_request       = "8Gi"
+      memory_limit         = "8Gi"
+      persistent_disk_size = "20Gi"
+    }
+  }
+}
 `}</CollaboratorCodeBlock>
 
 Run Terraform:
@@ -193,12 +213,12 @@ Run Terraform:
 cd orphaned-wells-ui-server/deployment/terraform
 terraform init
 terraform workspace select ogrre
-terraform plan -var-file=terraform.tfvars
-terraform apply -var-file=terraform.tfvars
+terraform plan
+terraform apply
 ```
 
 :::caution
-Adding a name to `gke_backend_names` creates only the GKE backend infrastructure for that collaborator. Only add an entry to `local.collaborators` in `main.tf` if you intentionally need Terraform to manage a legacy VM.
+Adding a name to `gke_backends` or `gke_backend_overrides` creates only the GKE backend infrastructure for that collaborator. Only add an entry to `legacy_backend_vms` if you intentionally need Terraform to manage a legacy VM.
 :::
 
 ## 3. Update backend deployment targets
@@ -289,7 +309,13 @@ When editing the frontend workflow, set the existing `collaborator` field to the
 
 See [Frontend on App Engine](./frontend-app-engine) for details.
 
-## 8. Configure frontend DNS and OAuth
+## 8. Add the App Engine custom domain
+
+In the Google Cloud console, open **App Engine -> Settings -> Custom domains**. If the console labels this page differently, use **Domain mappings**.
+
+Add a new custom domain mapping for <CollaboratorInline suffix=".uow-carbon.org" /> and associate it with the App Engine frontend service, <CollaboratorInline suffix="-uow" />.
+
+## 9. Configure frontend DNS and OAuth
 
 Add frontend DNS records for <CollaboratorInline suffix=".uow-carbon.org" /> using the same App Engine frontend IPv4 and IPv6 addresses as the other frontend deployments.
 
@@ -298,7 +324,7 @@ Add both frontend URLs to Google OAuth credentials:
 - The App Engine generated service URL.
 - <CollaboratorInline prefix="https://" suffix=".uow-carbon.org" />.
 
-## 9. Confirm application setup
+## 10. Confirm application setup
 
 Confirm the collaborator deployment has:
 
