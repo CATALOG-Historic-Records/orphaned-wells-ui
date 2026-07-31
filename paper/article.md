@@ -63,7 +63,7 @@ The document-processing workflow is broken into a four-stage workflow, with the 
 
 The OGRRE UI emphasizes review efficiency. Attribute values and the source document are displayed together, selections are linked to image regions, low-confidence values can be prioritized, and keyboard shortcuts support movement through records. Review statuses including unreviewed, incomplete, reviewed, and defective make the state of a dataset visible to collaborators. These choices favor traceability and collaborative correction over a fully automated but opaque pipeline.
 
-![alt text](image.png)
+![alt text](ogrre-ui.png)
 Figure 1: OGRRE UI. This screen shows review of a document. The fields on the left show extracted values, which can be edited by a person and saved to the database. As fields are selected on the left, the corresponding bounding box detected by the AI processing will be highlighted in the image on the right. Buttons at the bottom of the page and numerous keyboard shortcuts allow for navigation through a list of documents.
 
 # Research impact statement
