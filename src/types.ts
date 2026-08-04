@@ -168,6 +168,7 @@ export interface User {
     user_info?: any;
     permissions?: any;
     default_team: string;
+    collaborator?: string;
 }
 
 export interface ChangeTeamRequest {
@@ -178,6 +179,14 @@ export interface ChangeTeamResponse {
     team: string;
     created_team: boolean;
     added_to_team: boolean;
+}
+
+export interface ChangeCollaboratorRequest {
+    new_collaborator: string;
+}
+
+export interface ChangeCollaboratorResponse {
+    collaborator: string;
 }
 
 export interface RecordNote {
@@ -418,6 +427,8 @@ export interface ColumnSelectDialogProps {
     appliedFilters: FilterOption[];
     sortBy: string;
     sortAscending: number;
+    documentTypes?: string[];
+    selectedRecordGroups?: string[];
 }
 
 export interface CheckboxesGroupProps {

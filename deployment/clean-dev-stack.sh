@@ -15,6 +15,10 @@ set +a
 backend_dir="${BACKEND_DIR:-../../orphaned-wells-ui-server}"
 backend_mode="${BACKEND_MODE:-auto}"
 
+has_backend_source() {
+  [ -f "$1/deployment/dockerfile" ] && [ -f "$1/ogrre/main.py" ]
+}
+
 case "${backend_dir}" in
   /*) backend_path="${backend_dir}" ;;
   *) backend_path="${script_dir}/${backend_dir}" ;;
@@ -22,7 +26,7 @@ esac
 
 compose_files="-f ${script_dir}/docker-compose.dev.yml"
 
-if { [ "${backend_mode}" = "source" ] || [ "${backend_mode}" = "auto" ]; } && [ -d "${backend_path}/.git" ]; then
+if { [ "${backend_mode}" = "source" ] || [ "${backend_mode}" = "auto" ]; } && has_backend_source "${backend_path}"; then
   compose_files="${compose_files} -f ${script_dir}/docker-compose.source.yml"
 fi
 
