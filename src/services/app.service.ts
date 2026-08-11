@@ -1,4 +1,4 @@
-import { ChangeTeamRequest, MongoProcessor } from "../types";
+import { ChangeCollaboratorRequest, ChangeTeamRequest, MongoProcessor } from "../types";
 
 let BACKEND_URL = process.env.REACT_APP_BACKEND_URL as string;
 const CORS_MODE: RequestMode = "cors";
@@ -28,8 +28,16 @@ export const getProcessorData = (google_id: string) => {
   });
 };
 
-export const getColumnData = (location: string, _id: string) => {
-  return fetch(BACKEND_URL + "/get_column_data/"+location+"/"+_id, {
+export const getColumnData = (location: string, _id: string, selectedRecordGroups?: string[]) => {
+  let url = BACKEND_URL + "/get_column_data/" + location + "/" + _id;
+  if (selectedRecordGroups && selectedRecordGroups.length > 0) {
+    const params = new URLSearchParams();
+    selectedRecordGroups.forEach((group) => {
+      params.append("selected_record_groups", group);
+    });
+    url += "?" + params.toString();
+  }
+  return fetch(url, {
     mode: CORS_MODE,
   });
 };
@@ -292,6 +300,15 @@ export const updateUserRoles = (data: any) => {
 
 export const changeTeam = (data: ChangeTeamRequest) => {
   return fetch(BACKEND_URL + "/update_default_team", {
+    method: "POST",
+    mode: CORS_MODE,
+    body: JSON.stringify(data),
+    headers: JSON_HEADERS,
+  });
+};
+
+export const changeCollaborator = (data: ChangeCollaboratorRequest) => {
+  return fetch(BACKEND_URL + "/change_collaborator", {
     method: "POST",
     mode: CORS_MODE,
     body: JSON.stringify(data),

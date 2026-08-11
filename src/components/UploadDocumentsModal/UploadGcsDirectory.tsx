@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Alert,
@@ -10,6 +10,7 @@ import {
   Stack,
   Switch,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import {
   batchProcessDocuments,
@@ -30,6 +31,13 @@ interface GcsPathCheckResult {
   totalFiles: number;
   totalBatches: number;
   totalLroWaves: number;
+  duplicateFiles?: string[];
+  duplicateCount?: number;
+  nonDuplicateCount?: number;
+  totalFilesToSubmit?: number;
+  totalBatchesToSubmit?: number;
+  totalLroWavesToSubmit?: number;
+  preventDuplicates?: boolean;
 }
 
 const UploadGcsDirectory = (props: UploadGcsDirectoryProps) => {
@@ -45,6 +53,7 @@ const UploadGcsDirectory = (props: UploadGcsDirectoryProps) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [jobId, setJobId] = useState("");
   const [checkingPath, setCheckingPath] = useState(false);
+  const [preventDuplicates, setPreventDuplicates] = useState(true);
   const [pathCheckResult, setPathCheckResult] =
     useState<GcsPathCheckResult | null>(null);
 
@@ -80,7 +89,18 @@ const UploadGcsDirectory = (props: UploadGcsDirectoryProps) => {
       bucketName: trimmedBucketName,
       prefix: trimmedPrefix,
       runCleaningFunctions,
+      preventDuplicates,
     };
+  };
+
+  const getFilesToSubmit = () => {
+    if (!pathCheckResult) return 0;
+    return pathCheckResult.totalFilesToSubmit ?? pathCheckResult.totalFiles;
+  };
+
+  const getBatchesToSubmit = () => {
+    if (!pathCheckResult) return 0;
+    return pathCheckResult.totalBatchesToSubmit ?? pathCheckResult.totalBatches;
   };
 
   const checkPath = () => {
@@ -135,11 +155,28 @@ const UploadGcsDirectory = (props: UploadGcsDirectoryProps) => {
     );
   };
 
+  const handlePreventDuplicates = (e: any) => {
+    setPreventDuplicates(e.target.checked);
+    setPathCheckResult(null);
+  };
+
+  const handleBucketNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setBucketName(e.target.value);
+    setPathCheckResult(null);
+    setJobId("");
+  };
+
+  const handlePrefixChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPrefix(e.target.value);
+    setPathCheckResult(null);
+    setJobId("");
+  };
+
   return (
     <Grid container spacing={2} sx={styles.form}>
       <Grid item xs={12}>
         <p style={styles.guidance}>
-          Process every supported document in a Google Cloud Storage bucket or
+          Process supported documents in a Google Cloud Storage bucket or
           folder. The bucket name and prefix are entered separately.
         </p>
       </Grid>
@@ -149,10 +186,7 @@ const UploadGcsDirectory = (props: UploadGcsDirectoryProps) => {
           label="Bucket name"
           placeholder="my-upload-bucket"
           value={bucketName}
-          onChange={(e) => {
-            setBucketName(e.target.value);
-            setPathCheckResult(null);
-          }}
+          onChange={handleBucketNameChange}
           disabled={uploading || checkingPath}
           helperText="Use only the bucket name. Do not include gs://."
         />
@@ -163,22 +197,30 @@ const UploadGcsDirectory = (props: UploadGcsDirectoryProps) => {
           label="Prefix or folder path"
           placeholder="incoming/well-records/"
           value={prefix}
-          onChange={(e) => {
-            setPrefix(e.target.value);
-            setPathCheckResult(null);
-          }}
+          onChange={handlePrefixChange}
           disabled={uploading || checkingPath}
           helperText="Optional folder path. Trailing slash is optional."
         />
       </Grid>
       <Grid item xs={12}>
-        <FormControlLabel
-          disabled={uploading}
-          control={<Switch />}
-          label="Run cleaning functions"
-          onChange={(e: any) => setRunCleaningFunctions(e.target.checked)}
-          checked={runCleaningFunctions}
-        />
+        <Stack direction="row" flexWrap="wrap" gap={2}>
+          <Tooltip title={"When selected, filenames that are already present in database will not be uploaded."}>
+            <FormControlLabel
+              disabled={uploading || checkingPath}
+              control={<Switch />}
+              label="Prevent Duplicates"
+              onChange={handlePreventDuplicates}
+              checked={preventDuplicates}
+            />
+          </Tooltip>
+          <FormControlLabel
+            disabled={uploading || checkingPath}
+            control={<Switch />}
+            label="Run cleaning functions"
+            onChange={(e: any) => setRunCleaningFunctions(e.target.checked)}
+            checked={runCleaningFunctions}
+          />
+        </Stack>
       </Grid>
       {errorMessage && (
         <Grid item xs={12}>
@@ -194,15 +236,24 @@ const UploadGcsDirectory = (props: UploadGcsDirectoryProps) => {
       )}
       {pathCheckResult && (
         <Grid item xs={12}>
-          <Alert severity={pathCheckResult.totalFiles > 0 ? "info" : "warning"}>
+          <Alert severity={getFilesToSubmit() > 0 ? "info" : "warning"}>
             {pathCheckResult.totalFiles} supported file
-            {pathCheckResult.totalFiles === 1 ? "" : "s"} will be submitted from{" "}
+            {pathCheckResult.totalFiles === 1 ? "" : "s"} found in{" "}
             gs://{pathCheckResult.bucketName}/
-            {pathCheckResult.normalizedPrefix || ""}
-            {pathCheckResult.totalBatches > 0 &&
-              ` across ${pathCheckResult.totalBatches} batch request${
-                pathCheckResult.totalBatches === 1 ? "" : "s"
-              }.`}
+            {pathCheckResult.normalizedPrefix || ""}.{" "}
+            {(pathCheckResult.duplicateCount || 0) > 0 &&
+              `${pathCheckResult.duplicateCount} duplicate file${
+                pathCheckResult.duplicateCount === 1 ? "" : "s"
+              } already ${
+                pathCheckResult.duplicateCount === 1 ? "exists" : "exist"
+              } in this record group. `}
+            {getFilesToSubmit()} file
+            {getFilesToSubmit() === 1 ? "" : "s"} will be submitted
+            {getBatchesToSubmit() > 0 &&
+              ` across ${getBatchesToSubmit()} batch request${
+                getBatchesToSubmit() === 1 ? "" : "s"
+              }`}
+            .
           </Alert>
         </Grid>
       )}
@@ -227,7 +278,7 @@ const UploadGcsDirectory = (props: UploadGcsDirectoryProps) => {
                 variant="contained"
                 sx={styles.button}
                 onClick={submit}
-                disabled={!bucketName.trim() || checkingPath}
+                disabled={!bucketName.trim() || checkingPath || (pathCheckResult !== null && getFilesToSubmit() === 0)}
               >
                 Start Batch Processing
               </Button>
