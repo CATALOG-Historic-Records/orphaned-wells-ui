@@ -495,6 +495,12 @@ export interface ExportTypeSelectionProps {
     location?: string;
 }
 
+export interface ReviewStateSelectionProps {
+    reviewStateFilter: string;
+    onChange: (value: string) => void;
+    disabled?: boolean;
+}
+
 export interface ErrorBarProps {
     errorMessage: string | null;
     setErrorMessage: (v: string | null) => void;

@@ -11,6 +11,8 @@ import {
   TextField,
   InputAdornment,
   Typography,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Checkbox, Stack, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -18,7 +20,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import SearchIcon from "@mui/icons-material/Search";
 import { callAPI, convertFiltersToMongoFormat } from "../../util";
 import { downloadRecords, getColumnData, getDownloadSize } from "../../services/app.service";
-import { ColumnSelectDialogProps, CheckboxesGroupProps, ExportTypeSelectionProps } from "../../types";
+import { ColumnSelectDialogProps, CheckboxesGroupProps, ExportTypeSelectionProps, ReviewStateSelectionProps } from "../../types";
 import CircularProgress from "@mui/material/CircularProgress";
 import ErrorBar from "../ErrorBar/ErrorBar";
 import { useUserContext } from "../../usercontext";
@@ -49,6 +51,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
     "image_files": false,
     "embedded_pdf_files": false,
   });
+  const [reviewStateFilter, setReviewStateFilter] = useState<string>("All");
   const [name, setName] = useState("");
   const dialogHeight = "85vh";
   const dialogWidth = "60vw";
@@ -57,6 +60,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
 
   useEffect(() => {
     if (open) {
+      setReviewStateFilter("All");
       callAPI(
         getColumnData,
         [location, _id, selectedRecordGroups],
@@ -167,13 +171,27 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
     return Array.from(new Set([...attributeRawCols, ...notesSelected]));
   };
 
+  const getMongoFilter = () => {
+    const mongoFilter: any = convertFiltersToMongoFormat(appliedFilters);
+    if (reviewStateFilter === "Reviewed Only") {
+      mongoFilter["review_status"] = { "$in": ["reviewed"] };
+    } else if (reviewStateFilter === "Non-Defective") {
+      mongoFilter["review_status"] = { "$in": ["reviewed", "unreviewed", "incomplete"] };
+    } else if (reviewStateFilter === "Defective Only") {
+      mongoFilter["review_status"] = { "$in": ["defective"] };
+    } else if (reviewStateFilter === "All") {
+      delete mongoFilter["review_status"];
+    }
+    return mongoFilter;
+  };
+
   const handleGetTotalBytes = () => {
     const exportCols = getExportColumnsList();
     if (exportTypes.image_files || exportTypes.embedded_pdf_files) {
       const body = {
         columns: exportCols,
         sort: [sortBy, sortAscending],
-        filter: convertFiltersToMongoFormat(appliedFilters),
+        filter: getMongoFilter(),
         document_types: documentTypes || [],
       };
       setLoadingFileSize(true);
@@ -198,7 +216,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
     const body = {
       columns: exportCols,
       sort: [sortBy, sortAscending],
-      filter: convertFiltersToMongoFormat(appliedFilters),
+      filter: getMongoFilter(),
       document_types: documentTypes || [],
     };
     await downloadWithProgress(downloadRecords, [location, _id, exportTypes, name, body], `${name}.zip`, totalBytes);
@@ -284,6 +302,12 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
             location={location}
           />
           <Divider sx={{ my: 1.5 }} />
+          <ReviewStateSelection
+            reviewStateFilter={reviewStateFilter}
+            onChange={setReviewStateFilter}
+            disabled={loadingFileSize || isDownloading}
+          />
+          <Divider sx={{ my: 1.5 }} />
           <CheckboxesGroup
             columns={columns}
             docTypeColumns={docTypeColumns}
@@ -341,6 +365,33 @@ const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
             })}
           </Stack>
         </FormGroup>
+      </FormControl>
+    </Box>
+  );
+};
+
+const ReviewStateSelection = (props: ReviewStateSelectionProps) => {
+  const { reviewStateFilter, onChange, disabled } = props;
+
+  return (
+    <Box>
+      <FormControl component="fieldset" variant="standard" disabled={disabled} sx={{ minWidth: 200 }}>
+        <FormLabel component="legend" id="export-review-state-label" sx={{ mb: 1 }}>
+          Review State
+        </FormLabel>
+        <Select
+          labelId="export-review-state-label"
+          id="export-review-state-select"
+          data-cy="export-review-state-select"
+          value={reviewStateFilter}
+          onChange={(e) => onChange(e.target.value as string)}
+          size="small"
+        >
+          <MenuItem value="All" data-cy="export-review-state-option-all">All</MenuItem>
+          <MenuItem value="Reviewed Only" data-cy="export-review-state-option-reviewed">Reviewed Only</MenuItem>
+          <MenuItem value="Non-Defective" data-cy="export-review-state-option-non-defective">Non-Defective</MenuItem>
+          <MenuItem value="Defective Only" data-cy="export-review-state-option-defective">Defective Only</MenuItem>
+        </Select>
       </FormControl>
     </Box>
   );
