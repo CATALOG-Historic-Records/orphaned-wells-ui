@@ -32,6 +32,7 @@ Add a collaborator to `gke_backends` or `gke_backend_overrides` for GKE-only inf
 - GitHub CLI `gh` for updating GitHub Actions secrets from the command line.
 - Access to the target GCP project.
 - Access to the shared Terraform state bucket: `gs://tidy-outlet-412020-ogrre-terraform-state`.
+- A Google identity with the [deployment and Terraform service-account permissions](/docs/install/gcp_setup#grant-deployment-and-terraform-access), either as your human `gcloud` account or as the `ogrre-deployment-ci` service account.
 - A local `terraform.tfvars` file only when you need uncommitted local overrides.
 
 Shared non-secret defaults live in `variables.tf`. Add long-lived public collaborators to the `gke_backends` map there so the repo remains the source of truth.
@@ -48,6 +49,8 @@ gke_backend_overrides = {
 
 ## Authenticate
 
+Use your human Google account when it has the required infrastructure roles:
+
 ```bash
 cd orphaned-wells-ui-server/deployment/terraform
 
@@ -55,6 +58,19 @@ gcloud auth login
 gcloud config set project <PROJECT_ID>
 gcloud auth application-default login
 ```
+
+Or use the deployment and Terraform service-account key for this shell only:
+
+```bash
+cd orphaned-wells-ui-server/deployment/terraform
+
+export GOOGLE_APPLICATION_CREDENTIALS=/secure/path/ogrre-deployment-ci-service-key.json
+gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
+gcloud config set project <PROJECT_ID>
+```
+
+Do not use the storage runtime or Document AI runtime service-account keys for
+Terraform. Those accounts are intentionally limited to backend runtime tasks.
 
 ## Plan and apply
 
@@ -86,11 +102,19 @@ gh secret set K8S_DEPLOY_TARGETS \
 
 Re-export it any time Terraform changes hostnames, static IP names, namespaces, upload bucket names, resource requests, or cluster metadata.
 
+Keep the backend repository deployment docs and these frontend docs in sync when changing Kubernetes or Terraform behavior. The source of truth lives in `orphaned-wells-ui-server`, but this docs site is the operator-facing deployment guide.
+
 ## Upload buckets
 
 Each GKE backend gets a Cloud Storage upload bucket. The default bucket name is `<collaborator>_uploads`; use `upload_bucket_name` only for existing exceptions or explicit custom names. Staging uses `uploaded_documents_v0`.
 
 Terraform keys bucket resources by bucket name, so collaborators can intentionally share a bucket without creating duplicate resources. Buckets use `force_destroy=false` and `prevent_destroy=true` to protect uploaded files.
+
+## GKE resource sizing
+
+Collaborator backends default to 2 replicas with 1850m CPU and 12 GiB memory per pod. The memory headroom preserves large upload and batch-processing workflows. Staging is intentionally smaller: 1 replica with 1 CPU and 6 GiB memory.
+
+Changing these values in Terraform does not update running Kubernetes pods by itself. Apply Terraform, update `K8S_DEPLOY_TARGETS`, then redeploy the affected backend environments.
 
 ## Legacy Compute Engine VMs
 
@@ -103,6 +127,8 @@ enabled_legacy_backend_vms = ["isgs"]
 ```
 
 To disable it again without deleting the definition, remove the name from `enabled_legacy_backend_vms`. If Terraform state still contains old module resources and you want Terraform to stop managing them rather than destroy them, remove only those bindings from state with `terraform state rm`.
+
+Stopped legacy VMs, detached disks, static IPs, or automatic snapshots that are no longer in Terraform state require explicit Google Cloud cleanup. Confirm rollback is no longer needed before deleting them.
 
 ## Workspaces and state
 
