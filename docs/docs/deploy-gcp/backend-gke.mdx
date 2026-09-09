@@ -54,6 +54,7 @@ Other required access:
 
 - Ability to edit GitHub Secrets and Actions for the OGRRE GitHub project `CATALOG-HISTORIC-RECORDS`.
 - Permissions to manage GKE, Compute addresses, Cloud DNS, Cloud Storage buckets, OAuth, and project services in Google Cloud.
+- The three [OGRRE service accounts](/docs/install/gcp_setup#create-google-service-account-keys): storage runtime, Document AI runtime, and deployment/Terraform.
 
 ## Prepare deployment targets
 
@@ -79,6 +80,8 @@ gh secret set K8S_DEPLOY_TARGETS \
 
 The `host` field controls the Kubernetes Ingress host and the Google-managed certificate domain. The `storage_bucket_name` field controls the runtime `STORAGE_BUCKET_NAME` written to `Secret/backend-runtime-env`. DNS or bucket changes in Terraform are not enough by themselves; update `K8S_DEPLOY_TARGETS` and redeploy the backend.
 
+Resource target changes work the same way: Terraform updates the desired values in `kubernetes_deploy_targets`, the backend repository secret `K8S_DEPLOY_TARGETS` copies those values into GitHub Actions, and the next backend deployment renders and applies them to Kubernetes.
+
 ## Required backend secrets
 
 The GKE deployment workflows require:
@@ -86,10 +89,16 @@ The GKE deployment workflows require:
 - `PROJECT_ID`
 - `DOCKERHUB_USERNAME`
 - `DOCKERHUB_ACCESS_TOKEN`
-- `CREDS_JSON`
-- `SERVICE_KEY_JSON`
+- `DEPLOYMENT_SERVICE_KEY_JSON`
+- `STORAGE_SERVICE_KEY_JSON`
+- `DOCUMENT_AI_SERVICE_KEY_JSON`
 - `K8S_DEPLOY_TARGETS`
 - One runtime env secret per dispatch-supported collaborator, currently `STAGING_ENV`, `CA_ENV`, `ISGS_ENV`, `NEWTS_ENV`, `OSAGE_ENV`, and `RRC_ENV`
+
+`DEPLOYMENT_SERVICE_KEY_JSON` is used only by GitHub Actions to authenticate to
+Google Cloud and apply the deployment. `STORAGE_SERVICE_KEY_JSON` and
+`DOCUMENT_AI_SERVICE_KEY_JSON` are written into the Kubernetes
+`backend-runtime-files` secret and mounted into backend pods as runtime keys.
 
 The environment-file secret should contain the same key/value pairs used by the VM `.env` file. The workflow overrides these Kubernetes-owned values:
 
@@ -99,6 +108,9 @@ The environment-file secret should contain the same key/value pairs used by the 
 - `LOCAL_STORAGE_ROOT`
 - `LOCAL_STORAGE_URL_BASE`
 - `STORAGE_BUCKET_NAME`
+- `STORAGE_SERVICE_KEY`
+- `DOCUMENT_AI_SERVICE_KEY`
+- `GOOGLE_APPLICATION_CREDENTIALS`
 
 Keep `COLLABORATOR` in the runtime secret when the backend needs collaborator-specific processor metadata.
 
@@ -114,7 +126,7 @@ gh workflow run deploy-k8s-staging.yml \
   --ref main
 ```
 
-Collaborator workflows deploy an existing image tag, defaulting to `latest`:
+Collaborator workflows deploy an existing image tag through `IMAGE_TAG: auto`. On collaborator branch merge commits, `auto` resolves to the second parent commit, which is the main commit that staging built and tested. On fast-forward or non-merge commits, `auto` resolves to the current commit:
 
 ```bash
 gh workflow run deploy-k8s-isgs.yml --repo CATALOG-Historic-Records/orphaned-wells-ui-server --ref isgs
@@ -124,6 +136,8 @@ gh workflow run deploy-k8s-ca.yml --repo CATALOG-Historic-Records/orphaned-wells
 ```
 
 The exact set of deployable collaborators is controlled by `.github/workflows/deploy-k8s-dispatch.yml`. Confirm the collaborator is present in `workflow_dispatch.inputs.DEPLOY_ENV.options` and in the runtime-env secret mapping before dispatching it.
+
+Merging source changes into a collaborator branch only changes the live backend when that branch's deployment workflow runs. If automatic deployments are enabled for the branch, the merge can trigger the rollout. Otherwise, manually dispatch the collaborator workflow after the merge.
 
 Automatic deployments are controlled by repository variables:
 
@@ -189,3 +203,4 @@ kubectl top nodes
 - Google-managed certificates require DNS to point at the GKE load balancer before they become active.
 - The rendered manifest in `deployment/kubernetes/rendered/backend.yaml` is an ephemeral artifact. Do not commit it.
 - The Kubernetes Deployment uses pod-local `emptyDir` volumes for `/logs` and `/data`. Production document storage should continue using the Terraform-managed Google Cloud Storage upload bucket.
+- The default collaborator backend resource target is 2 replicas at 1850m CPU and 12 GiB memory per pod. Staging is intentionally smaller at 1 replica with 1 CPU and 6 GiB memory.
