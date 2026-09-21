@@ -333,7 +333,8 @@ const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
         <FormGroup>
           <Stack direction="row" spacing={1} flexWrap="wrap">
             {Object.entries(exportTypes).map(([export_type, is_selected]) => {
-              const labelText = export_type === "embedded_pdf_files" ? "Embedded PDF Files" : export_type.replace("_", " ");
+              const labelText = export_type === "embedded_pdf_files" ? "Embedded & Reconstructed PDF Files" : export_type.replace("_", " ");
+
               return (
                 <FormControlLabel
                   key={export_type}
