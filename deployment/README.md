@@ -89,11 +89,97 @@ DB_CONNECTION=mongodb://mongodb:27017
 DB_NAME=isgs
 DB_USERNAME=
 DB_PASSWORD=
+USE_DB_PROCESSORS=false
 ```
 
 Set these values in `deployment/.env` to point the backend at a different MongoDB instance. Existing `.env` files are not regenerated from `.env.example`, so add any missing keys manually after pulling deployment changes.
 
+`USE_DB_PROCESSORS` defaults to `false` in the backend, Compose, and the provided
+environment templates. In this mode, the app reads schemas from the installed
+`ogrre_data_cleaning` package and displays them read-only. Set it to `true`
+explicitly and recreate the backend when the deployment should use editable,
+database-backed schemas.
+
+`SCHEMA_INFERENCE_MAX_RECORDS` sets the maximum record sample for explicit schema
+generation and extension (default 1,000; range 1–10,000). Add it to an existing
+`deployment/.env` and recreate the backend container to change it. Fixed byte,
+field-count, nesting, and query-time limits also apply. The backend creates the
+sampling index on startup; no record rewrite or schema generation runs at startup.
+
+### Lightweight record loading and schema maintenance
+
+Deploy the frontend and backend changes together. With a sibling backend checkout,
+use `BACKEND_MODE=source npm run docker:start` to build and run the current backend
+with the current frontend. In image mode, publish/select a backend image containing
+the same changes, pull that image, and recreate the backend; a previously cached
+image does not contain local backend fixes. No new environment variables or seed
+database reset are required for lightweight loading.
+
+Project/table requests and statistics do not reconcile entire record groups.
+Statistics tolerate malformed attribute arrays and entries. Opening a record
+prepares only that record. Missing schemas do not prevent browsing; failed API
+requests display an error with Retry in the frontend.
+
+The backend also preserves indexed `dateCreated` sorting for All Records by
+hiding retired attributes after metadata filtering, ranking, and pagination.
+Update/rebuild the backend to get this fix; the frontend API and Compose settings
+are unchanged. Existing databases can keep their `dateCreated` index, and no
+`allowDiskUse` setting or schema migration is needed.
+
+Schema retirement/replacement runs as an explicit mutation, and saved package
+imports can resume their reconciliation steps. For a repo-package update or old
+retirement definitions that have not been applied, use the optional bounded
+maintenance command in the updated backend container:
+
+```sh
+docker compose --env-file deployment/.env -f deployment/docker-compose.dev.yml exec -T backend python -m ogrre.reconcile_schema_records RECORD_GROUP_ID
+docker compose --env-file deployment/.env -f deployment/docker-compose.dev.yml exec backend python -m ogrre.reconcile_schema_records RECORD_GROUP_ID --batch-size 100 --apply
+```
+
+The commands use the running backend's database configuration, including cloud
+overrides. Verify the displayed database, collaborator, and group before confirming
+an apply. Repeat batches until `complete` is true and `remaining` is zero. Lists
+use stored retirement flags until maintenance completes. Do not add this command
+to container startup or page-loading hooks. Neither this command nor
+`migrate_schema_bindings` is required just to browse existing data.
+
 ## MongoDB Seed Data
+
+### Schema roles and permissions
+
+The bundled dump and `docs/static/downloads/InitializeMongoDB.py` grant
+`manage_schema` to team leads and all system roles, and
+`manage_schema_destructive` only to `sys_admin`. Fresh Docker databases and
+restores of the updated dump need no schema-permission migration.
+
+Existing volumes retain their stored roles when containers restart. To update
+those roles while preserving the database's data, run the migration using an
+updated backend:
+
+```sh
+docker compose --env-file deployment/.env -f deployment/docker-compose.dev.yml exec -T backend python -m ogrre.migrate_schema_permissions
+docker compose --env-file deployment/.env -f deployment/docker-compose.dev.yml exec backend python -m ogrre.migrate_schema_permissions --apply
+docker compose --env-file deployment/.env -f deployment/docker-compose.dev.yml exec -T backend python -m ogrre.migrate_schema_permissions
+```
+
+Run these from the frontend repository. The commands use the running backend's
+database configuration, including any cloud database override. Each command
+shows the hosts, database name, configured collaborator, and proposed changes
+without URI credentials or query options. The apply command needs interactive
+input: verify the target and preview, then enter `y` to confirm. Any other answer
+or end of input cancels. The final command should report `No changes needed.`
+with an empty changes list. For the E2E stack, use `deployment/.env.e2e` in place
+of `deployment/.env`.
+
+The migration grants safe schema management to team leads and all system roles,
+and destructive schema management only to `sys_admin`. It preserves other
+permissions and user role assignments. Refresh the app after migrating.
+
+The development and E2E defaults use `REQUIRE_AUTH=false`. Destructive schema
+actions intentionally remain disabled in that mode, even after migrating roles.
+To test them, enable authentication and sign in with the `sys_admin` system role.
+
+### Restore the sample dump
 
 The sample dump lives at `deployment/mongo-dumps/sample_mongodump`. MongoDB restores it automatically the first time the `mongodb_data` volume is created.
 
