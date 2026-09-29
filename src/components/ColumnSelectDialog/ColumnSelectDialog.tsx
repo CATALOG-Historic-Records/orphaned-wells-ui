@@ -53,6 +53,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
     "json": true,
     "image_files": false,
     "embedded_pdf_files": false,
+    "reconstructed_pdf_files": false,
   });
   const [name, setName] = useState("");
   const dialogHeight = "85vh";
@@ -175,7 +176,8 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   const handleGetTotalBytes = () => {
     setErrorMsg(null);
     const exportCols = getExportColumnsList();
-    if (exportTypes.image_files || exportTypes.embedded_pdf_files) {
+    if (exportTypes.image_files || exportTypes.embedded_pdf_files || exportTypes.reconstructed_pdf_files) {
+
       const body = {
         columns: exportCols,
         sort: [sortBy, sortAscending],
@@ -338,7 +340,14 @@ const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
         <FormGroup>
           <Stack direction="row" spacing={1} flexWrap="wrap">
             {Object.entries(exportTypes).map(([export_type, is_selected]) => {
-              const labelText = export_type === "embedded_pdf_files" ? "Embedded PDF Files" : export_type.replace("_", " ");
+              let labelText = export_type.replace("_", " ");
+              if (export_type === "embedded_pdf_files") {
+                labelText = "Embedded PDF Files";
+              } else if (export_type === "reconstructed_pdf_files") {
+                labelText = "Reconstructed Original PDFs";
+              }
+
+
               return (
                 <FormControlLabel
                   key={export_type}
