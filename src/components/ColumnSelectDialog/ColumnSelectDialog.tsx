@@ -55,6 +55,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
     "embedded_pdf_files": false,
   });
   const [name, setName] = useState("");
+  const [reconstructOriginalDoc, setReconstructOriginalDoc] = useState<boolean>(false);
   const dialogHeight = "85vh";
   const dialogWidth = "60vw";
 
@@ -181,6 +182,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         sort: [sortBy, sortAscending],
         filter: convertFiltersToMongoFormat(appliedFilters),
         document_types: documentTypes || [],
+        reconstruct_original_doc: location === "project" ? reconstructOriginalDoc : false,
       };
       setLoadingFileSize(true);
       callAPI(
@@ -206,6 +208,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
       sort: [sortBy, sortAscending],
       filter: convertFiltersToMongoFormat(appliedFilters),
       document_types: documentTypes || [],
+      reconstruct_original_doc: location === "project" ? reconstructOriginalDoc : false,
     };
     try {
       await downloadWithProgress(downloadRecords, [location, _id, exportTypes, name, body], `${name}.zip`, totalBytes);
@@ -292,6 +295,8 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
             updateExportTypes={handleChangeExportTypes}
             disabled={loadingFileSize || isDownloading}
             location={location}
+            reconstructOriginalDoc={reconstructOriginalDoc}
+            setReconstructOriginalDoc={setReconstructOriginalDoc}
           />
           <Divider sx={{ my: 1.5 }} />
           <CheckboxesGroup
@@ -322,7 +327,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
 };
 
 const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
-  const { exportTypes, updateExportTypes, disabled } = props;
+  const { exportTypes, updateExportTypes, disabled, location, reconstructOriginalDoc, setReconstructOriginalDoc } = props;
 
   const handleChangeExportTypes = (event: React.ChangeEvent<HTMLInputElement>) => {
     let name = event.target.name;
@@ -352,6 +357,22 @@ const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
           </Stack>
         </FormGroup>
       </FormControl>
+      {location === "project" && setReconstructOriginalDoc && (
+        <Box sx={{ mt: 1.5 }}>
+          <FormControlLabel
+            data-cy="reconstruct-original-doc-option"
+            control={
+              <Checkbox
+                checked={reconstructOriginalDoc || false}
+                onChange={(e) => setReconstructOriginalDoc(e.target.checked)}
+                name="reconstruct_original_doc"
+                disabled={disabled}
+              />
+            }
+            label="Reconstruct original document page order"
+          />
+        </Box>
+      )}
     </Box>
   );
 };

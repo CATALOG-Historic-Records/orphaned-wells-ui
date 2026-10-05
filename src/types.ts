@@ -717,6 +717,8 @@ export interface ExportTypeSelectionProps {
     updateExportTypes: (exportType: string) => void;
     disabled?: boolean;
     location?: string;
+    reconstructOriginalDoc?: boolean;
+    setReconstructOriginalDoc?: (val: boolean) => void;
 }
 
 export interface ErrorBarProps {
