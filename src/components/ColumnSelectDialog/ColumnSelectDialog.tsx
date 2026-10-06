@@ -40,7 +40,7 @@ import {
 
 const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   const { open, onClose, location, handleUpdate, _id, appliedFilters, sortBy, sortAscending, documentTypes, selectedRecordGroups } = props;
-  const { hasPermission } = useUserContext();
+  const { user, hasPermission } = useUserContext();
 
   const [columns, setColumns] = useState<string[]>([]);
   const [docTypeColumns, setDocTypeColumns] = useState<{ [key: string]: string[] }>({});
@@ -328,6 +328,8 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
 
 const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
   const { exportTypes, updateExportTypes, disabled, location, reconstructOriginalDoc, setReconstructOriginalDoc } = props;
+  const { user } = useUserContext();
+  const collaborator = (user?.collaborator || process.env.REACT_APP_COLLABORATOR || "").toLowerCase();
 
   const handleChangeExportTypes = (event: React.ChangeEvent<HTMLInputElement>) => {
     let name = event.target.name;
@@ -357,7 +359,7 @@ const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
           </Stack>
         </FormGroup>
       </FormControl>
-      {location === "project" && setReconstructOriginalDoc && (
+      {location === "project" && collaborator === "rrc" && setReconstructOriginalDoc && (
         <Box sx={{ mt: 1.5 }}>
           <FormControlLabel
             data-cy="reconstruct-original-doc-option"
