@@ -40,7 +40,7 @@ import {
 
 const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   const { open, onClose, location, handleUpdate, _id, appliedFilters, sortBy, sortAscending, documentTypes, selectedRecordGroups } = props;
-  const { hasPermission } = useUserContext();
+  const { user, hasPermission } = useUserContext();
 
   const [columns, setColumns] = useState<string[]>([]);
   const [docTypeColumns, setDocTypeColumns] = useState<{ [key: string]: string[] }>({});
@@ -55,6 +55,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
     "embedded_pdf_files": false,
   });
   const [name, setName] = useState("");
+  const [reconstructOriginalDoc, setReconstructOriginalDoc] = useState<boolean>(false);
   const [exportRawValues, setExportRawValues] = useState<boolean>(false);
   const dialogHeight = "85vh";
   const dialogWidth = "60vw";
@@ -182,6 +183,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         sort: [sortBy, sortAscending],
         filter: convertFiltersToMongoFormat(appliedFilters),
         document_types: documentTypes || [],
+        reconstruct_original_doc: location === "project" ? reconstructOriginalDoc : false,
         export_raw_values: exportRawValues,
       };
       setLoadingFileSize(true);
@@ -208,6 +210,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
       sort: [sortBy, sortAscending],
       filter: convertFiltersToMongoFormat(appliedFilters),
       document_types: documentTypes || [],
+      reconstruct_original_doc: location === "project" ? reconstructOriginalDoc : false,
       export_raw_values: exportRawValues,
     };
     try {
@@ -295,6 +298,8 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
             updateExportTypes={handleChangeExportTypes}
             disabled={loadingFileSize || isDownloading}
             location={location}
+            reconstructOriginalDoc={reconstructOriginalDoc}
+            setReconstructOriginalDoc={setReconstructOriginalDoc}
             exportRawValues={exportRawValues}
             setExportRawValues={setExportRawValues}
           />
@@ -327,7 +332,18 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
 };
 
 const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
-  const { exportTypes, updateExportTypes, disabled, location, exportRawValues, setExportRawValues } = props;
+  const {
+    exportTypes,
+    updateExportTypes,
+    disabled,
+    location,
+    reconstructOriginalDoc,
+    setReconstructOriginalDoc,
+    exportRawValues,
+    setExportRawValues,
+  } = props;
+  const { user } = useUserContext();
+  const collaborator = (user?.collaborator || process.env.REACT_APP_COLLABORATOR || "").toLowerCase();
 
   const handleChangeExportTypes = (event: React.ChangeEvent<HTMLInputElement>) => {
     let name = event.target.name;
@@ -357,6 +373,22 @@ const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
           </Stack>
         </FormGroup>
       </FormControl>
+      {location === "project" && collaborator === "rrc" && setReconstructOriginalDoc && (
+        <Box sx={{ mt: 1.5 }}>
+          <FormControlLabel
+            data-cy="reconstruct-original-doc-option"
+            control={
+              <Checkbox
+                checked={reconstructOriginalDoc || false}
+                onChange={(e) => setReconstructOriginalDoc(e.target.checked)}
+                name="reconstruct_original_doc"
+                disabled={disabled}
+              />
+            }
+            label="Reconstruct original document page order"
+          />
+        </Box>
+      )}
       {setExportRawValues && (
         <Box sx={{ mt: 1.5 }}>
           <FormControlLabel
