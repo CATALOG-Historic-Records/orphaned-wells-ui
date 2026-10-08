@@ -56,6 +56,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   });
   const [name, setName] = useState("");
   const [reconstructOriginalDoc, setReconstructOriginalDoc] = useState<boolean>(false);
+  const [exportRawValues, setExportRawValues] = useState<boolean>(false);
   const dialogHeight = "85vh";
   const dialogWidth = "60vw";
 
@@ -183,6 +184,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         filter: convertFiltersToMongoFormat(appliedFilters),
         document_types: documentTypes || [],
         reconstruct_original_doc: location === "project" ? reconstructOriginalDoc : false,
+        export_raw_values: exportRawValues,
       };
       setLoadingFileSize(true);
       callAPI(
@@ -209,6 +211,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
       filter: convertFiltersToMongoFormat(appliedFilters),
       document_types: documentTypes || [],
       reconstruct_original_doc: location === "project" ? reconstructOriginalDoc : false,
+      export_raw_values: exportRawValues,
     };
     try {
       await downloadWithProgress(downloadRecords, [location, _id, exportTypes, name, body], `${name}.zip`, totalBytes);
@@ -297,6 +300,8 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
             location={location}
             reconstructOriginalDoc={reconstructOriginalDoc}
             setReconstructOriginalDoc={setReconstructOriginalDoc}
+            exportRawValues={exportRawValues}
+            setExportRawValues={setExportRawValues}
           />
           <Divider sx={{ my: 1.5 }} />
           <CheckboxesGroup
@@ -330,6 +335,7 @@ const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
   const { exportTypes, updateExportTypes, disabled, location, reconstructOriginalDoc, setReconstructOriginalDoc } = props;
   const { user } = useUserContext();
   const collaborator = (user?.collaborator || process.env.REACT_APP_COLLABORATOR || "").toLowerCase();
+  const { exportTypes, updateExportTypes, disabled, location, exportRawValues, setExportRawValues } = props;
 
   const handleChangeExportTypes = (event: React.ChangeEvent<HTMLInputElement>) => {
     let name = event.target.name;
@@ -372,6 +378,19 @@ const ExportTypeSelection = (props: ExportTypeSelectionProps) => {
               />
             }
             label="Reconstruct original document page order"
+      {setExportRawValues && (
+        <Box sx={{ mt: 1.5 }}>
+          <FormControlLabel
+            data-cy="export-raw-values-option"
+            control={
+              <Checkbox
+                checked={exportRawValues || false}
+                onChange={(e) => setExportRawValues(e.target.checked)}
+                name="export_raw_values"
+                disabled={disabled}
+              />
+            }
+            label="Export raw OCR read values for all fields"
           />
         </Box>
       )}
