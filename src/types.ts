@@ -166,6 +166,7 @@ export interface SchemaImportRequest {
     selected: string[];
     decisions: Record<string, SchemaImportDecision>;
     source?: SchemaImportSourceOptions;
+    reconcile_records?: boolean;
 }
 
 export interface SchemaImportEntry {
@@ -200,7 +201,7 @@ export interface SchemaImportPreview {
 
 export interface RepoSchemaImportSource {
     source: RepoSchemaSource;
-    schemas: { source_id: string; name: string; field_count?: number; error?: string }[];
+    schemas: { source_id: string; name: string; field_count?: number; error?: string; warnings?: string[] }[];
     pending_import?: SchemaImportPreview | null;
     busy: boolean;
     error?: string;
@@ -305,6 +306,7 @@ export interface MongoProcessor {
     can_process?: boolean;
     created_by?: string | null;
     created_by_team?: string | null;
+    record_groups?: SchemaImportGroup[];
     "name": string;
     "processorId"?: string | null;
     "modelId"?: string | null;
@@ -736,8 +738,8 @@ export interface ExportTypeSelectionProps {
 }
 
 export interface ErrorBarProps {
-    errorMessage: string | null;
-    setErrorMessage: (v: string | null) => void;
+    errorMessage: any;
+    setErrorMessage: (v: any) => void;
     duration?: number;
     margin?: boolean;
 }
