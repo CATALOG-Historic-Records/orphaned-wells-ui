@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import SchemaView from "../views/SchemaView/SchemaView";
-import { createSchema, getCleaningFunctions, getSchema, updateProcessorAttribute } from "../services/app.service";
+import { createSchema, deleteProcessorSchema, getCleaningFunctions, getSchema, updateProcessorAttribute } from "../services/app.service";
 
 const mockHasPermission = jest.fn();
 jest.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: mockHasPermission }) }));
@@ -117,4 +117,71 @@ test("schema managers can create an empty schema without processor identifiers",
   fireEvent.click(screen.getByRole("button", { name: "Submit" }));
   await waitFor(() => expect(createSchema).toHaveBeenCalledWith({ name: "Imported", displayName: "Imported", documentType: "Well", processorId: null, modelId: null, attributes: [] }));
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+});
+
+test("schema table highlights fields with validation warnings without blocking adding new fields", async () => {
+  (getSchema as jest.Mock).mockResolvedValue(response({
+    processors: [{
+      ...processor,
+      attributes: [
+        ...processor.attributes,
+        { name: "sample::test_parameter::limits", alias: "Limits", data_type: "Plain text", database_data_type: "str" },
+        { name: "analysis", alias: "Analysis", data_type: "Parent", database_data_type: "Table" },
+        { name: "analysis::parameter_test", alias: "Parameter Test", data_type: "Parent", database_data_type: "bool" },
+      ],
+    }],
+    source: "database",
+    read_only: false,
+  }));
+  await openFields();
+
+  expect(screen.getByTestId("schema-field-warning-sample::test_parameter::limits")).toBeInTheDocument();
+  expect(screen.getByTestId("schema-field-warning-analysis::parameter_test")).toBeInTheDocument();
+  expect(screen.queryByTestId("schema-field-warning-depth")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("schema-field-warning-analysis")).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole("button", { name: "Add field" }));
+  fireEvent.change(screen.getByRole("textbox", { name: /Field Name/ }), { target: { value: "new_field" } });
+  fireEvent.mouseDown(screen.getByLabelText("Data type"));
+  fireEvent.click(screen.getByRole("option", { name: "Plain text" }));
+  fireEvent.click(screen.getByRole("button", { name: "Add Field" }));
+  await waitFor(() =>
+    expect(updateProcessorAttribute).toHaveBeenCalledWith(
+      "Well schema",
+      "new_field",
+      expect.objectContaining({ name: "new_field" }),
+      "add",
+      processor.schema_id
+    )
+  );
+});
+
+test("administrators see a detachment warning when deleting a schema with attached record groups", async () => {
+  mockHasPermission.mockReturnValue(true);
+  (deleteProcessorSchema as jest.Mock).mockResolvedValue(response("success"));
+  (getSchema as jest.Mock).mockResolvedValue(response({
+    processors: [{
+      ...processor,
+      record_groups: [
+        { id: "cccccccccccccccccccccccc", name: "Group A", team: "test" },
+        { id: "dddddddddddddddddddddddd", name: "Group B", team: "test" },
+      ],
+    }],
+    source: "database",
+    read_only: false,
+  }));
+  render(<MemoryRouter><SchemaView /></MemoryRouter>);
+  const deleteButton = await screen.findByRole("button", { name: "Delete Well schema" });
+  fireEvent.click(deleteButton);
+  expect(await screen.findByRole("dialog", { name: "Remove Schema" })).toBeInTheDocument();
+  expect(screen.getByText(/2 record groups will be detached/)).toBeInTheDocument();
+  expect(
+    screen.getByText(/The following record groups are attached to this schema and will be detached:/)
+  ).toBeInTheDocument();
+  expect(screen.getByText("Group A")).toBeInTheDocument();
+  expect(screen.getByText("Group B")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+  await waitFor(() =>
+    expect(deleteProcessorSchema).toHaveBeenCalledWith("Well schema", processor.schema_id)
+  );
 });

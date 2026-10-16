@@ -33,7 +33,7 @@ const SchemaView = () => {
 
 
   useEffect(() => {
-    const hasAccess = hasPermission("manage_schema");
+    const hasAccess = hasPermission("manage_schema") || hasPermission("view_schema");
     if (!hasAccess) {
       navigate("/");
       return;
@@ -221,7 +221,7 @@ const SchemaView = () => {
       />
       <Box sx={styles.innerBox}>
         {schemaData?.source === "repo" && <Alert severity="info" sx={{ mb: 2 }}>
-            Repo schemas are read-only. To enable editable, database-backed schemas, set USE_DB_PROCESSORS=true on the backend.
+            Repo schemas are read-only. To enable editable, database-backed schemas, set USE_DB_SCHEMAS=true on the backend.
         </Alert>}
         <SchemaTable
           schema={schemaData}
