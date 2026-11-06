@@ -333,6 +333,16 @@ export const getExportDownloadUrl = (jobId: string) => fetch(
   `${BACKEND_URL}/export_jobs/${encodeURIComponent(jobId)}/download`, { mode: CORS_MODE }
 );
 
+export const rerunExportJob = (jobId: string) => fetch(
+  `${BACKEND_URL}/export_jobs/${encodeURIComponent(jobId)}/rerun`,
+  { method: "POST", headers: JSON_HEADERS, mode: CORS_MODE }
+);
+
+export const cancelExportJob = (jobId: string) => fetch(
+  `${BACKEND_URL}/export_jobs/${encodeURIComponent(jobId)}/cancel`,
+  { method: "POST", headers: JSON_HEADERS, mode: CORS_MODE }
+);
+
 export const getExportNotifications = () => fetch(
   `${BACKEND_URL}/export_jobs/notifications`, { mode: CORS_MODE }
 );

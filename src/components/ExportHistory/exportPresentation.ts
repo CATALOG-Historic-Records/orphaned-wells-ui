@@ -39,6 +39,41 @@ export const exportStageLabels: Record<string, string> = {
 export const exportTime = (value?: number | null) =>
   value ? new Date(value * 1000).toLocaleString() : "—";
 
+export const formatClockTime = (value?: number | null): string => {
+  if (!value) return "—";
+  return new Date(value * 1000).toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
+
+export const formatRelativeExportTime = (value?: number | null): string => {
+  if (!value) return "—";
+  const date = new Date(value * 1000);
+  const now = new Date();
+  const timeStr = date.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfTarget = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
+  const diffDays = Math.round(
+    (startOfToday.getTime() - startOfTarget.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  if (diffDays === 0) return `Today ${timeStr}`;
+  if (diffDays === 1) return `Yesterday ${timeStr}`;
+  const dateStr = date.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    ...(date.getFullYear() !== now.getFullYear() ? { year: "numeric" } : {}),
+  });
+  return `${dateStr}, ${timeStr}`;
+};
+
 export const formatExportBytes = (bytes?: number | null): string => {
   if (bytes == null || Number.isNaN(bytes)) return "—";
   if (bytes < 1024) return `${bytes} B`;
@@ -50,7 +85,10 @@ export const formatExportBytes = (bytes?: number | null): string => {
   return `${gb.toFixed(2)} GB`;
 };
 
-export const formatExportFormats = (job: ExportJob): string => {
+export const formatExportFormats = (
+  job: ExportJob,
+  separator = ", "
+): string => {
   const opts = job.options || {};
   const types = opts.export_types || {};
   const labels: string[] = [];
@@ -58,7 +96,7 @@ export const formatExportFormats = (job: ExportJob): string => {
   if (opts.export_json ?? types.json) labels.push("JSON");
   if (opts.export_images ?? types.images) labels.push("Images");
   if (opts.export_embedded_pdfs ?? types.embedded_pdfs) labels.push("Searchable PDFs");
-  return labels.length ? labels.join(", ") : "—";
+  return labels.length ? labels.join(separator) : "—";
 };
 
 export const canDownloadExport = (job?: ExportJob | null): boolean => {
@@ -68,15 +106,15 @@ export const canDownloadExport = (job?: ExportJob | null): boolean => {
 };
 
 export const formatExportExpiration = (job: ExportJob): string => {
-  if (job.status === "expired") return "Expired";
-  if (job.status === "error") return "—";
+  if (job.status === "expired") return "Archive removed";
+  if (job.status === "error") return job.error || "Export failed";
   if (isActiveExportJob(job)) return "1h after completion";
   if (!job.expires_at) return "—";
   const remainingSec = Math.floor(job.expires_at - Date.now() / 1000);
-  if (remainingSec <= 0) return "Expired";
-  if (remainingSec < 60) return `${remainingSec}s left`;
+  if (remainingSec <= 0) return "Archive removed";
+  if (remainingSec < 60) return `Expires in ${remainingSec} sec`;
   const minutes = Math.ceil(remainingSec / 60);
-  return `${minutes}m left`;
+  return `Expires in ${minutes} min`;
 };
 
 export const triggerExportDownload = (

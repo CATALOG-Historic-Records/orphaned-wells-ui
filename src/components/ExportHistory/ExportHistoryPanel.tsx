@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Alert, Button, Stack, Typography } from "@mui/material";
+import { Alert, Button, Stack } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { getExportHistoryProjects } from "../../services/app.service";
 import { ExportJob, JobScopeProject } from "../../types";
-import JobHistoryScope from "../JobHistoryScope/JobHistoryScope";
 import { useJobQuery } from "../JobHistoryScope/useJobQuery";
 import ExportHistoryResults from "./ExportHistoryResults";
 import ExportJobDetails from "./ExportJobDetails";
@@ -24,7 +23,7 @@ const ExportHistoryPanel = () => {
     getExportHistoryProjects,
     [],
     () => false,
-    "Unable to load export status. Please retry."
+    "Unable to load export scopes. Please retry."
   );
 
   const changeScope = (project: string, group: string) => {
@@ -51,36 +50,17 @@ const ExportHistoryPanel = () => {
 
   return (
     <Stack spacing={2.5} sx={{ minWidth: 0, textAlign: "left" }}>
-      <Stack spacing={0.5}>
-        <Typography variant="h6" component="h2">
-          Export history
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Track active and completed exports across your projects and record groups,
-          and download completed archives.
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Completed export archives remain available to download for 1 hour after
-          completion.
-        </Typography>
-      </Stack>
       {error && (
         <Alert severity="error" action={<Button onClick={refresh}>Retry</Button>}>
           {error}
         </Alert>
       )}
-      <JobHistoryScope
-        projects={projects || []}
-        projectId={projectId}
-        recordGroupId={recordGroupId}
-        loading={loading && !projects}
-        onChange={changeScope}
-        noun="exports"
-      />
       <ExportHistoryResults
-        key={`${projectId}/${recordGroupId}`}
+        projects={projects || []}
+        projectsLoading={loading && !projects}
         projectId={projectId}
         recordGroupId={recordGroupId}
+        onScopeChange={changeScope}
         revision={revision}
         onOpen={openJob}
       />
@@ -97,4 +77,3 @@ const ExportHistoryPanel = () => {
 };
 
 export default ExportHistoryPanel;
-
