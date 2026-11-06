@@ -7,9 +7,10 @@ interface Props {
   recordGroupId: string;
   loading: boolean;
   onChange: (projectId: string, recordGroupId: string) => void;
+  noun?: "uploads" | "exports";
 }
 
-const UploadHistoryScope = ({projects, projectId, recordGroupId, loading, onChange}: Props) => {
+const UploadHistoryScope = ({projects, projectId, recordGroupId, loading, onChange, noun = "uploads"}: Props) => {
   const groups = projects.filter((project) => !projectId || project.id === projectId)
     .flatMap((project) => project.record_groups.map((group) => ({...group, projectName: project.name})));
   return <Paper variant="outlined" sx={{p: 2, borderRadius: 2}}>
@@ -36,7 +37,7 @@ const UploadHistoryScope = ({projects, projectId, recordGroupId, loading, onChan
     </Box>
     <Stack direction="row" justifyContent="space-between" alignItems="center" gap={1} sx={{mt: 1, minHeight: 30}}>
       <Typography variant="caption" color="text.secondary">
-        {projectId || recordGroupId ? "Project and record group selections apply to active and finished uploads." : "Showing uploads across all projects you can access in your current team."}
+        {projectId || recordGroupId ? `Project and record group selections apply to active and finished ${noun}.` : `Showing ${noun} across all projects you can access in your current team.`}
       </Typography>
       {(projectId || recordGroupId) && <Button size="small" onClick={() => onChange("", "")} sx={{flexShrink: 0, textTransform: "none"}}>Clear selection</Button>}
     </Stack>

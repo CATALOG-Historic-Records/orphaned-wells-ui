@@ -6,13 +6,12 @@ import RecordGroup from "./views/RecordGroupPage/RecordGroupPage";
 import UploadHistoryRedirect from "./components/UploadHistory/UploadHistoryRedirect";
 import Record from "./views/RecordPage/RecordPage";
 import TeamRecordsPage from "./views/TeamRecordsPage/TeamRecordsPage";
+import ExportsPage from "./views/ExportsPage/ExportsPage";
 import AdminPage from "./views/AdminPage/AdminPage";
 import LoginPage from "./views/LoginPage/LoginPage";
 import Header from "./components/Header/Header";
 import SchemaView from "./views/SchemaView/SchemaView";
 import "./App.css";
-import { DownloadProvider } from "./context/DownloadContext";
-import DownloadProgressBar from "./components/DownloadProgressBar/DownloadProgressBar";
 import { useUserContext } from "./usercontext";
 import StagingBanner from "./components/StagingBanner/StagingBanner";
 
@@ -60,69 +59,70 @@ function App() {
   );
 
   return (
-    <DownloadProvider>
-      <div className="App">
-        {showAuthenticatedShell && <Header/>}
-        {showAuthenticatedShell && (
-          <StagingBanner isStaging={databaseEnvironment === "staging"}/>
-        )}
+    <div className="App">
+      {showAuthenticatedShell && <Header/>}
+      {showAuthenticatedShell && (
+        <StagingBanner isStaging={databaseEnvironment === "staging"}/>
+      )}
             
-        <Routes>
+      <Routes>
+        <Route
+          path="login"
+          element={<LoginRoute />}
+        />
+        <Route
+          path="auth/google/callback"
+          element={<LoginRoute />}
+        />
+        <Route
+          path="auth/cilogon/callback"
+          element={<LoginRoute />}
+        />
+        <Route element={<ProtectedRoutes />}>
+          <Route path="record_group/:id/uploads" element={<UploadHistoryRedirect />} />
           <Route
-            path="login"
-            element={<LoginRoute />}
+            path="record/:id"
+            element={<Record />}
           />
           <Route
-            path="auth/google/callback"
-            element={<LoginRoute />}
+            path="project/:id"
+            element={<Project />}
           />
           <Route
-            path="auth/cilogon/callback"
-            element={<LoginRoute />}
+            path="record_group/:id"
+            element={<RecordGroup />}
           />
-          <Route element={<ProtectedRoutes />}>
-            <Route path="record_group/:id/uploads" element={<UploadHistoryRedirect />} />
-            <Route
-              path="record/:id"
-              element={<Record />}
-            />
-            <Route
-              path="project/:id"
-              element={<Project />}
-            />
-            <Route
-              path="record_group/:id"
-              element={<RecordGroup />}
-            />
-            <Route
-              path="records"
-              element={<TeamRecordsPage />}
-            />
-            <Route
-              path="projects"
-              element={<ProjectsListPage/>}
-            />
-            <Route
-              path="admin"
-              element={<AdminPage/>}
-            />
-            <Route
-              path="users"
-              element={<Navigate replace to="/admin" />}
-            />
-            <Route
-              path="schema"
-              element={<SchemaView/>}
-            />
-            <Route
-              path="*"
-              element={<Navigate replace to="/projects" />}
-            />
-          </Route>
-        </Routes>
-        {showAuthenticatedShell && <DownloadProgressBar/>}
-      </div>
-    </DownloadProvider>
+          <Route
+            path="records"
+            element={<TeamRecordsPage />}
+          />
+          <Route
+            path="exports"
+            element={<ExportsPage />}
+          />
+          <Route
+            path="projects"
+            element={<ProjectsListPage/>}
+          />
+          <Route
+            path="admin"
+            element={<AdminPage/>}
+          />
+          <Route
+            path="users"
+            element={<Navigate replace to="/admin" />}
+          />
+          <Route
+            path="schema"
+            element={<SchemaView/>}
+          />
+          <Route
+            path="*"
+            element={<Navigate replace to="/projects" />}
+          />
+        </Route>
+      </Routes>
+    </div>
   );
 }
 

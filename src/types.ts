@@ -696,6 +696,93 @@ export interface ProcessingJobDetails {
     retry: {allowed: boolean; reason?: string};
 }
 
+export type ExportJobStatus = "queued" | "dispatched" | "running" | "completed" | "error" | "expired";
+
+export interface ExportJob {
+    job_id: string;
+    job_type?: "export";
+    status: ExportJobStatus;
+    stage?: string;
+    status_text?: string;
+    progress?: {
+        current: number;
+        total: number;
+        percent: number;
+    };
+    team?: string;
+    location: string;
+    target_id: string;
+    project_id?: string | null;
+    project_name?: string | null;
+    record_group_id?: string | null;
+    record_group_name?: string | null;
+    output_name?: string;
+    scope?: {
+        location: string;
+        target_id: string;
+        project_id?: string | null;
+        project_name?: string | null;
+        record_group_id?: string | null;
+        record_group_name?: string | null;
+        output_name?: string;
+    };
+    request_user: {
+        email: string;
+        name?: string;
+    };
+    options: {
+        export_csv?: boolean;
+        export_json?: boolean;
+        export_images?: boolean;
+        export_embedded_pdfs?: boolean;
+        export_types?: {
+            csv?: boolean;
+            json?: boolean;
+            images?: boolean;
+            embedded_pdfs?: boolean;
+        };
+        columns?: string[];
+        document_types?: string[] | null;
+        reconstruct_original_doc?: boolean;
+        export_raw_values?: boolean;
+    };
+    column_count?: number;
+    artifact?: {
+        filename: string;
+        size_bytes?: number;
+        record_count?: number;
+    } | null;
+    created_at: number;
+    updated_at?: number;
+    started_at?: number | null;
+    last_progress_at?: number | null;
+    completed_at?: number | null;
+    expires_at?: number | null;
+    notification_read_at?: number | null;
+    error?: string | null;
+    attempt?: number;
+}
+
+export interface ExportJobHistory {
+    active_jobs: ExportJob[];
+    active_count: number;
+    jobs: ExportJob[];
+    count: number;
+}
+
+export interface ExportNotificationsResponse {
+    unread_count: number;
+    active_count: number;
+    notifications: ExportJob[];
+}
+
+export interface ExportDownloadResponse {
+    job_id: string;
+    download_url: string;
+    filename: string;
+    expires_at?: number | null;
+}
+
 export interface BottombarProps {
     recordData: RecordData;
     onPreviousButtonClick: () => void;

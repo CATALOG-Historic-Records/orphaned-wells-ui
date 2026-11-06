@@ -2,7 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { callAPI } from "../../util";
 
 /** Refresh active work while visible; retain the last response during refresh. */
-export const useProcessingQuery = <T,>(api: (...args: any[]) => Promise<Response>, args: any[], active: (data: T) => boolean) => {
+export const useProcessingQuery = <T,>(
+  api: (...args: any[]) => Promise<Response>,
+  args: any[],
+  active: (data: T) => boolean,
+  fallbackErrorMessage = "Unable to load upload status. Please retry."
+) => {
   const [data, setData] = useState<T>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,7 +36,7 @@ export const useProcessingQuery = <T,>(api: (...args: any[]) => Promise<Response
         inFlight = false;
         if (cancelled) return;
         const message = typeof failure === "string" ? failure : failure?.detail;
-        setError(typeof message === "string" ? message : "Unable to load upload status. Please retry.");
+        setError(typeof message === "string" ? message : fallbackErrorMessage);
         setLoading(false);
         if (status !== 401 && status !== 403 && status !== 404) schedule();
       });
@@ -40,7 +45,7 @@ export const useProcessingQuery = <T,>(api: (...args: any[]) => Promise<Response
     document.addEventListener("visibilitychange", onVisibility);
     load();
     return () => { cancelled = true; clearTimeout(timer); document.removeEventListener("visibilitychange", onVisibility); };
-  }, [api, key, revision]);
+  }, [api, fallbackErrorMessage, key, revision]);
   const refresh = useCallback(() => setRevision((value) => value + 1), []);
   return {data, loading, error, refresh};
 };
