@@ -29,8 +29,8 @@ const mockAttributes: Attribute[] = [
 
 const mockFunction = () => {};
 
-test("renders zoom lens icons and handles zoom controls and reset on field click", () => {
-  render(
+test("renders zoom lens icons and maintains zoom state on field click", () => {
+  const { container } = render(
     <HashRouter>
       <DocumentContainer
         imageFiles={["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="]}
@@ -56,6 +56,8 @@ test("renders zoom lens icons and handles zoom controls and reset on field click
   );
 
   const zoomInBtn = screen.getByTestId("zoom-in-button");
+  const imageBox = container.querySelector("#image-box") as HTMLDivElement;
+  const imageDiv = container.querySelector("#image-div") as HTMLDivElement;
   expect(screen.getByTestId("zoom-out-button")).toHaveAttribute("disabled");
 
   act(() => {
@@ -63,15 +65,30 @@ test("renders zoom lens icons and handles zoom controls and reset on field click
   });
 
   expect(screen.getByTestId("zoom-out-button")).not.toHaveAttribute("disabled");
-  expect(screen.getByTestId("zoom-reset-button")).not.toBeNull();
+  expect(screen.getByTestId("zoom-reset-button")).not.toHaveAttribute("disabled");
+  expect(imageDiv.style.transform).toBe("scale(1.25)");
 
-  const fieldElement = screen.getByText("well_name");
+  const firstField = screen.getByText("well_name");
   act(() => {
-    fireEvent.click(fieldElement);
+    fireEvent.click(firstField);
   });
 
-  expect(screen.getByTestId("zoom-reset-button")).toHaveAttribute("disabled");
-  expect(screen.getByTestId("zoom-out-button")).toHaveAttribute("disabled");
+  expect(screen.getByTestId("zoom-reset-button")).not.toHaveAttribute("disabled");
+  expect(screen.getByTestId("zoom-out-button")).not.toHaveAttribute("disabled");
+  expect(imageDiv.style.transform).toBe("scale(1.25)");
+  const firstFieldScrollTop = imageBox.scrollTop;
+  expect(firstFieldScrollTop).toBeGreaterThan(0);
+
+  // Clicking a second field maintains the zoom state and jumps to the second field's bounding box
+  const secondField = screen.getByText("api_number");
+  act(() => {
+    fireEvent.click(secondField);
+  });
+
+  expect(screen.getByTestId("zoom-reset-button")).not.toHaveAttribute("disabled");
+  expect(screen.getByTestId("zoom-out-button")).not.toHaveAttribute("disabled");
+  expect(imageDiv.style.transform).toBe("scale(1.25)");
+  expect(imageBox.scrollTop).toBeGreaterThan(firstFieldScrollTop);
 });
 
 test("keeps field highlighted, zooms into bounding box on zoom click, and opens edit mode on Enter", () => {

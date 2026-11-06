@@ -75,6 +75,7 @@ const DocumentContainer = ({
   const attributesListRef = React.useRef<Attribute[]>([]);
   const displayIndexesRef = React.useRef<number[]>([]);
   const zoomActionTriggeredRef = React.useRef(false);
+  const zoomScaleRef = React.useRef<number>(MIN_ZOOM);
 
   const handleZoomIn = (event?: React.MouseEvent<HTMLButtonElement>) => {
     event?.stopPropagation();
@@ -142,6 +143,10 @@ const DocumentContainer = ({
   useEffect(() => {
     displayIndexesRef.current = displayIndexes;
   }, [displayIndexes]);
+
+  useEffect(() => {
+    zoomScaleRef.current = zoomScale;
+  }, [zoomScale]);
 
   useEffect(() => {
     let newImgIdx = displayAttribute?.page || 0;
@@ -302,20 +307,10 @@ const DocumentContainer = ({
     const currentDisplayIndexes = displayIndexesRef.current;
     const fieldIsAlreadySelected = indexes.length === currentDisplayIndexes.length && indexes.every((val, index) => val === currentDisplayIndexes[index]);
     if (!forceDisplay && (!key || fieldIsAlreadySelected)) {
-      if (key && fieldIsAlreadySelected) {
-        setZoomScale(MIN_ZOOM);
-        if (imageBoxRef.current) {
-          imageBoxRef.current.scrollLeft = 0;
-        }
-      }
       setDisplayPoints(null);
       setDisplayIndexes([]);
     }
     else {
-      setZoomScale(MIN_ZOOM);
-      if (imageBoxRef.current) {
-        imageBoxRef.current.scrollLeft = 0;
-      }
       setDisplayIndexes([...indexes]);
       let current_attr = deriveAttribute(indexes, attributesListRef.current);
       if (!current_attr) {
@@ -336,11 +331,19 @@ const DocumentContainer = ({
           console.log("error getting page");
           console.log(e);
         }
-        if (pageNumber) page = pageNumber;
-        page = getVisualPageNumber(page);
-        const scrollTop = (coordinates[2][1] / imageFiles.length) + (page / imageFiles.length);
+        if (pageNumber !== undefined) page = pageNumber;
+        setImgIndex(page);
         setDisplayPoints(percentage_vertices);
-        scrollToAttribute("image-box", "image-div", scrollTop, imageFiles);
+        if (zoomScaleRef.current > MIN_ZOOM) {
+          zoomActionTriggeredRef.current = true;
+        } else {
+          if (imageBoxRef.current) {
+            imageBoxRef.current.scrollLeft = 0;
+          }
+          const visualPage = getVisualPageNumber(page);
+          const scrollTop = (coordinates[2][1] / imageFiles.length) + (visualPage / imageFiles.length);
+          scrollToAttribute("image-box", "image-div", scrollTop, imageFiles);
+        }
       } else {
         setDisplayPoints(null);
       }
