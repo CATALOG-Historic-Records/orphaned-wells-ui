@@ -1,8 +1,8 @@
 import { Autocomplete, Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
-import { ProcessingHistoryProject } from "../../types";
+import { JobScopeProject } from "../../types";
 
 interface Props {
-  projects: ProcessingHistoryProject[];
+  projects: JobScopeProject[];
   projectId: string;
   recordGroupId: string;
   loading: boolean;
@@ -10,7 +10,7 @@ interface Props {
   noun?: "uploads" | "exports";
 }
 
-const UploadHistoryScope = ({projects, projectId, recordGroupId, loading, onChange, noun = "uploads"}: Props) => {
+const JobHistoryScope = ({projects, projectId, recordGroupId, loading, onChange, noun = "uploads"}: Props) => {
   const groups = projects.filter((project) => !projectId || project.id === projectId)
     .flatMap((project) => project.record_groups.map((group) => ({...group, projectName: project.name})));
   return <Paper variant="outlined" sx={{p: 2, borderRadius: 2}}>
@@ -44,4 +44,5 @@ const UploadHistoryScope = ({projects, projectId, recordGroupId, loading, onChan
   </Paper>;
 };
 
-export default UploadHistoryScope;
+export default JobHistoryScope;
+

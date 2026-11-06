@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { getExportHistoryProjects } from "../../services/app.service";
-import { ExportJob, ProcessingHistoryProject } from "../../types";
-import UploadHistoryScope from "../UploadHistory/UploadHistoryScope";
-import { useProcessingQuery } from "../UploadHistory/useProcessingQuery";
+import { ExportJob, JobScopeProject } from "../../types";
+import JobHistoryScope from "../JobHistoryScope/JobHistoryScope";
+import { useJobQuery } from "../JobHistoryScope/useJobQuery";
 import ExportHistoryResults from "./ExportHistoryResults";
 import ExportJobDetails from "./ExportJobDetails";
 
@@ -20,7 +20,7 @@ const ExportHistoryPanel = () => {
     loading,
     error,
     refresh,
-  } = useProcessingQuery<ProcessingHistoryProject[]>(
+  } = useJobQuery<JobScopeProject[]>(
     getExportHistoryProjects,
     [],
     () => false,
@@ -69,7 +69,7 @@ const ExportHistoryPanel = () => {
           {error}
         </Alert>
       )}
-      <UploadHistoryScope
+      <JobHistoryScope
         projects={projects || []}
         projectId={projectId}
         recordGroupId={recordGroupId}

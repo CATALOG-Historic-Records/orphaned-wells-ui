@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { callAPI } from "../../util";
 
 /** Refresh active work while visible; retain the last response during refresh. */
-export const useProcessingQuery = <T,>(
+export const useJobQuery = <T,>(
   api: (...args: any[]) => Promise<Response>,
   args: any[],
   active: (data: T) => boolean,
-  fallbackErrorMessage = "Unable to load upload status. Please retry."
+  fallbackErrorMessage = "Unable to load job status. Please retry."
 ) => {
   const [data, setData] = useState<T>();
   const [loading, setLoading] = useState(true);
@@ -49,3 +49,4 @@ export const useProcessingQuery = <T,>(
   const refresh = useCallback(() => setRevision((value) => value + 1), []);
   return {data, loading, error, refresh};
 };
+

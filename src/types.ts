@@ -683,7 +683,7 @@ export interface ProcessingJobHistory {
     count: number;
 }
 
-export interface ProcessingHistoryProject {
+export interface JobScopeProject {
     id: string;
     name: string;
     record_groups: {id: string; name: string}[];

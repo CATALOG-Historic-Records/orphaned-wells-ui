@@ -14,7 +14,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { getExportJob } from "../../services/app.service";
 import { ExportJob } from "../../types";
-import { useProcessingQuery } from "../UploadHistory/useProcessingQuery";
+import { useJobQuery } from "../JobHistoryScope/useJobQuery";
 import {
   canDownloadExport,
   exportStageLabels,
@@ -36,7 +36,7 @@ const CurrentExportStatus = ({ initialJob, onCloseDialog }: Props) => {
   const navigate = useNavigate();
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState("");
-  const { data: liveJob, error } = useProcessingQuery<ExportJob>(
+  const { data: liveJob, error } = useJobQuery<ExportJob>(
     getExportJob,
     [initialJob.job_id],
     (result) => isActiveExportJob(result),

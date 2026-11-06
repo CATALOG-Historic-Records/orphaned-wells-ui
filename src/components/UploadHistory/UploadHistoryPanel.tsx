@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { getProcessingHistoryProjects } from "../../services/app.service";
-import { ProcessingHistoryProject, ProcessingJob } from "../../types";
-import UploadHistoryScope from "./UploadHistoryScope";
+import { JobScopeProject, ProcessingJob } from "../../types";
+import JobHistoryScope from "../JobHistoryScope/JobHistoryScope";
+import { useJobQuery } from "../JobHistoryScope/useJobQuery";
 import UploadHistoryResults from "./UploadHistoryResults";
 import UploadJobDetails from "./UploadJobDetails";
-import { useProcessingQuery } from "./useProcessingQuery";
 
 const UploadHistoryPanel = () => {
   const [search, setSearch] = useSearchParams();
@@ -15,7 +15,7 @@ const UploadHistoryPanel = () => {
   const recordGroupId = search.get("record_group") || "";
   const jobId = search.get("job");
   const jobGroupId = search.get("job_group") || recordGroupId;
-  const {data: projects, loading, error, refresh} = useProcessingQuery<ProcessingHistoryProject[]>(getProcessingHistoryProjects, [], () => false);
+  const {data: projects, loading, error, refresh} = useJobQuery<JobScopeProject[]>(getProcessingHistoryProjects, [], () => false);
   const changeScope = (project: string, group: string) => {
     const next = new URLSearchParams(search);
     next.delete("project"); next.delete("record_group");
@@ -44,7 +44,7 @@ const UploadHistoryPanel = () => {
       <Typography variant="caption" color="text.secondary">Single-file, ZIP, and local-storage fallback uploads are not tracked here.</Typography>
     </Stack>
     {error && <Alert severity="error" action={<Button onClick={refresh}>Retry</Button>}>{error}</Alert>}
-    <UploadHistoryScope projects={projects || []} projectId={projectId} recordGroupId={recordGroupId} loading={loading && !projects} onChange={changeScope} />
+    <JobHistoryScope projects={projects || []} projectId={projectId} recordGroupId={recordGroupId} loading={loading && !projects} onChange={changeScope} />
     <UploadHistoryResults key={`${projectId}/${recordGroupId}`} projectId={projectId} recordGroupId={recordGroupId} revision={revision} onOpen={openJob} />
     {jobId && jobGroupId && <UploadJobDetails key={`${jobGroupId}/${jobId}`} recordGroupId={jobGroupId} jobId={jobId}
       projectName={jobProject?.name} recordGroupName={jobGroup?.name}

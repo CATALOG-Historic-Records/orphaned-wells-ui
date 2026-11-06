@@ -5,7 +5,7 @@ import { getProcessingJobDetails, retryProcessingJob } from "../../services/app.
 import { ProcessingJobDetails } from "../../types";
 import { callAPI } from "../../util";
 import { useUserContext } from "../../usercontext";
-import { useProcessingQuery } from "./useProcessingQuery";
+import { useJobQuery } from "../JobHistoryScope/useJobQuery";
 import { isActiveJob, jobStages, jobStatusLabels, jobTime } from "./jobPresentation";
 
 const UploadJobDetails = ({recordGroupId, jobId, projectName, recordGroupName, onClose, onRetry}: {recordGroupId: string; jobId: string; projectName?: string; recordGroupName?: string; onClose: () => void; onRetry: () => void}) => {
@@ -15,7 +15,7 @@ const UploadJobDetails = ({recordGroupId, jobId, projectName, recordGroupName, o
   const [retryError, setRetryError] = useState("");
   const {hasPermission} = useUserContext();
   const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
-  const {data, error, loading, refresh} = useProcessingQuery<ProcessingJobDetails>(getProcessingJobDetails, [recordGroupId, jobId, kind, page], (result) => isActiveJob(result.job));
+  const {data, error, loading, refresh} = useJobQuery<ProcessingJobDetails>(getProcessingJobDetails, [recordGroupId, jobId, kind, page], (result) => isActiveJob(result.job));
   const job = data?.job;
   const retry = () => {
     setRetrying(true); setRetryError("");

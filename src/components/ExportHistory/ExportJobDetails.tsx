@@ -19,7 +19,7 @@ import {
 import DownloadIcon from "@mui/icons-material/Download";
 import { getExportJob } from "../../services/app.service";
 import { ExportJob } from "../../types";
-import { useProcessingQuery } from "../UploadHistory/useProcessingQuery";
+import { useJobQuery } from "../JobHistoryScope/useJobQuery";
 import {
   canDownloadExport,
   exportStageLabels,
@@ -47,7 +47,7 @@ const ExportJobDetails = ({ jobId, onClose, onUpdated }: Props) => {
     error,
     loading,
     refresh,
-  } = useProcessingQuery<ExportJob>(
+  } = useJobQuery<ExportJob>(
     getExportJob,
     [jobId],
     (result) => isActiveExportJob(result),

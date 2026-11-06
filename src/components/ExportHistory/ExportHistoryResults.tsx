@@ -4,7 +4,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import { getExportJobHistory } from "../../services/app.service";
 import { ExportJob, ExportJobHistory, FilterOption } from "../../types";
 import { convertFiltersToMongoFormat } from "../../util";
-import { useProcessingQuery } from "../UploadHistory/useProcessingQuery";
+import { useJobQuery } from "../JobHistoryScope/useJobQuery";
 import ExportHistoryFilters from "./ExportHistoryFilters";
 import ExportHistoryTable from "./ExportHistoryTable";
 import { EXPORT_JOBS_UPDATED_EVENT } from "./exportPresentation";
@@ -26,7 +26,7 @@ const ExportHistoryResults = ({
   const [filters, setFilters] = useState<FilterOption[]>([]);
   const [page, setPage] = useState(0);
 
-  const { data, loading, error, refresh } = useProcessingQuery<ExportJobHistory>(
+  const { data, loading, error, refresh } = useJobQuery<ExportJobHistory>(
     getExportJobHistory,
     [
       {
