@@ -1,15 +1,18 @@
 import "./Header.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HeaderStyles as styles } from "../../styles";
 import { useUserContext } from "../../usercontext";
-import { changeCollaborator, changeTeam, fetchTeams, getOgrreVersion } from "../../services/app.service";
-import { ChangeTeamResponse } from "../../types";
+import { changeCollaborator, changeTeam, fetchTeams, getExportNotifications, getOgrreVersion } from "../../services/app.service";
+import { ChangeTeamResponse, ExportNotificationsResponse } from "../../types";
 import ChangeCollaboratorDialog from "./ChangeCollaboratorDialog";
 import ChangeTeamDialog from "./ChangeTeamDialog";
+import ExportNotificationsMenuSection from "./ExportNotificationsMenuSection";
 import OgrreVersionDialog, { OgrreVersionInfo } from "./OgrreVersionDialog";
+import { EXPORT_JOBS_UPDATED_EVENT } from "../ExportHistory/exportPresentation";
 import {
   Avatar,
+  Badge,
   Box,
   Button,
   Divider,
@@ -70,12 +73,37 @@ const Header = (props: any) => {
   const [versionInfo, setVersionInfo] = useState<OgrreVersionInfo | null>(null);
   const [versionLoading, setVersionLoading] = useState(false);
   const [versionError, setVersionError] = useState("");
+  const [exportNotifications, setExportNotifications] = useState<ExportNotificationsResponse>();
+
+  const loadExportNotifications = useCallback(() => {
+    callAPI(
+      getExportNotifications,
+      [],
+      (data: ExportNotificationsResponse) => setExportNotifications(data),
+      () => {}
+    );
+  }, []);
+
+  useEffect(() => {
+    loadExportNotifications();
+    const handleUpdated = () => loadExportNotifications();
+    window.addEventListener(EXPORT_JOBS_UPDATED_EVENT, handleUpdated);
+    return () => window.removeEventListener(EXPORT_JOBS_UPDATED_EVENT, handleUpdated);
+  }, [loadExportNotifications, location.pathname]);
+
+  useEffect(() => {
+    if (!exportNotifications?.active_count) return;
+    const timer = setInterval(loadExportNotifications, 5000);
+    return () => clearInterval(timer);
+  }, [exportNotifications?.active_count, loadExportNotifications]);
 
   useEffect(() => {
     if (location.pathname.includes("project")) {
       setTabValue("projects");
     } else if (location.pathname.includes("records")) {
       setTabValue("records");
+    } else if (location.pathname.includes("exports")) {
+      setTabValue("exports");
     } else if (location.pathname.includes("admin") || location.pathname.includes("users")) {
       setTabValue("admin");
     } else if (location.pathname.includes("schema")) {
@@ -91,8 +119,17 @@ const Header = (props: any) => {
   };
 
   const handleShowProfileActions = (event: React.MouseEvent<HTMLElement>) => {
-    setProfileActions(!profileActions);
+    const nextOpen = !profileActions;
+    setProfileActions(nextOpen);
     setAnchorAr(event.currentTarget);
+    if (nextOpen) {
+      loadExportNotifications();
+    }
+  };
+
+  const handleNavigateToExports = (jobId?: string) => {
+    setProfileActions(false);
+    navigate(jobId ? `/exports?job=${encodeURIComponent(jobId)}` : "/exports");
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newLocation: string) => {
@@ -219,11 +256,12 @@ const Header = (props: any) => {
           >
             <Tab data-cy="header-tab-projects" label="Projects" value="projects" {...a11yProps(0)} />
             <Tab data-cy="header-tab-records" label="Records" value="records" {...a11yProps(1)} />
+            <Tab data-cy="header-tab-exports" label="Exports" value="exports" {...a11yProps(2)} />
             {hasPermission("manage_team") &&
-              <Tab data-cy="header-tab-admin" label="Admin" value="admin" {...a11yProps(2)} />
+              <Tab data-cy="header-tab-admin" label="Admin" value="admin" {...a11yProps(3)} />
             }
             {(hasPermission("manage_schema") || hasPermission("view_schema")) &&
-              <Tab data-cy="header-tab-schema" label="Schema" value="schema" {...a11yProps(3)} />
+              <Tab data-cy="header-tab-schema" label="Schema" value="schema" {...a11yProps(4)} />
             }
           </Tabs>
         </div>
@@ -247,9 +285,23 @@ const Header = (props: any) => {
           </Button>
             
           <IconButton data-cy="profile-menu-button" sx={styles.icon} onClick={handleShowProfileActions}>
-            <Avatar sx={styles.avatar} alt={displayName || displayEmail} src={userPhoto || undefined}>
-              {userInitials}
-            </Avatar>
+            <Badge
+              badgeContent={exportNotifications?.unread_count || 0}
+              variant={
+                !exportNotifications?.unread_count && exportNotifications?.active_count
+                  ? "dot"
+                  : "standard"
+              }
+              invisible={
+                !exportNotifications?.unread_count && !exportNotifications?.active_count
+              }
+              color="primary"
+              overlap="circular"
+            >
+              <Avatar sx={styles.avatar} alt={displayName || displayEmail} src={userPhoto || undefined}>
+                {userInitials}
+              </Avatar>
+            </Badge>
           </IconButton>
           <Menu
             id="actions-list"
@@ -287,6 +339,11 @@ const Header = (props: any) => {
               </Box>
             )}
             {(displayName || displayEmail) && <Divider />}
+            <ExportNotificationsMenuSection
+              notificationsData={exportNotifications}
+              onRefresh={loadExportNotifications}
+              onNavigateToExports={handleNavigateToExports}
+            />
             {(hasPermission("manage_system") || hasPermission("system_administration")) && (
               <span>
                 {hasPermission("manage_system") && (

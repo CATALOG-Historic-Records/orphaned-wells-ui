@@ -4,9 +4,9 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import { getProcessingJobHistory } from "../../services/app.service";
 import { FilterOption, ProcessingJob, ProcessingJobHistory } from "../../types";
 import { convertFiltersToMongoFormat } from "../../util";
+import { useJobQuery } from "../JobHistoryScope/useJobQuery";
 import UploadHistoryFilters from "./UploadHistoryFilters";
 import UploadHistoryTable from "./UploadHistoryTable";
-import { useProcessingQuery } from "./useProcessingQuery";
 
 interface Props {
   projectId: string;
@@ -19,7 +19,7 @@ const UploadHistoryResults = ({projectId, recordGroupId, revision, onOpen}: Prop
   const [filters, setFilters] = useState<FilterOption[]>([]);
   const [page, setPage] = useState(0);
   const [activePage, setActivePage] = useState(0);
-  const {data, loading, error, refresh} = useProcessingQuery<ProcessingJobHistory>(getProcessingJobHistory, [{
+  const {data, loading, error, refresh} = useJobQuery<ProcessingJobHistory>(getProcessingJobHistory, [{
     page, active_page: activePage, page_size: 25,
     ...(projectId ? {project_id: projectId} : {}),
     ...(recordGroupId ? {record_group_id: recordGroupId} : {}),
