@@ -90,12 +90,11 @@ export const formatExportFormats = (
   separator = ", "
 ): string => {
   const opts = job.options || {};
-  const types = opts.export_types || {};
   const labels: string[] = [];
-  if (opts.export_csv ?? types.csv) labels.push("CSV");
-  if (opts.export_json ?? types.json) labels.push("JSON");
-  if (opts.export_images ?? types.images) labels.push("Images");
-  if (opts.export_embedded_pdfs ?? types.embedded_pdfs) labels.push("Searchable PDFs");
+  if (opts.export_csv) labels.push("CSV");
+  if (opts.export_json) labels.push("JSON");
+  if (opts.export_images) labels.push("Images");
+  if (opts.export_embedded_pdfs) labels.push("Searchable PDFs");
   return labels.length ? labels.join(separator) : "—";
 };
 

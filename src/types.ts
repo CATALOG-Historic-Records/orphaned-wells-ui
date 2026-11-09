@@ -717,15 +717,6 @@ export interface ExportJob {
     record_group_id?: string | null;
     record_group_name?: string | null;
     output_name?: string;
-    scope?: {
-        location: string;
-        target_id: string;
-        project_id?: string | null;
-        project_name?: string | null;
-        record_group_id?: string | null;
-        record_group_name?: string | null;
-        output_name?: string;
-    };
     request_user: {
         email: string;
         name?: string;
@@ -735,12 +726,6 @@ export interface ExportJob {
         export_json?: boolean;
         export_images?: boolean;
         export_embedded_pdfs?: boolean;
-        export_types?: {
-            csv?: boolean;
-            json?: boolean;
-            images?: boolean;
-            embedded_pdfs?: boolean;
-        };
         columns?: string[];
         document_types?: string[] | null;
         reconstruct_original_doc?: boolean;
