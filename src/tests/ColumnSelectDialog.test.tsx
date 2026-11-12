@@ -8,14 +8,14 @@ import {
   getExportJob,
 } from "../services/app.service";
 
-jest.mock("../services/app.service", () => ({
-  createExportJob: jest.fn(),
-  getColumnData: jest.fn(),
-  getExportJob: jest.fn(),
-  getExportDownloadUrl: jest.fn(),
+vi.mock("../services/app.service", () => ({
+  createExportJob: vi.fn(),
+  getColumnData: vi.fn(),
+  getExportJob: vi.fn(),
+  getExportDownloadUrl: vi.fn(),
 }));
 
-jest.mock("../usercontext", () => ({
+vi.mock("../usercontext", () => ({
   useUserContext: () => ({
     user: { collaborator: "rrc" },
     hasPermission: () => true,

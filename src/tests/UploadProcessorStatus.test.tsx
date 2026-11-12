@@ -2,8 +2,8 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import UploadProcessorStatus from "../components/UploadDocumentsModal/UploadProcessorStatus";
 import { checkProcessorStatus, deployProcessor, undeployProcessor } from "../services/app.service";
 
-jest.mock("../services/app.service", () => ({
-  checkProcessorStatus: jest.fn(), deployProcessor: jest.fn(), undeployProcessor: jest.fn(),
+vi.mock("../services/app.service", () => ({
+  checkProcessorStatus: vi.fn(), deployProcessor: vi.fn(), undeployProcessor: vi.fn(),
 }));
 const response = (body: unknown, status = 200) => ({status, json: async () => body});
 const flush = async () => {await act(async () => {await Promise.resolve();});};

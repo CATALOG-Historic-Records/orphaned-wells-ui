@@ -4,8 +4,8 @@ import { useJobQuery } from "../components/JobHistoryScope/useJobQuery";
 import UploadJobDetails from "../components/UploadHistory/UploadJobDetails";
 import { getProcessingJobDetails, getProcessingJobHistory, retryProcessingJob } from "../services/app.service";
 
-jest.mock("../services/app.service", () => ({getProcessingJobDetails: jest.fn(), getProcessingJobHistory: jest.fn(), retryProcessingJob: jest.fn()}));
-jest.mock("../usercontext", () => ({useUserContext: () => ({hasPermission: () => true})}));
+vi.mock("../services/app.service", () => ({getProcessingJobDetails: vi.fn(), getProcessingJobHistory: vi.fn(), retryProcessingJob: vi.fn()}));
+vi.mock("../usercontext", () => ({useUserContext: () => ({hasPermission: () => true})}));
 const response = (body: unknown) => ({status: 200, json: async () => body});
 const job = {job_id: "job", status: "error", created_at: 100, input: {upload_session_id: "job"}, request_user: {email: "user"}, summary: {total_succeeded: 0, total_failed: 1, total_skipped_duplicates: 0}};
 

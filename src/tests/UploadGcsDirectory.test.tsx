@@ -4,8 +4,8 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import UploadGcsDirectory from "../components/UploadDocumentsModal/UploadGcsDirectory";
 import { batchProcessDocuments, checkGcsBucketPath } from "../services/app.service";
 
-jest.mock("../services/app.service", () => ({batchProcessDocuments: jest.fn(), checkGcsBucketPath: jest.fn()}));
-jest.mock("../components/UploadDocumentsModal/CurrentUploadStatus", () => () => <div>Job submitted</div>);
+vi.mock("../services/app.service", () => ({batchProcessDocuments: vi.fn(), checkGcsBucketPath: vi.fn()}));
+vi.mock("../components/UploadDocumentsModal/CurrentUploadStatus", () => ({ default: () => <div>Job submitted</div> }));
 const response = (body: unknown) => ({status: 200, json: async () => body});
 const summary = {bucketName: "test-bucket", normalizedPrefix: "folder/", totalFiles: 3, totalBatches: 1, duplicateCount: 1, totalFilesToSubmit: 2, totalBatchesToSubmit: 1};
 const Form = ({processorReady = true}: {processorReady?: boolean}) => {

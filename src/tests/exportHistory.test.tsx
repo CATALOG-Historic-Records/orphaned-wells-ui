@@ -10,13 +10,13 @@ import {
   rerunExportJob,
 } from "../services/app.service";
 
-jest.mock("../services/app.service", () => ({
-  getExportHistoryProjects: jest.fn(),
-  getExportJobHistory: jest.fn(),
-  getExportJob: jest.fn(),
-  getExportDownloadUrl: jest.fn(),
-  rerunExportJob: jest.fn(),
-  cancelExportJob: jest.fn(),
+vi.mock("../services/app.service", () => ({
+  getExportHistoryProjects: vi.fn(),
+  getExportJobHistory: vi.fn(),
+  getExportJob: vi.fn(),
+  getExportDownloadUrl: vi.fn(),
+  rerunExportJob: vi.fn(),
+  cancelExportJob: vi.fn(),
 }));
 
 const response = (body: unknown) => ({ status: 200, json: async () => body });
