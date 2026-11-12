@@ -20,7 +20,7 @@
     "react-image-crop": "^11.0.5",
     "react-lasso-select": "^1.2.2",
     "react-loader-spinner": "^6.1.6",
-    "react-router-dom": "^6.20.0",
+    "react-router-dom": "^6.30.4",
     "react-scripts": "^5.0.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
@@ -33,6 +33,14 @@
     "@types/node": "^22.5.5",
     "cypress": "^13.14.2",
     "fflate": "0.8.3"
+  },
+  "overrides": {
+    "@cypress/request": {
+      "qs": "^6.16.1"
+    },
+    "jsonpath": {
+      "underscore": "^1.13.8"
+    }
   },
   "scripts": {
     "start": "react-scripts start",
