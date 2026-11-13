@@ -743,7 +743,6 @@ export interface ExportJob {
     last_progress_at?: number | null;
     completed_at?: number | null;
     expires_at?: number | null;
-    notification_read_at?: number | null;
     error?: string | null;
     attempt?: number;
 }
@@ -753,12 +752,6 @@ export interface ExportJobHistory {
     active_count: number;
     jobs: ExportJob[];
     count: number;
-}
-
-export interface ExportNotificationsResponse {
-    unread_count: number;
-    active_count: number;
-    notifications: ExportJob[];
 }
 
 export interface ExportDownloadResponse {

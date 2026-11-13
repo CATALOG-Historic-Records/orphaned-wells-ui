@@ -343,15 +343,6 @@ export const cancelExportJob = (jobId: string) => fetch(
   { method: "POST", headers: JSON_HEADERS, mode: CORS_MODE }
 );
 
-export const getExportNotifications = () => fetch(
-  `${BACKEND_URL}/export_jobs/notifications`, { mode: CORS_MODE }
-);
-
-export const markExportNotificationsRead = (body: { job_id?: string; mark_all?: boolean } = {}) => fetch(
-  `${BACKEND_URL}/export_jobs/notifications/read`,
-  { method: "POST", headers: JSON_HEADERS, mode: CORS_MODE, body: JSON.stringify(body) }
-);
-
 export const cleanRecords = (location: string, _id: string) => {
   return fetch(BACKEND_URL + "/run_cleaning_functions/" + location + "/" + _id, {
     method: "POST",
