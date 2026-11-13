@@ -293,8 +293,21 @@ export const getRecordHistory = (record_id: string) => {
   });
 };
 
-export const getDownloadSize = (location: string, _id: string, data: any) => {
-  let endpoint = `${BACKEND_URL}/get_download_size/${location}/${_id}`;
+export const createExportJob = (
+  location: string,
+  _id: string,
+  export_types: { [key: string]: boolean },
+  output_name: string,
+  data: any
+) => {
+  const params = new URLSearchParams({
+    export_csv: String(Boolean(export_types["csv"])),
+    export_json: String(Boolean(export_types["json"])),
+    export_images: String(Boolean(export_types["image_files"])),
+    export_embedded_pdfs: String(Boolean(export_types["embedded_pdf_files"])),
+    output_name: output_name || "",
+  });
+  const endpoint = `${BACKEND_URL}/export_jobs/${location}/${_id}?${params.toString()}`;
   return fetch(endpoint, {
     method: "POST",
     mode: CORS_MODE,
@@ -303,15 +316,32 @@ export const getDownloadSize = (location: string, _id: string, data: any) => {
   });
 };
 
-export const downloadRecords = (location: string, _id: string, export_types: { [key: string]: boolean }, output_name: string, data: any) => {
-  let endpoint = `${BACKEND_URL}/download_records/${location}/${_id}?export_csv=${export_types["csv"] || false}&export_json=${export_types["json"] || false}&export_images=${export_types["image_files"] || false}&export_embedded_pdfs=${export_types["embedded_pdf_files"] || false}&output_name=${output_name}`;
-  return fetch(endpoint, {
-    method: "POST",
-    mode: CORS_MODE,
-    body: JSON.stringify(data),
-    headers: JSON_HEADERS,
-  });
-};
+export const getExportHistoryProjects = () => fetch(
+  `${BACKEND_URL}/export_jobs/scopes`, { mode: CORS_MODE }
+);
+
+export const getExportJobHistory = (body: object) => fetch(
+  `${BACKEND_URL}/export_jobs/history`,
+  { method: "POST", headers: JSON_HEADERS, mode: CORS_MODE, body: JSON.stringify(body) }
+);
+
+export const getExportJob = (jobId: string) => fetch(
+  `${BACKEND_URL}/export_jobs/${encodeURIComponent(jobId)}`, { mode: CORS_MODE }
+);
+
+export const getExportDownloadUrl = (jobId: string) => fetch(
+  `${BACKEND_URL}/export_jobs/${encodeURIComponent(jobId)}/download`, { mode: CORS_MODE }
+);
+
+export const rerunExportJob = (jobId: string) => fetch(
+  `${BACKEND_URL}/export_jobs/${encodeURIComponent(jobId)}/rerun`,
+  { method: "POST", headers: JSON_HEADERS, mode: CORS_MODE }
+);
+
+export const cancelExportJob = (jobId: string) => fetch(
+  `${BACKEND_URL}/export_jobs/${encodeURIComponent(jobId)}/cancel`,
+  { method: "POST", headers: JSON_HEADERS, mode: CORS_MODE }
+);
 
 export const cleanRecords = (location: string, _id: string) => {
   return fetch(BACKEND_URL + "/run_cleaning_functions/" + location + "/" + _id, {

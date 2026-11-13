@@ -20,22 +20,31 @@
     "react-image-crop": "^11.0.5",
     "react-lasso-select": "^1.2.2",
     "react-loader-spinner": "^6.1.6",
-    "react-router-dom": "^6.20.0",
-    "react-scripts": "^5.0.1",
-    "typescript": "^4.9.5",
+    "react-router-dom": "^6.30.4",
+    "typescript": "~5.6.2",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "7.21.11",
     "@testing-library/cypress": "^10.0.2",
     "@types/jest": "^29.5.12",
     "@types/mocha": "^10.0.7",
     "@types/node": "^22.5.5",
+    "@vitejs/plugin-react": "^4.7.0",
     "cypress": "^13.14.2",
-    "fflate": "0.8.3"
+    "dotenv": "^16.4.7",
+    "fflate": "0.8.3",
+    "jsdom": "^26.1.0",
+    "vite": "^6.4.6",
+    "vitest": "^4.1.12"
+  },
+  "overrides": {
+    "@cypress/request": {
+      "qs": "^6.16.1",
+      "uuid": "^11.1.1"
+    }
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "vite",
     "docker:start": "node deployment/scripts/docker-dev-stack.cjs start",
     "docker:stop": "node deployment/scripts/docker-dev-stack.cjs stop",
     "docker:down": "node deployment/scripts/docker-dev-stack.cjs down",
@@ -51,28 +60,16 @@
     "docker:down:shell": "sh deployment/scripts/down-dev-stack.sh",
     "docker:clean:shell": "sh deployment/scripts/clean-dev-stack.sh",
     "docs:start": "npm --prefix docs run start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "build": "vite build",
+    "test": "node -e \"const {spawnSync}=require('child_process');const args=process.argv.slice(1).filter(a=>!a.startsWith('--watchAll')&&a!=='--runInBand');process.exit(spawnSync('./node_modules/.bin/vitest',['run',...args],{stdio:'inherit'}).status??1)\" --",
     "e2e:open": "node deployment/scripts/run-cypress-e2e.cjs open",
     "e2e:run": "node deployment/scripts/run-cypress-e2e.cjs run",
     "e2e:smoke": "node deployment/scripts/run-cypress-e2e.cjs smoke",
     "e2e:schema-modes": "node deployment/scripts/run-cypress-e2e.cjs schema-modes",
     "e2e:full": "node deployment/scripts/run-cypress-e2e.cjs full",
     "e2e:ci": "node deployment/scripts/run-cypress-e2e.cjs ci",
-    "eject": "react-scripts eject",
     "lint": "eslint . --fix",
     "gcp-build": ""
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "rules": {
-      "semi": ["warn", "always"],
-      "indent": ["warn", 2],
-      "quotes": ["warn", "double"]
-    }
   },
   "browserslist": {
     "production": [
