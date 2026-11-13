@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Stack, Typography } from "@mui/material";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import { Alert, Button, Stack } from "@mui/material";
 import { getProcessingJobHistory } from "../../services/app.service";
 import {
   FilterOption,
@@ -57,30 +56,7 @@ const UploadHistoryResults = ({
   onOpen,
 }: Props) => {
   const [filters, setFilters] = useState<FilterOption[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery.trim());
-      setPage(0);
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const effectiveFilters: FilterOption[] = debouncedSearch
-    ? [
-        ...filters,
-        {
-          key: "request_user.email",
-          displayName: "Uploader",
-          type: "string",
-          operator: "contains",
-          value: debouncedSearch,
-        },
-      ]
-    : filters;
 
   const { data, loading, error, refresh } = useJobQuery<ProcessingJobHistory>(
     getProcessingJobHistory,
@@ -91,7 +67,7 @@ const UploadHistoryResults = ({
         page_size: 25,
         ...(projectId ? { project_id: projectId } : {}),
         ...(recordGroupId ? { record_group_id: recordGroupId } : {}),
-        filter: convertFiltersToMongoFormat(effectiveFilters),
+        filter: convertFiltersToMongoFormat(filters),
       },
     ],
     (result) => result.active_count > 0
@@ -111,6 +87,13 @@ const UploadHistoryResults = ({
   const combinedJobs = [...(data?.active_jobs || []), ...(data?.jobs || [])];
   const finishedCount = data?.count || 0;
   const totalCount = (data?.active_count || 0) + finishedCount;
+  const userOptions = Array.from(
+    new Set(
+      combinedJobs
+        .map((job) => job.request_user?.email)
+        .filter((email): email is string => Boolean(email))
+    )
+  ).sort();
 
   return (
     <Stack spacing={2.5}>
@@ -123,39 +106,14 @@ const UploadHistoryResults = ({
           setPage(0);
           onScopeChange(nextProj, nextGroup);
         }}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Filter by uploader email…"
-        searchAriaLabel="Uploader"
-        searchDataCy="upload-search-input"
         filters={filters}
         onApplyFilters={(nextFilters) => {
           setFilters(nextFilters);
           setPage(0);
         }}
         choiceFilters={UPLOAD_CHOICE_FILTERS}
+        userOptions={userOptions}
       />
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        gap={1}
-      >
-        <Typography variant="caption" color="text.secondary">
-          {data?.active_count
-            ? "Updates every 5 seconds while uploads are active."
-            : "Newest uploads first."}
-        </Typography>
-        <Button
-          size="small"
-          startIcon={<RefreshIcon />}
-          onClick={refresh}
-          disabled={loading}
-          sx={{ textTransform: "none", flexShrink: 0, whiteSpace: "nowrap" }}
-        >
-          Refresh uploads
-        </Button>
-      </Stack>
       {error && (
         <Alert
           severity="error"

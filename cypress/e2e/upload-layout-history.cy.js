@@ -166,7 +166,9 @@ describe("upload dialog layout and history", () => {
     cy.contains('[role="button"]', "Record group").click();
     cy.contains('[role="menuitem"]', "Well completion reports").click();
     cy.wait("@history").its("request.body").should("include", {project_id: project, record_group_id: group});
-    cy.findByRole("textbox", {name: "Uploader"}).type("uploader@");
+    cy.contains('[role="button"]', "User").click();
+    cy.findByRole("textbox", {name: "User email"}).type("uploader@");
+    cy.contains("button", "Apply").click();
     cy.wait("@history").its("request.body.filter").should("deep.equal", {"request_user.email": {$regex: "uploader@"}});
     cy.get('[aria-label="View upload processing"]').should("exist");
     cy.getByCy("admin-roles-section").click();

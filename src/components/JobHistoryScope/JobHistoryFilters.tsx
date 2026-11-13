@@ -34,14 +34,15 @@ interface Props {
   viewScope?: "mine" | "team";
   onViewScopeChange?: (scope: "mine" | "team") => void;
   viewScopeLabels?: { mine: string; team: string };
-  searchQuery: string;
-  onSearchChange: (search: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (search: string) => void;
   searchPlaceholder?: string;
   searchAriaLabel?: string;
   searchDataCy?: string;
   filters: FilterOption[];
   onApplyFilters: (filters: FilterOption[]) => void;
   choiceFilters: JobHistoryChoiceFilterConfig[];
+  userOptions?: string[];
 }
 
 const DEFAULT_VIEW_SCOPE_LABELS = {
@@ -58,7 +59,7 @@ const JobHistoryFilters = ({
   viewScope,
   onViewScopeChange,
   viewScopeLabels = DEFAULT_VIEW_SCOPE_LABELS,
-  searchQuery,
+  searchQuery = "",
   onSearchChange,
   searchPlaceholder = "Search…",
   searchAriaLabel = "Search",
@@ -66,12 +67,14 @@ const JobHistoryFilters = ({
   filters,
   onApplyFilters,
   choiceFilters,
+  userOptions = [],
 }: Props) => {
   const [projectAnchor, setProjectAnchor] = useState<HTMLElement | null>(null);
   const [groupAnchor, setGroupAnchor] = useState<HTMLElement | null>(null);
   const [choiceAnchors, setChoiceAnchors] = useState<
     Record<string, HTMLElement | null>
   >({});
+  const [userAnchor, setUserAnchor] = useState<HTMLElement | null>(null);
   const [dateAnchor, setDateAnchor] = useState<HTMLElement | null>(null);
 
   const getFilterValue = (key: string, operator?: string) => {
@@ -81,6 +84,9 @@ const JobHistoryFilters = ({
     return match?.value || match?.selectedOptions?.[0] || "";
   };
 
+  const [draftUser, setDraftUser] = useState(() =>
+    getFilterValue("request_user.email")
+  );
   const [draftAfter, setDraftAfter] = useState(() =>
     getFilterValue("created_at", "after")
   );
@@ -96,6 +102,7 @@ const JobHistoryFilters = ({
     );
   const selectedGroup = availableGroups.find((g) => g.id === recordGroupId);
 
+  const userFilterValue = getFilterValue("request_user.email");
   const afterDate = getFilterValue("created_at", "after");
   const beforeDate = getFilterValue("created_at", "before");
 
@@ -120,6 +127,25 @@ const JobHistoryFilters = ({
       : rest;
     onApplyFilters(nextFilters);
     setChoiceAnchors((prev) => ({ ...prev, [choiceConfig.key]: null }));
+  };
+
+  const applyUserFilter = (nextUser: string) => {
+    const trimmed = nextUser.trim();
+    const rest = filters.filter((f) => f.key !== "request_user.email");
+    const nextFilters = trimmed
+      ? [
+          ...rest,
+          {
+            key: "request_user.email",
+            displayName: "User",
+            type: "string",
+            operator: "contains",
+            value: trimmed,
+          },
+        ]
+      : rest;
+    onApplyFilters(nextFilters);
+    setUserAnchor(null);
   };
 
   const applyDateFilter = (nextAfter: string, nextBefore: string) => {
@@ -410,6 +436,92 @@ const JobHistoryFilters = ({
           );
         })}
 
+        {/* + User pill */}
+        <Chip
+          size="small"
+          icon={!userFilterValue ? <AddIcon fontSize="small" /> : undefined}
+          label={userFilterValue ? `User: ${userFilterValue}` : "User"}
+          variant="outlined"
+          onClick={(e) => {
+            setDraftUser(userFilterValue);
+            setUserAnchor(e.currentTarget);
+          }}
+          onDelete={
+            userFilterValue ? () => applyUserFilter("") : undefined
+          }
+          sx={{
+            borderRadius: 99,
+            fontWeight: userFilterValue ? 600 : 500,
+            bgcolor: userFilterValue ? "action.selected" : "background.paper",
+          }}
+        />
+        <Popover
+          open={Boolean(userAnchor)}
+          anchorEl={userAnchor}
+          onClose={() => setUserAnchor(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          transformOrigin={{ vertical: "top", horizontal: "left" }}
+          PaperProps={{ sx: { p: 2, width: 260, borderRadius: 2 } }}
+        >
+          <Stack spacing={1.5}>
+            <Typography variant="subtitle2" fontWeight={600}>
+              User
+            </Typography>
+            <TextField
+              label="User email"
+              placeholder="Email contains…"
+              size="small"
+              value={draftUser}
+              onChange={(e) => setDraftUser(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  applyUserFilter(draftUser);
+                }
+              }}
+            />
+            {userOptions.length > 0 && (
+              <Box sx={{ maxHeight: 160, overflowY: "auto", mx: -1 }}>
+                {userOptions.map((email) => (
+                  <MenuItem
+                    key={email}
+                    dense
+                    selected={userFilterValue === email}
+                    onClick={() => {
+                      setDraftUser(email);
+                      applyUserFilter(email);
+                    }}
+                  >
+                    <Typography variant="body2" noWrap>
+                      {email}
+                    </Typography>
+                  </MenuItem>
+                ))}
+              </Box>
+            )}
+            <Stack direction="row" justifyContent="flex-end" spacing={1}>
+              <Button
+                size="small"
+                onClick={() => {
+                  setDraftUser("");
+                  applyUserFilter("");
+                }}
+                sx={{ textTransform: "none" }}
+              >
+                Clear
+              </Button>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => applyUserFilter(draftUser)}
+                sx={{ textTransform: "none" }}
+              >
+                Apply
+              </Button>
+            </Stack>
+          </Stack>
+        </Popover>
+
         {/* + Date pill */}
         <Chip
           size="small"
@@ -487,7 +599,7 @@ const JobHistoryFilters = ({
             size="small"
             onClick={() => {
               onScopeChange("", "");
-              onSearchChange("");
+              onSearchChange?.("");
               onApplyFilters([]);
             }}
             sx={{ textTransform: "none", fontSize: "0.75rem", minWidth: 0 }}
@@ -497,43 +609,45 @@ const JobHistoryFilters = ({
         )}
       </Stack>
 
-      {/* Search input */}
-      <TextField
-        size="small"
-        placeholder={searchPlaceholder}
-        value={searchQuery}
-        onChange={(e) => onSearchChange(e.target.value)}
-        inputProps={{
-          "aria-label": searchAriaLabel,
-          "data-cy": searchDataCy,
-        }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon fontSize="small" color="action" />
-            </InputAdornment>
-          ),
-          endAdornment: searchQuery ? (
-            <InputAdornment position="end">
-              <ButtonBase
-                aria-label="Clear search"
-                onClick={() => onSearchChange("")}
-                sx={{ p: 0.25, borderRadius: 1 }}
-              >
-                <ClearIcon fontSize="small" color="action" />
-              </ButtonBase>
-            </InputAdornment>
-          ) : undefined,
-        }}
-        sx={{
-          width: { xs: "100%", md: 280 },
-          "& .MuiOutlinedInput-root": {
-            borderRadius: 2,
-            bgcolor: "background.paper",
-            fontSize: "0.875rem",
-          },
-        }}
-      />
+      {/* Optional search input */}
+      {onSearchChange && (
+        <TextField
+          size="small"
+          placeholder={searchPlaceholder}
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          inputProps={{
+            "aria-label": searchAriaLabel,
+            "data-cy": searchDataCy,
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" color="action" />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery ? (
+              <InputAdornment position="end">
+                <ButtonBase
+                  aria-label="Clear search"
+                  onClick={() => onSearchChange("")}
+                  sx={{ p: 0.25, borderRadius: 1 }}
+                >
+                  <ClearIcon fontSize="small" color="action" />
+                </ButtonBase>
+              </InputAdornment>
+            ) : undefined,
+          }}
+          sx={{
+            width: { xs: "100%", md: 280 },
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              bgcolor: "background.paper",
+              fontSize: "0.875rem",
+            },
+          }}
+        />
+      )}
     </Stack>
   );
 };

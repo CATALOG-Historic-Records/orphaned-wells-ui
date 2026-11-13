@@ -93,3 +93,42 @@ test("UploadHistoryTable renders TableLoading while loading and EmptyTable when 
   expect(screen.getByText("No uploads match this selection.")).toBeInTheDocument();
   expect(container.querySelector("#empty-table")).toBeInTheDocument();
 });
+
+test("UploadHistoryTable sorts rows by submitted date when clicking the column header", () => {
+  const olderJob = {
+    ...job,
+    job_id: "older-job",
+    created_at: 100,
+    request_user: { email: "older@example.com" },
+  };
+  const newerJob = {
+    ...job,
+    job_id: "newer-job",
+    created_at: 200,
+    request_user: { email: "newer@example.com" },
+  };
+
+  const { container } = render(
+    <MemoryRouter>
+      <UploadHistoryTable
+        title="Uploads"
+        jobs={[olderJob, newerJob]}
+        count={2}
+        loading={false}
+        page={0}
+        onPage={jest.fn()}
+        onOpen={jest.fn()}
+        emptyMessage="No uploads match this selection."
+      />
+    </MemoryRouter>
+  );
+
+  let rows = container.querySelectorAll("tbody tr");
+  expect(rows[0].textContent).toContain("newer@example.com");
+  expect(rows[1].textContent).toContain("older@example.com");
+
+  fireEvent.click(screen.getByText("Submitted / uploader"));
+  rows = container.querySelectorAll("tbody tr");
+  expect(rows[0].textContent).toContain("older@example.com");
+  expect(rows[1].textContent).toContain("newer@example.com");
+});

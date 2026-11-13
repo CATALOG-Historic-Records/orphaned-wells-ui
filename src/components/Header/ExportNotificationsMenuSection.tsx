@@ -42,18 +42,6 @@ const ExportNotificationsMenuSection = ({
     .slice(0, 4);
   const unreadCount = notificationsData?.unread_count || 0;
 
-  const handleOpenNotification = (job: ExportJob) => {
-    if (!isActiveExportJob(job) && !job.notification_read_at) {
-      callAPI(
-        markExportNotificationsRead,
-        [{ job_id: job.job_id }],
-        () => onRefresh(),
-        () => {}
-      );
-    }
-    onNavigateToExports(job.job_id);
-  };
-
   const handleMarkAllRead = (event: React.MouseEvent) => {
     event.stopPropagation();
     callAPI(
@@ -150,7 +138,7 @@ const ExportNotificationsMenuSection = ({
             return (
               <Box
                 key={job.job_id}
-                onClick={() => handleOpenNotification(job)}
+                onClick={() => onNavigateToExports(job.job_id)}
                 data-cy={`export-notification-item-${job.job_id}`}
                 sx={{
                   p: 1,
