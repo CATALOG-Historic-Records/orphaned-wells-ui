@@ -26,6 +26,7 @@ interface Props {
   title: string;
   jobs: ProcessingJob[];
   count: number;
+  totalCount?: number;
   loading: boolean;
   page: number;
   onPage: (page: number) => void;
@@ -38,6 +39,7 @@ const UploadHistoryTable = ({
   title,
   jobs,
   count,
+  totalCount,
   loading,
   page,
   onPage,
@@ -54,7 +56,7 @@ const UploadHistoryTable = ({
           </Typography>
           <Chip
             size="small"
-            label={loading && !jobs.length ? "…" : count}
+            label={loading && !jobs.length ? "…" : totalCount ?? count}
             sx={{ height: 24, fontVariantNumeric: "tabular-nums" }}
           />
         </Stack>

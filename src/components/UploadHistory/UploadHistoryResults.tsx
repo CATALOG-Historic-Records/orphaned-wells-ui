@@ -18,9 +18,8 @@ interface Props {
 const UploadHistoryResults = ({projectId, recordGroupId, revision, onOpen}: Props) => {
   const [filters, setFilters] = useState<FilterOption[]>([]);
   const [page, setPage] = useState(0);
-  const [activePage, setActivePage] = useState(0);
   const {data, loading, error, refresh} = useJobQuery<ProcessingJobHistory>(getProcessingJobHistory, [{
-    page, active_page: activePage, page_size: 25,
+    page, active_page: 0, page_size: 25,
     ...(projectId ? {project_id: projectId} : {}),
     ...(recordGroupId ? {record_group_id: recordGroupId} : {}),
     filter: convertFiltersToMongoFormat(filters),
@@ -28,9 +27,12 @@ const UploadHistoryResults = ({projectId, recordGroupId, revision, onOpen}: Prop
   useEffect(() => {if (revision) refresh();}, [revision, refresh]);
   useEffect(() => {
     if (!data) return;
-    if (activePage > 0 && activePage * 25 >= data.active_count) setActivePage(Math.max(0, Math.ceil(data.active_count / 25) - 1));
     if (page > 0 && page * 25 >= data.count) setPage(Math.max(0, Math.ceil(data.count / 25) - 1));
-  }, [data, activePage, page]);
+  }, [data, page]);
+
+  const combinedJobs = [...(data?.active_jobs || []), ...(data?.jobs || [])];
+  const finishedCount = data?.count || 0;
+  const totalCount = (data?.active_count || 0) + finishedCount;
 
   return <Stack spacing={2.5}>
     <Stack direction="row" justifyContent="space-between" alignItems="center" gap={1}>
@@ -38,8 +40,7 @@ const UploadHistoryResults = ({projectId, recordGroupId, revision, onOpen}: Prop
       <Button size="small" startIcon={<RefreshIcon />} onClick={refresh} disabled={loading} sx={{textTransform: "none", flexShrink: 0, whiteSpace: "nowrap"}}>Refresh uploads</Button>
     </Stack>
     {error && <Alert severity="error" action={<Button onClick={refresh}>Retry</Button>}>{error}</Alert>}
-    <UploadHistoryTable title="Active uploads" jobs={data?.active_jobs || []} count={data?.active_count || 0} loading={loading} page={activePage} onPage={setActivePage} onOpen={onOpen} emptyMessage="No active uploads in this selection." />
-    <UploadHistoryTable title="Finished uploads" jobs={data?.jobs || []} count={data?.count || 0} loading={loading} page={page} onPage={setPage} onOpen={onOpen} emptyMessage="No finished uploads match this selection."
+    <UploadHistoryTable title="Uploads" jobs={combinedJobs} count={finishedCount} totalCount={totalCount} loading={loading} page={page} onPage={setPage} onOpen={onOpen} emptyMessage="No uploads match this selection."
       filters={<UploadHistoryFilters onApply={(next) => {setFilters(next); setPage(0);}} />} />
   </Stack>;
 };

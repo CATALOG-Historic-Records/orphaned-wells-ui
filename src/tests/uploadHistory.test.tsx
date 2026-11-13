@@ -62,14 +62,14 @@ test("UploadHistoryTable renders TableLoading while loading and EmptyTable when 
   const { container, rerender } = render(
     <MemoryRouter>
       <UploadHistoryTable
-        title="Active uploads"
+        title="Uploads"
         jobs={[]}
         count={0}
         loading={true}
         page={0}
         onPage={jest.fn()}
         onOpen={jest.fn()}
-        emptyMessage="No active uploads in this selection."
+        emptyMessage="No uploads match this selection."
       />
     </MemoryRouter>
   );
@@ -78,18 +78,18 @@ test("UploadHistoryTable renders TableLoading while loading and EmptyTable when 
   rerender(
     <MemoryRouter>
       <UploadHistoryTable
-        title="Active uploads"
+        title="Uploads"
         jobs={[]}
         count={0}
         loading={false}
         page={0}
         onPage={jest.fn()}
         onOpen={jest.fn()}
-        emptyMessage="No active uploads in this selection."
+        emptyMessage="No uploads match this selection."
       />
     </MemoryRouter>
   );
   expect(screen.getByText("No uploads found.")).toBeInTheDocument();
-  expect(screen.getByText("No active uploads in this selection.")).toBeInTheDocument();
+  expect(screen.getByText("No uploads match this selection.")).toBeInTheDocument();
   expect(container.querySelector("#empty-table")).toBeInTheDocument();
 });

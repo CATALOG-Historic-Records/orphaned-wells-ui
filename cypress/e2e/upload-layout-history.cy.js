@@ -202,7 +202,7 @@ describe("upload dialog layout and history", () => {
     cy.getByCy("admin-uploads-section").click();
     cy.contains("History temporarily unavailable").should("be.visible").then(() => {failed = false;});
     cy.contains("button", "Retry").click();
-    cy.contains("No active uploads in this selection.").should("be.visible");
+    cy.contains("No uploads match this selection.").should("be.visible");
     cy.contains("History temporarily unavailable").should("not.exist");
   });
 });

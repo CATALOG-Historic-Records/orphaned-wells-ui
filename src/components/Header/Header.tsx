@@ -298,7 +298,12 @@ const Header = (props: any) => {
               color="primary"
               overlap="circular"
             >
-              <Avatar sx={styles.avatar} alt={displayName || displayEmail} src={userPhoto || undefined}>
+              <Avatar
+                sx={styles.avatar}
+                alt={displayName || displayEmail}
+                src={userPhoto || undefined}
+                imgProps={{ referrerPolicy: "no-referrer" }}
+              >
                 {userInitials}
               </Avatar>
             </Badge>
@@ -318,6 +323,7 @@ const Header = (props: any) => {
                   sx={styles.menuUserAvatar}
                   alt={displayName || displayEmail}
                   src={userPhoto || undefined}
+                  imgProps={{ referrerPolicy: "no-referrer" }}
                 >
                   {userInitials}
                 </Avatar>
