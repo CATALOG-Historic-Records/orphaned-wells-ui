@@ -3,15 +3,17 @@ import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
 import ProjectPage from "../views/ProjectPage/ProjectPage";
 import { getRecordGroups } from "../services/app.service";
 
-jest.mock("../services/app.service", () => ({ getRecordGroups: jest.fn() }));
-jest.mock("../components/NewRecordGroupDialog/NewRecordGroupDialog", () => () => null);
-jest.mock("../components/JsonImportDialog/JsonImportDialog", () => () => null);
-jest.mock("../components/RecordsTable/RecordsTable", () => () => <div>All project records</div>);
-jest.mock("../components/RecordGroupsTable/RecordGroupsTable", () => ({ record_groups, loading }: any) => (
-  loading ? <div>Loading record groups</div> : <table aria-label="Record groups">
-    <tbody>{record_groups.map((group: any) => <tr key={group._id}><td>{group.name}</td></tr>)}</tbody>
-  </table>
-));
+vi.mock("../services/app.service", () => ({ getRecordGroups: vi.fn() }));
+vi.mock("../components/NewRecordGroupDialog/NewRecordGroupDialog", () => ({ default: () => null }));
+vi.mock("../components/JsonImportDialog/JsonImportDialog", () => ({ default: () => null }));
+vi.mock("../components/RecordsTable/RecordsTable", () => ({ default: () => <div>All project records</div> }));
+vi.mock("../components/RecordGroupsTable/RecordGroupsTable", () => ({
+  default: ({ record_groups, loading }: any) => (
+    loading ? <div>Loading record groups</div> : <table aria-label="Record groups">
+      <tbody>{record_groups.map((group: any) => <tr key={group._id}><td>{group.name}</td></tr>)}</tbody>
+    </table>
+  ),
+}));
 
 const response = (body: unknown, status = 200) => ({ status, json: async () => body });
 const project = (id = "project") => response({
