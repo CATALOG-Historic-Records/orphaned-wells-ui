@@ -240,7 +240,7 @@ const ApiKeyDialog = ({
               variant="contained"
               onClick={handleSubmit}
               disabled={!canCreate}
-              sx={{ whiteSpace: "nowrap", height: "40px" }}
+              sx={{ whiteSpace: "nowrap", height: "40px", minWidth: "100px" }}
             >
               {creating ? "Creating..." : "Create key"}
             </Button>

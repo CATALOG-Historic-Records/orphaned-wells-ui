@@ -389,7 +389,7 @@ const Header = (props: any) => {
                 </Box>
               </Box>
             )}
-            {(displayName || displayEmail) && <Divider />}
+            {(displayName || displayEmail) && <Divider sx={{ mb: 1 }} />}
             {(hasPermission("manage_system") || hasPermission("system_administration")) && (
               <span>
                 {hasPermission("manage_system") && (
