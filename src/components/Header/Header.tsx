@@ -3,8 +3,17 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HeaderStyles as styles } from "../../styles";
 import { useUserContext } from "../../usercontext";
-import { changeCollaborator, changeTeam, fetchTeams, getOgrreVersion } from "../../services/app.service";
-import { ChangeTeamResponse } from "../../types";
+import {
+  changeCollaborator,
+  changeTeam,
+  createApiKey,
+  fetchTeams,
+  getApiKeys,
+  getOgrreVersion,
+  revokeApiKey,
+} from "../../services/app.service";
+import { ApiKeyInfo, ChangeTeamResponse, CreatedApiKeyResponse } from "../../types";
+import ApiKeyDialog from "./ApiKeyDialog";
 import ChangeCollaboratorDialog from "./ChangeCollaboratorDialog";
 import ChangeTeamDialog from "./ChangeTeamDialog";
 import OgrreVersionDialog, { OgrreVersionInfo } from "./OgrreVersionDialog";
@@ -27,6 +36,7 @@ import Logout from "@mui/icons-material/Logout";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 
 const getApiErrorMessage = (error: any, fallback: string) => {
   if (typeof error === "string") return error;
@@ -70,6 +80,13 @@ const Header = (props: any) => {
   const [versionInfo, setVersionInfo] = useState<OgrreVersionInfo | null>(null);
   const [versionLoading, setVersionLoading] = useState(false);
   const [versionError, setVersionError] = useState("");
+  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
+  const [apiKeys, setApiKeys] = useState<ApiKeyInfo[]>([]);
+  const [newlyCreatedKey, setNewlyCreatedKey] = useState<CreatedApiKeyResponse | null>(null);
+  const [apiKeysLoading, setApiKeysLoading] = useState(false);
+  const [apiKeyCreating, setApiKeyCreating] = useState(false);
+  const [revokingKeyId, setRevokingKeyId] = useState<string | null>(null);
+  const [apiKeyError, setApiKeyError] = useState("");
 
   useEffect(() => {
     if (location.pathname.includes("project")) {
@@ -207,6 +224,83 @@ const Header = (props: any) => {
     setVersionError(getApiErrorMessage(error, "Unable to load OGRRE version."));
   };
 
+  const handleOpenApiKeyDialog = () => {
+    setProfileActions(false);
+    setApiKeyDialogOpen(true);
+    setNewlyCreatedKey(null);
+    setApiKeyError("");
+    setApiKeysLoading(true);
+    callAPI(getApiKeys, [], handleFetchedApiKeys, handleFailedFetchApiKeys);
+  };
+
+  const handleCloseApiKeyDialog = () => {
+    if (apiKeyCreating) return;
+    setApiKeyDialogOpen(false);
+    setNewlyCreatedKey(null);
+    setApiKeyError("");
+  };
+
+  const handleFetchedApiKeys = (data: { api_keys?: ApiKeyInfo[] }) => {
+    setApiKeys(data?.api_keys || []);
+    setApiKeysLoading(false);
+  };
+
+  const handleFailedFetchApiKeys = (error: any) => {
+    setApiKeysLoading(false);
+    setApiKeyError(getApiErrorMessage(error, "Unable to load API keys."));
+  };
+
+  const handleCreateApiKey = (name: string, expiresInDays: number) => {
+    setApiKeyCreating(true);
+    setApiKeyError("");
+    callAPI(
+      createApiKey,
+      [{ name, expires_in_days: expiresInDays }],
+      handleCreatedApiKey,
+      handleFailedCreateApiKey
+    );
+  };
+
+  const handleCreatedApiKey = (created: CreatedApiKeyResponse) => {
+    setApiKeyCreating(false);
+    setNewlyCreatedKey(created);
+    setApiKeys((prev) => [
+      {
+        key_id: created.key_id,
+        name: created.name,
+        key_prefix: created.key_prefix,
+        created_at: created.created_at,
+        expires_at: created.expires_at,
+        last_used_at: created.last_used_at,
+        expired: false,
+      },
+      ...prev,
+    ]);
+  };
+
+  const handleFailedCreateApiKey = (error: any) => {
+    setApiKeyCreating(false);
+    setApiKeyError(getApiErrorMessage(error, "Unable to create API key."));
+  };
+
+  const handleRevokeApiKey = (keyId: string) => {
+    setRevokingKeyId(keyId);
+    setApiKeyError("");
+    callAPI(
+      revokeApiKey,
+      [keyId],
+      () => {
+        setRevokingKeyId(null);
+        setApiKeys((prev) => prev.filter((item) => item.key_id !== keyId));
+        setNewlyCreatedKey((prev) => (prev?.key_id === keyId ? null : prev));
+      },
+      (error: any) => {
+        setRevokingKeyId(null);
+        setApiKeyError(getApiErrorMessage(error, "Unable to revoke API key."));
+      }
+    );
+  };
+
   return (
     <div id="Header">
       <div className="titlebar">
@@ -326,6 +420,14 @@ const Header = (props: any) => {
                 OGRRE Version
               </MenuItem>
             )}
+            {!user?.anonymous && (
+              <MenuItem data-cy="api-keys-menu-item" onClick={handleOpenApiKeyDialog}>
+                <ListItemIcon>
+                  <VpnKeyOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                API Keys
+              </MenuItem>
+            )}
             <MenuItem onClick={logout}>
               <ListItemIcon>
                 <Logout fontSize="small" />
@@ -359,6 +461,18 @@ const Header = (props: any) => {
         loading={versionLoading}
         error={versionError}
         onClose={() => setVersionDialogOpen(false)}
+      />
+      <ApiKeyDialog
+        open={apiKeyDialogOpen}
+        apiKeys={apiKeys}
+        newlyCreatedKey={newlyCreatedKey}
+        loading={apiKeysLoading}
+        creating={apiKeyCreating}
+        revokingKeyId={revokingKeyId}
+        error={apiKeyError}
+        onClose={handleCloseApiKeyDialog}
+        onCreateKey={handleCreateApiKey}
+        onRevokeKey={handleRevokeApiKey}
       />
     </div>
   );

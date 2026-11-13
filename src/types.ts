@@ -914,4 +914,18 @@ export interface HotkeyInfoProps {
   onClose: () => void;
 }
 
+export interface ApiKeyInfo {
+  key_id: string;
+  name: string;
+  key_prefix: string;
+  created_at: number;
+  expires_at: number;
+  last_used_at: number | null;
+  expired?: boolean;
+}
+
+export interface CreatedApiKeyResponse extends ApiKeyInfo {
+  api_key: string;
+}
+
 export type AttributesListUpdateTypes = "insertField" | "deleteField" | "updateFieldCoordinates"
