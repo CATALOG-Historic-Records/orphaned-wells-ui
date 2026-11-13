@@ -1,11 +1,12 @@
 import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { useJobQuery } from "../components/JobHistoryScope/useJobQuery";
+import UploadHistoryTable from "../components/UploadHistory/UploadHistoryTable";
 import UploadJobDetails from "../components/UploadHistory/UploadJobDetails";
 import { getProcessingJobDetails, getProcessingJobHistory, retryProcessingJob } from "../services/app.service";
 
-jest.mock("../services/app.service", () => ({getProcessingJobDetails: jest.fn(), getProcessingJobHistory: jest.fn(), retryProcessingJob: jest.fn()}));
-jest.mock("../usercontext", () => ({useUserContext: () => ({hasPermission: () => true})}));
+vi.mock("../services/app.service", () => ({getProcessingJobDetails: vi.fn(), getProcessingJobHistory: vi.fn(), retryProcessingJob: vi.fn()}));
+vi.mock("../usercontext", () => ({useUserContext: () => ({hasPermission: () => true})}));
 const response = (body: unknown) => ({status: 200, json: async () => body});
 const job = {job_id: "job", status: "error", created_at: 100, input: {upload_session_id: "job"}, request_user: {email: "user"}, summary: {total_succeeded: 0, total_failed: 1, total_skipped_duplicates: 0}};
 
@@ -55,4 +56,79 @@ test("details show why retry is unavailable and load file pages on demand", asyn
   await waitFor(() => expect(getProcessingJobDetails).toHaveBeenLastCalledWith("group", "job", "records", 1));
   await screen.findByText("The upload has expired.");
   expect(retryProcessingJob).not.toHaveBeenCalled();
+});
+
+test("UploadHistoryTable renders TableLoading while loading and EmptyTable when empty", () => {
+  const { container, rerender } = render(
+    <MemoryRouter>
+      <UploadHistoryTable
+        title="Uploads"
+        jobs={[]}
+        count={0}
+        loading={true}
+        page={0}
+        onPage={jest.fn()}
+        onOpen={jest.fn()}
+        emptyMessage="No uploads match this selection."
+      />
+    </MemoryRouter>
+  );
+  expect(container.querySelector("#table-loading")).toBeInTheDocument();
+
+  rerender(
+    <MemoryRouter>
+      <UploadHistoryTable
+        title="Uploads"
+        jobs={[]}
+        count={0}
+        loading={false}
+        page={0}
+        onPage={jest.fn()}
+        onOpen={jest.fn()}
+        emptyMessage="No uploads match this selection."
+      />
+    </MemoryRouter>
+  );
+  expect(screen.getByText("No uploads found.")).toBeInTheDocument();
+  expect(screen.getByText("No uploads match this selection.")).toBeInTheDocument();
+  expect(container.querySelector("#empty-table")).toBeInTheDocument();
+});
+
+test("UploadHistoryTable sorts rows by submitted date when clicking the column header", () => {
+  const olderJob = {
+    ...job,
+    job_id: "older-job",
+    created_at: 100,
+    request_user: { email: "older@example.com" },
+  };
+  const newerJob = {
+    ...job,
+    job_id: "newer-job",
+    created_at: 200,
+    request_user: { email: "newer@example.com" },
+  };
+
+  const { container } = render(
+    <MemoryRouter>
+      <UploadHistoryTable
+        title="Uploads"
+        jobs={[olderJob, newerJob]}
+        count={2}
+        loading={false}
+        page={0}
+        onPage={jest.fn()}
+        onOpen={jest.fn()}
+        emptyMessage="No uploads match this selection."
+      />
+    </MemoryRouter>
+  );
+
+  let rows = container.querySelectorAll("tbody tr");
+  expect(rows[0].textContent).toContain("newer@example.com");
+  expect(rows[1].textContent).toContain("older@example.com");
+
+  fireEvent.click(screen.getByText("Submitted / uploader"));
+  rows = container.querySelectorAll("tbody tr");
+  expect(rows[0].textContent).toContain("older@example.com");
+  expect(rows[1].textContent).toContain("newer@example.com");
 });

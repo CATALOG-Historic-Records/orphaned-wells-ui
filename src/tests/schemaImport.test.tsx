@@ -3,9 +3,9 @@ import SchemaImportDialog from "../components/SchemaImportDialog/SchemaImportDia
 import { applyRepoSchemaImport, getRepoSchemaImport, previewRepoSchemaImport } from "../services/app.service";
 import { SchemaImportPreview } from "../types";
 
-const mockPermission = jest.fn();
-jest.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: mockPermission }) }));
-jest.mock("../services/app.service", () => ({ getRepoSchemaImport: jest.fn(), previewRepoSchemaImport: jest.fn(), applyRepoSchemaImport: jest.fn() }));
+const mockPermission = vi.hoisted(() => vi.fn());
+vi.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: mockPermission }) }));
+vi.mock("../services/app.service", () => ({ getRepoSchemaImport: vi.fn(), previewRepoSchemaImport: vi.fn(), applyRepoSchemaImport: vi.fn() }));
 const source = { package: "ogrre_data_cleaning", version: "1.2", collaborator: "isgs" };
 const diff = { added: ["new"], retired: ["old"], changed: [], metadata: [] };
 const response = (body: unknown, status = 200) => ({ status, json: async () => body });

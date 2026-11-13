@@ -10,7 +10,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   cancelExportJob,
@@ -24,7 +23,9 @@ import {
 } from "../../types";
 import { callAPI, convertFiltersToMongoFormat } from "../../util";
 import { useJobQuery } from "../JobHistoryScope/useJobQuery";
-import ExportHistoryFilters from "./ExportHistoryFilters";
+import JobHistoryFilters, {
+  JobHistoryChoiceFilterConfig,
+} from "../JobHistoryScope/JobHistoryFilters";
 import ExportHistoryTable from "./ExportHistoryTable";
 import {
   EXPORT_JOBS_UPDATED_EVENT,
@@ -33,6 +34,19 @@ import {
   formatExportFormats,
   notifyExportJobsUpdated,
 } from "./exportPresentation";
+
+const EXPORT_CHOICE_FILTERS: JobHistoryChoiceFilterConfig[] = [
+  {
+    key: "status",
+    label: "Status",
+    allLabel: "All statuses",
+    options: [
+      { value: "completed", label: "Ready" },
+      { value: "error", label: "Failed" },
+      { value: "expired", label: "Expired" },
+    ],
+  },
+];
 
 interface Props {
   projects: JobScopeProject[];
@@ -129,42 +143,18 @@ const ExportHistoryResults = ({
 
   const activeJobs = data?.active_jobs || [];
   const activeCount = data?.active_count || 0;
+  const userOptions = Array.from(
+    new Set(
+      [...activeJobs, ...(data?.jobs || [])]
+        .map((job) => job.request_user?.email)
+        .filter((email): email is string => Boolean(email))
+    )
+  ).sort();
 
   return (
     <Stack spacing={3}>
-      {/* Top description + Refresh button */}
-      {/* <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        gap={1.5}
-      >
-        <Typography variant="body2" color="text.secondary">
-        </Typography>
-        <Button
-          size="small"
-          variant="outlined"
-          color="inherit"
-          startIcon={<RefreshIcon fontSize="small" />}
-          onClick={refresh}
-          disabled={loading}
-          data-cy="refresh-exports-button"
-          sx={{
-            textTransform: "none",
-            borderRadius: 2,
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            px: 1.5,
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Refresh
-        </Button>
-      </Stack> */}
-
       {/* Filter Bar */}
-      <ExportHistoryFilters
+      <JobHistoryFilters
         projects={projects}
         projectsLoading={projectsLoading}
         projectId={projectId}
@@ -176,15 +166,28 @@ const ExportHistoryResults = ({
         viewScope={viewScope}
         onViewScopeChange={(nextScope) => {
           setViewScope(nextScope);
+          if (nextScope === "mine") {
+            setFilters((prev) =>
+              prev.filter((f) => f.key !== "request_user.email")
+            );
+          }
           setPage(0);
         }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        searchPlaceholder="Search file, record group, requester…"
+        searchAriaLabel="Search exports"
+        searchDataCy="export-search-input"
         filters={filters}
         onApplyFilters={(nextFilters) => {
           setFilters(nextFilters);
+          if (nextFilters.some((f) => f.key === "request_user.email")) {
+            setViewScope("team");
+          }
           setPage(0);
         }}
+        choiceFilters={EXPORT_CHOICE_FILTERS}
+        userOptions={userOptions}
       />
 
       {(error || cancelError) && (

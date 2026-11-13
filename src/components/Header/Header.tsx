@@ -1,18 +1,15 @@
 import "./Header.css";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HeaderStyles as styles } from "../../styles";
 import { useUserContext } from "../../usercontext";
-import { changeCollaborator, changeTeam, fetchTeams, getExportNotifications, getOgrreVersion } from "../../services/app.service";
-import { ChangeTeamResponse, ExportNotificationsResponse } from "../../types";
+import { changeCollaborator, changeTeam, fetchTeams, getOgrreVersion } from "../../services/app.service";
+import { ChangeTeamResponse } from "../../types";
 import ChangeCollaboratorDialog from "./ChangeCollaboratorDialog";
 import ChangeTeamDialog from "./ChangeTeamDialog";
-import ExportNotificationsMenuSection from "./ExportNotificationsMenuSection";
 import OgrreVersionDialog, { OgrreVersionInfo } from "./OgrreVersionDialog";
-import { EXPORT_JOBS_UPDATED_EVENT } from "../ExportHistory/exportPresentation";
 import {
   Avatar,
-  Badge,
   Box,
   Button,
   Divider,
@@ -73,29 +70,6 @@ const Header = (props: any) => {
   const [versionInfo, setVersionInfo] = useState<OgrreVersionInfo | null>(null);
   const [versionLoading, setVersionLoading] = useState(false);
   const [versionError, setVersionError] = useState("");
-  const [exportNotifications, setExportNotifications] = useState<ExportNotificationsResponse>();
-
-  const loadExportNotifications = useCallback(() => {
-    callAPI(
-      getExportNotifications,
-      [],
-      (data: ExportNotificationsResponse) => setExportNotifications(data),
-      () => {}
-    );
-  }, []);
-
-  useEffect(() => {
-    loadExportNotifications();
-    const handleUpdated = () => loadExportNotifications();
-    window.addEventListener(EXPORT_JOBS_UPDATED_EVENT, handleUpdated);
-    return () => window.removeEventListener(EXPORT_JOBS_UPDATED_EVENT, handleUpdated);
-  }, [loadExportNotifications, location.pathname]);
-
-  useEffect(() => {
-    if (!exportNotifications?.active_count) return;
-    const timer = setInterval(loadExportNotifications, 5000);
-    return () => clearInterval(timer);
-  }, [exportNotifications?.active_count, loadExportNotifications]);
 
   useEffect(() => {
     if (location.pathname.includes("project")) {
@@ -119,17 +93,8 @@ const Header = (props: any) => {
   };
 
   const handleShowProfileActions = (event: React.MouseEvent<HTMLElement>) => {
-    const nextOpen = !profileActions;
-    setProfileActions(nextOpen);
+    setProfileActions(!profileActions);
     setAnchorAr(event.currentTarget);
-    if (nextOpen) {
-      loadExportNotifications();
-    }
-  };
-
-  const handleNavigateToExports = (jobId?: string) => {
-    setProfileActions(false);
-    navigate(jobId ? `/exports?job=${encodeURIComponent(jobId)}` : "/exports");
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newLocation: string) => {
@@ -285,23 +250,14 @@ const Header = (props: any) => {
           </Button>
             
           <IconButton data-cy="profile-menu-button" sx={styles.icon} onClick={handleShowProfileActions}>
-            <Badge
-              badgeContent={exportNotifications?.unread_count || 0}
-              variant={
-                !exportNotifications?.unread_count && exportNotifications?.active_count
-                  ? "dot"
-                  : "standard"
-              }
-              invisible={
-                !exportNotifications?.unread_count && !exportNotifications?.active_count
-              }
-              color="primary"
-              overlap="circular"
+            <Avatar
+              sx={styles.avatar}
+              alt={displayName || displayEmail}
+              src={userPhoto || undefined}
+              imgProps={{ referrerPolicy: "no-referrer" }}
             >
-              <Avatar sx={styles.avatar} alt={displayName || displayEmail} src={userPhoto || undefined}>
-                {userInitials}
-              </Avatar>
-            </Badge>
+              {userInitials}
+            </Avatar>
           </IconButton>
           <Menu
             id="actions-list"
@@ -318,6 +274,7 @@ const Header = (props: any) => {
                   sx={styles.menuUserAvatar}
                   alt={displayName || displayEmail}
                   src={userPhoto || undefined}
+                  imgProps={{ referrerPolicy: "no-referrer" }}
                 >
                   {userInitials}
                 </Avatar>
@@ -339,11 +296,6 @@ const Header = (props: any) => {
               </Box>
             )}
             {(displayName || displayEmail) && <Divider />}
-            <ExportNotificationsMenuSection
-              notificationsData={exportNotifications}
-              onRefresh={loadExportNotifications}
-              onNavigateToExports={handleNavigateToExports}
-            />
             {(hasPermission("manage_system") || hasPermission("system_administration")) && (
               <span>
                 {hasPermission("manage_system") && (

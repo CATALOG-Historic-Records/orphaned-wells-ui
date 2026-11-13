@@ -3,7 +3,6 @@ import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { getProcessingHistoryProjects } from "../../services/app.service";
 import { JobScopeProject, ProcessingJob } from "../../types";
-import JobHistoryScope from "../JobHistoryScope/JobHistoryScope";
 import { useJobQuery } from "../JobHistoryScope/useJobQuery";
 import UploadHistoryResults from "./UploadHistoryResults";
 import UploadJobDetails from "./UploadJobDetails";
@@ -44,8 +43,15 @@ const UploadHistoryPanel = () => {
       <Typography variant="caption" color="text.secondary">Single-file, ZIP, and local-storage fallback uploads are not tracked here.</Typography>
     </Stack>
     {error && <Alert severity="error" action={<Button onClick={refresh}>Retry</Button>}>{error}</Alert>}
-    <JobHistoryScope projects={projects || []} projectId={projectId} recordGroupId={recordGroupId} loading={loading && !projects} onChange={changeScope} />
-    <UploadHistoryResults key={`${projectId}/${recordGroupId}`} projectId={projectId} recordGroupId={recordGroupId} revision={revision} onOpen={openJob} />
+    <UploadHistoryResults
+      projects={projects || []}
+      projectsLoading={loading && !projects}
+      projectId={projectId}
+      recordGroupId={recordGroupId}
+      onScopeChange={changeScope}
+      revision={revision}
+      onOpen={openJob}
+    />
     {jobId && jobGroupId && <UploadJobDetails key={`${jobGroupId}/${jobId}`} recordGroupId={jobGroupId} jobId={jobId}
       projectName={jobProject?.name} recordGroupName={jobGroup?.name}
       onClose={closeJob} onRetry={() => setRevision((value) => value + 1)} />}

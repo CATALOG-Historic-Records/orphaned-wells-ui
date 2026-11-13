@@ -10,13 +10,13 @@ import {
   rerunExportJob,
 } from "../services/app.service";
 
-jest.mock("../services/app.service", () => ({
-  getExportHistoryProjects: jest.fn(),
-  getExportJobHistory: jest.fn(),
-  getExportJob: jest.fn(),
-  getExportDownloadUrl: jest.fn(),
-  rerunExportJob: jest.fn(),
-  cancelExportJob: jest.fn(),
+vi.mock("../services/app.service", () => ({
+  getExportHistoryProjects: vi.fn(),
+  getExportJobHistory: vi.fn(),
+  getExportJob: vi.fn(),
+  getExportDownloadUrl: vi.fn(),
+  rerunExportJob: vi.fn(),
+  cancelExportJob: vi.fn(),
 }));
 
 const response = (body: unknown) => ({ status: 200, json: async () => body });
@@ -148,6 +148,12 @@ test("renders in-progress cards and history table, downloads completed archive, 
   }
 
   fireEvent.click(screen.getByRole("button", { name: "Run again" }));
+  expect(rerunExportJob).not.toHaveBeenCalled();
+  expect(
+    await screen.findByText("Are you sure you want to run this export again?")
+  ).toBeInTheDocument();
+  const rerunButtons = screen.getAllByRole("button", { name: "Run again" });
+  fireEvent.click(rerunButtons[rerunButtons.length - 1]);
   await waitFor(() =>
     expect(rerunExportJob).toHaveBeenCalledWith("export-expired-1")
   );
@@ -155,4 +161,38 @@ test("renders in-progress cards and history table, downloads completed archive, 
   fireEvent.click(screen.getByRole("button", { name: "View export export-1" }));
   expect(await screen.findByText("Export details")).toBeInTheDocument();
   expect(await screen.findByText(/Raw \(uncleaned\) values/)).toBeInTheDocument();
+});
+
+test("renders TableLoading while loading and EmptyTable when no finished exports exist", async () => {
+  let resolveHistory: (value: unknown) => void = () => {};
+  (getExportHistoryProjects as jest.Mock).mockResolvedValue(response([]));
+  (getExportJobHistory as jest.Mock).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        resolveHistory = resolve;
+      })
+  );
+
+  const { container } = render(
+    <MemoryRouter initialEntries={["/exports"]}>
+      <ExportHistoryPanel />
+    </MemoryRouter>
+  );
+
+  expect(container.querySelector("#table-loading")).toBeInTheDocument();
+
+  resolveHistory(
+    response({
+      active_jobs: [],
+      active_count: 0,
+      jobs: [],
+      count: 0,
+    })
+  );
+
+  expect(await screen.findByText("No exports found.")).toBeInTheDocument();
+  expect(
+    screen.getByText("You don't have any finished exports yet.")
+  ).toBeInTheDocument();
+  expect(container.querySelector("#empty-table")).toBeInTheDocument();
 });

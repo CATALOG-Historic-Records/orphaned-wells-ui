@@ -4,12 +4,13 @@ import { requestUploadApi } from "../components/UploadDocumentsModal/uploadApi";
 import { createDirectoryUpload, createDirectoryFileUpload, finalizeDirectoryUpload, uploadDocument } from "../services/app.service";
 import { uploadFileToGcs } from "../services/gcsUpload.service";
 
-jest.mock("../components/UploadDocumentsModal/uploadApi", () => ({
+vi.mock("../components/UploadDocumentsModal/uploadApi", () => ({
   filePath: (file: File) => file.webkitRelativePath || file.name,
-  requestUploadApi: jest.fn(),
+  requestUploadApi: vi.fn(),
 }));
-jest.mock("../services/gcsUpload.service", () => ({
-  ...jest.requireActual("../services/gcsUpload.service"), uploadFileToGcs: jest.fn(),
+vi.mock("../services/gcsUpload.service", async () => ({
+  ...(await vi.importActual<typeof import("../services/gcsUpload.service")>("../services/gcsUpload.service")),
+  uploadFileToGcs: vi.fn(),
 }));
 
 beforeEach(() => {

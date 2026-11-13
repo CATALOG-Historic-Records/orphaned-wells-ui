@@ -3,7 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import RecordsTable from "../components/RecordsTable/RecordsTable";
 import { useRecordsTableData } from "../components/RecordsTable/useRecordsTableData";
 
-jest.mock("../components/RecordsTable/useRecordsTableData", () => ({ useRecordsTableData: jest.fn() }));
+vi.mock("../components/RecordsTable/useRecordsTableData", () => ({ useRecordsTableData: vi.fn() }));
 
 test("shows the record load error with a working retry action", () => {
   const retry = jest.fn();
