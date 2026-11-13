@@ -29,6 +29,8 @@ import {
   formatExportExpiration,
   formatExportFormats,
   isActiveExportJob,
+  isDirectApiExport,
+  isIncrementalReviewedExport,
   triggerExportDownload,
 } from "./exportPresentation";
 
@@ -141,9 +143,9 @@ const ExportJobDetails = ({ jobId, onClose, onUpdated }: Props) => {
 
             {job.status === "expired" && (
               <Alert severity="info">
-                This export archive has expired. Exports are retained for 1 hour after
-                completion. Start a new export from the project or record group to
-                download again.
+                {isDirectApiExport(job)
+                  ? "This export was downloaded directly via the reviewed records API. Use 'Run again' in the exports table to generate a downloadable ZIP archive for this exact set of records."
+                  : "This export archive has expired. Exports are retained for 1 hour after completion. Start a new export from the project or record group to download again."}
               </Alert>
             )}
 
@@ -151,6 +153,18 @@ const ExportJobDetails = ({ jobId, onClose, onUpdated }: Props) => {
 
             <Stack spacing={0.75}>
               <Typography variant="subtitle2">Scope &amp; Options</Typography>
+              {isIncrementalReviewedExport(job) && (
+                <>
+                  <Typography variant="body2">
+                    <strong>Type:</strong> Incremental reviewed export
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Updated window:</strong>{" "}
+                    {job.options?.since ? exportTime(job.options.since) : "Beginning"} →{" "}
+                    {exportTime(job.options?.until)}
+                  </Typography>
+                </>
+              )}
               <Typography variant="body2">
                 <strong>Project:</strong>{" "}
                 {job.project_id ? (

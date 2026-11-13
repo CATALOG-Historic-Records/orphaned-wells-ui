@@ -35,6 +35,8 @@ import {
   formatExportExpiration,
   formatExportFormats,
   formatRelativeExportTime,
+  isDirectApiExport,
+  isIncrementalReviewedExport,
   notifyExportJobsUpdated,
   triggerExportDownload,
 } from "./exportPresentation";
@@ -191,6 +193,7 @@ const ExportHistoryTable = ({
                 archiveMetaParts.push(job.request_user.email);
               }
 
+              const directApiExport = isDirectApiExport(job);
               const dotColor = downloadable
                 ? "success.main"
                 : isFailed
@@ -200,6 +203,8 @@ const ExportHistoryTable = ({
                 ? "Ready"
                 : isFailed
                 ? "Failed"
+                : directApiExport
+                ? "Completed"
                 : "Expired";
 
               return (
@@ -305,6 +310,16 @@ const ExportHistoryTable = ({
                         borderRadius: 1.5,
                       }}
                     />
+                    {isIncrementalReviewedExport(job) && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                        sx={{ mt: 0.25 }}
+                      >
+                        Incremental (Reviewed)
+                      </Typography>
+                    )}
                     {job.options?.export_raw_values && (
                       <Typography
                         variant="caption"

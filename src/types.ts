@@ -701,6 +701,7 @@ export type ExportJobStatus = "queued" | "dispatched" | "running" | "completed" 
 export interface ExportJob {
     job_id: string;
     job_type?: "export";
+    export_source?: "reviewed_records_api";
     status: ExportJobStatus;
     stage?: string;
     status_text?: string;
@@ -730,6 +731,8 @@ export interface ExportJob {
         document_types?: string[] | null;
         reconstruct_original_doc?: boolean;
         export_raw_values?: boolean;
+        since?: number | null;
+        until?: number | null;
     };
     column_count?: number;
     artifact?: {
@@ -912,6 +915,20 @@ export interface deleteFieldSignature {
 export interface HotkeyInfoProps {
   anchorEl: HTMLElement | undefined;
   onClose: () => void;
+}
+
+export interface ApiKeyInfo {
+  key_id: string;
+  name: string;
+  key_prefix: string;
+  created_at: number;
+  expires_at: number;
+  last_used_at: number | null;
+  expired?: boolean;
+}
+
+export interface CreatedApiKeyResponse extends ApiKeyInfo {
+  api_key: string;
 }
 
 export type AttributesListUpdateTypes = "insertField" | "deleteField" | "updateFieldCoordinates"

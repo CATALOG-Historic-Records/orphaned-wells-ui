@@ -689,3 +689,27 @@ export const rotateRecordImages = (
     headers: JSON_HEADERS,
   });
 };
+
+export const getApiKeys = () => {
+  return fetch(`${BACKEND_URL}/api_keys`, {
+    method: "GET",
+    mode: CORS_MODE,
+  });
+};
+
+export const createApiKey = (data: { name: string; expires_in_days: number }) => {
+  return fetch(`${BACKEND_URL}/api_keys`, {
+    method: "POST",
+    mode: CORS_MODE,
+    headers: JSON_HEADERS,
+    body: JSON.stringify(data),
+  });
+};
+
+export const revokeApiKey = (keyId: string) => {
+  return fetch(`${BACKEND_URL}/api_keys/${encodeURIComponent(keyId)}/revoke`, {
+    method: "POST",
+    mode: CORS_MODE,
+    headers: JSON_HEADERS,
+  });
+};
