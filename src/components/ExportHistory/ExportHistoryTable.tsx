@@ -27,6 +27,7 @@ import { styles as sharedStyles } from "../../styles";
 import { ExportJob } from "../../types";
 import { callAPI } from "../../util";
 import EmptyTable from "../EmptyTable/EmptyTable";
+import PopupModal from "../PopupModal/PopupModal";
 import TableLoading from "../TableLoading/TableLoading";
 import {
   canDownloadExport,
@@ -65,6 +66,7 @@ const ExportHistoryTable = ({
 }: Props) => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [rerunningId, setRerunningId] = useState<string | null>(null);
+  const [confirmRerunJobId, setConfirmRerunJobId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
 
   const handleDownload = (jobId: string) => {
@@ -381,7 +383,7 @@ const ExportHistoryTable = ({
                           variant="outlined"
                           color="inherit"
                           disabled={rerunningId === job.job_id}
-                          onClick={() => handleRerun(job.job_id)}
+                          onClick={() => setConfirmRerunJobId(job.job_id)}
                           data-cy={`export-rerun-btn-${job.job_id}`}
                           sx={{
                             textTransform: "none",
@@ -435,6 +437,27 @@ const ExportHistoryTable = ({
       ) : !jobs.length ? (
         <EmptyTable title="No exports found." message={emptyMessage} />
       ) : null}
+      <PopupModal
+        open={confirmRerunJobId !== null}
+        handleClose={() => setConfirmRerunJobId(null)}
+        text="Are you sure you want to run this export again?"
+        handleSave={() => {
+          if (confirmRerunJobId) {
+            const jobId = confirmRerunJobId;
+            setConfirmRerunJobId(null);
+            handleRerun(jobId);
+          }
+        }}
+        buttonText="Run again"
+        buttonColor="primary"
+        buttonVariant="contained"
+        hasTwoButtons
+        buttonTwoText="Cancel"
+        buttonTwoColor="inherit"
+        buttonTwoVariant="outlined"
+        handleButtonTwoClick={() => setConfirmRerunJobId(null)}
+        width={400}
+      />
     </Box>
   );
 };

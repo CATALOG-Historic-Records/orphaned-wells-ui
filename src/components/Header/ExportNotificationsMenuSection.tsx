@@ -32,8 +32,27 @@ const ExportNotificationsMenuSection = ({
   onNavigateToExports,
 }: Props) => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const items = (notificationsData?.notifications || []).slice(0, 4);
+  const items = (notificationsData?.notifications || [])
+    .filter(
+      (job) =>
+        isActiveExportJob(job) ||
+        (["completed", "error", "expired"].includes(job.status) &&
+          !job.notification_read_at)
+    )
+    .slice(0, 4);
   const unreadCount = notificationsData?.unread_count || 0;
+
+  const handleOpenNotification = (job: ExportJob) => {
+    if (!isActiveExportJob(job) && !job.notification_read_at) {
+      callAPI(
+        markExportNotificationsRead,
+        [{ job_id: job.job_id }],
+        () => onRefresh(),
+        () => {}
+      );
+    }
+    onNavigateToExports(job.job_id);
+  };
 
   const handleMarkAllRead = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -107,10 +126,10 @@ const ExportNotificationsMenuSection = ({
         <Typography
           variant="caption"
           color="text.secondary"
-           display="block"
+          display="block"
           sx={{ px: 2, pb: 1 }}
         >
-          No recent exports.
+          No new export notifications.
         </Typography>
       ) : (
         <Stack spacing={0.5} sx={{ px: 1.5, pb: 1 }}>
@@ -131,7 +150,7 @@ const ExportNotificationsMenuSection = ({
             return (
               <Box
                 key={job.job_id}
-                onClick={() => onNavigateToExports(job.job_id)}
+                onClick={() => handleOpenNotification(job)}
                 data-cy={`export-notification-item-${job.job_id}`}
                 sx={{
                   p: 1,

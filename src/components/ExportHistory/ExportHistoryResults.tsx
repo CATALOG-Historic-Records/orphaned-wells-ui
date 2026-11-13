@@ -24,7 +24,9 @@ import {
 } from "../../types";
 import { callAPI, convertFiltersToMongoFormat } from "../../util";
 import { useJobQuery } from "../JobHistoryScope/useJobQuery";
-import ExportHistoryFilters from "./ExportHistoryFilters";
+import JobHistoryFilters, {
+  JobHistoryChoiceFilterConfig,
+} from "../JobHistoryScope/JobHistoryFilters";
 import ExportHistoryTable from "./ExportHistoryTable";
 import {
   EXPORT_JOBS_UPDATED_EVENT,
@@ -33,6 +35,19 @@ import {
   formatExportFormats,
   notifyExportJobsUpdated,
 } from "./exportPresentation";
+
+const EXPORT_CHOICE_FILTERS: JobHistoryChoiceFilterConfig[] = [
+  {
+    key: "status",
+    label: "Status",
+    allLabel: "All statuses",
+    options: [
+      { value: "completed", label: "Ready" },
+      { value: "error", label: "Failed" },
+      { value: "expired", label: "Expired" },
+    ],
+  },
+];
 
 interface Props {
   projects: JobScopeProject[];
@@ -164,7 +179,7 @@ const ExportHistoryResults = ({
       </Stack> */}
 
       {/* Filter Bar */}
-      <ExportHistoryFilters
+      <JobHistoryFilters
         projects={projects}
         projectsLoading={projectsLoading}
         projectId={projectId}
@@ -180,11 +195,15 @@ const ExportHistoryResults = ({
         }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        searchPlaceholder="Search file, record group, requester…"
+        searchAriaLabel="Search exports"
+        searchDataCy="export-search-input"
         filters={filters}
         onApplyFilters={(nextFilters) => {
           setFilters(nextFilters);
           setPage(0);
         }}
+        choiceFilters={EXPORT_CHOICE_FILTERS}
       />
 
       {(error || cancelError) && (

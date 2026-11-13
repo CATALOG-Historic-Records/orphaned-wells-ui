@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
@@ -32,7 +31,6 @@ interface Props {
   onPage: (page: number) => void;
   onOpen: (job: ProcessingJob) => void;
   emptyMessage: string;
-  filters?: ReactNode;
 }
 
 const UploadHistoryTable = ({
@@ -45,7 +43,6 @@ const UploadHistoryTable = ({
   onPage,
   onOpen,
   emptyMessage,
-  filters,
 }: Props) => (
   <Box component="section" sx={{ minWidth: 0 }}>
     <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
@@ -61,7 +58,6 @@ const UploadHistoryTable = ({
           />
         </Stack>
       </Box>
-      {filters && <Box sx={{ pt: 2 }}>{filters}</Box>}
       <Table
         size="small"
         aria-label={title}

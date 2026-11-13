@@ -18,27 +18,38 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { FilterOption, JobScopeProject } from "../../types";
 
+export interface JobHistoryChoiceFilterConfig {
+  key: string;
+  label: string;
+  allLabel: string;
+  options: { value: string; label: string }[];
+}
+
 interface Props {
   projects: JobScopeProject[];
   projectsLoading: boolean;
   projectId: string;
   recordGroupId: string;
   onScopeChange: (projectId: string, recordGroupId: string) => void;
-  viewScope: "mine" | "team";
-  onViewScopeChange: (scope: "mine" | "team") => void;
+  viewScope?: "mine" | "team";
+  onViewScopeChange?: (scope: "mine" | "team") => void;
+  viewScopeLabels?: { mine: string; team: string };
   searchQuery: string;
   onSearchChange: (search: string) => void;
+  searchPlaceholder?: string;
+  searchAriaLabel?: string;
+  searchDataCy?: string;
   filters: FilterOption[];
   onApplyFilters: (filters: FilterOption[]) => void;
+  choiceFilters: JobHistoryChoiceFilterConfig[];
 }
 
-const STATUS_OPTIONS: { value: string; label: string }[] = [
-  { value: "completed", label: "Ready" },
-  { value: "error", label: "Failed" },
-  { value: "expired", label: "Expired" },
-];
+const DEFAULT_VIEW_SCOPE_LABELS = {
+  mine: "My exports",
+  team: "Everyone's",
+};
 
-const ExportHistoryFilters = ({
+const JobHistoryFilters = ({
   projects,
   projectsLoading,
   projectId,
@@ -46,14 +57,21 @@ const ExportHistoryFilters = ({
   onScopeChange,
   viewScope,
   onViewScopeChange,
+  viewScopeLabels = DEFAULT_VIEW_SCOPE_LABELS,
   searchQuery,
   onSearchChange,
+  searchPlaceholder = "Search…",
+  searchAriaLabel = "Search",
+  searchDataCy = "job-history-search-input",
   filters,
   onApplyFilters,
+  choiceFilters,
 }: Props) => {
   const [projectAnchor, setProjectAnchor] = useState<HTMLElement | null>(null);
   const [groupAnchor, setGroupAnchor] = useState<HTMLElement | null>(null);
-  const [statusAnchor, setStatusAnchor] = useState<HTMLElement | null>(null);
+  const [choiceAnchors, setChoiceAnchors] = useState<
+    Record<string, HTMLElement | null>
+  >({});
   const [dateAnchor, setDateAnchor] = useState<HTMLElement | null>(null);
 
   const getFilterValue = (key: string, operator?: string) => {
@@ -78,29 +96,30 @@ const ExportHistoryFilters = ({
     );
   const selectedGroup = availableGroups.find((g) => g.id === recordGroupId);
 
-  const statusValue = getFilterValue("status");
-  const statusLabel = STATUS_OPTIONS.find((s) => s.value === statusValue)?.label;
   const afterDate = getFilterValue("created_at", "after");
   const beforeDate = getFilterValue("created_at", "before");
 
-  const setStatusFilter = (nextStatus: string) => {
-    const rest = filters.filter((f) => f.key !== "status");
-    const nextFilters = nextStatus
+  const setChoiceFilter = (
+    choiceConfig: JobHistoryChoiceFilterConfig,
+    nextValue: string
+  ) => {
+    const rest = filters.filter((f) => f.key !== choiceConfig.key);
+    const nextFilters = nextValue
       ? [
           ...rest,
           {
-            key: "status",
-            displayName: "Status",
+            key: choiceConfig.key,
+            displayName: choiceConfig.label,
             type: "checkbox",
             operator: "equals",
-            value: nextStatus,
-            options: [{ name: nextStatus, value: nextStatus, checked: true }],
-            selectedOptions: [nextStatus],
+            value: nextValue,
+            options: [{ name: nextValue, value: nextValue, checked: true }],
+            selectedOptions: [nextValue],
           },
         ]
       : rest;
     onApplyFilters(nextFilters);
-    setStatusAnchor(null);
+    setChoiceAnchors((prev) => ({ ...prev, [choiceConfig.key]: null }));
   };
 
   const applyDateFilter = (nextAfter: string, nextBefore: string) => {
@@ -155,54 +174,60 @@ const ExportHistoryFilters = ({
         gap={1}
         sx={{ minWidth: 0 }}
       >
-        {/* Segmented toggle: My exports | Everyone's */}
-        <Box
-          role="group"
-          aria-label="Export visibility"
-          sx={{
-            display: "inline-flex",
-            bgcolor: "grey.100",
-            p: 0.4,
-            borderRadius: 2,
-            border: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          {(
-            [
-              { value: "mine", label: "My exports" },
-              { value: "team", label: "Everyone's" },
-            ] as const
-          ).map((option) => {
-            const selected = viewScope === option.value;
-            return (
-              <ButtonBase
-                key={option.value}
-                onClick={() => onViewScopeChange(option.value)}
-                data-cy={`export-visibility-${option.value}`}
-                sx={{
-                  px: 1.5,
-                  py: 0.5,
-                  borderRadius: 1.5,
-                  fontSize: "0.8125rem",
-                  fontWeight: selected ? 600 : 500,
-                  color: selected ? "text.primary" : "text.secondary",
-                  bgcolor: selected ? "background.paper" : "transparent",
-                  boxShadow: selected ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                {option.label}
-              </ButtonBase>
-            );
-          })}
-        </Box>
+        {/* Optional segmented toggle */}
+        {viewScope && onViewScopeChange && (
+          <>
+            <Box
+              role="group"
+              aria-label="Export visibility"
+              sx={{
+                display: "inline-flex",
+                bgcolor: "grey.100",
+                p: 0.4,
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              {(
+                [
+                  { value: "mine", label: viewScopeLabels.mine },
+                  { value: "team", label: viewScopeLabels.team },
+                ] as const
+              ).map((option) => {
+                const selected = viewScope === option.value;
+                return (
+                  <ButtonBase
+                    key={option.value}
+                    onClick={() => onViewScopeChange(option.value)}
+                    data-cy={`export-visibility-${option.value}`}
+                    sx={{
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 1.5,
+                      fontSize: "0.8125rem",
+                      fontWeight: selected ? 600 : 500,
+                      color: selected ? "text.primary" : "text.secondary",
+                      bgcolor: selected ? "background.paper" : "transparent",
+                      boxShadow: selected
+                        ? "0 1px 2px rgba(0,0,0,0.08)"
+                        : "none",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    {option.label}
+                  </ButtonBase>
+                );
+              })}
+            </Box>
 
-        <Divider
-          orientation="vertical"
-          flexItem
-          sx={{ mx: 0.5, display: { xs: "none", sm: "block" } }}
-        />
+            <Divider
+              orientation="vertical"
+              flexItem
+              sx={{ mx: 0.5, display: { xs: "none", sm: "block" } }}
+            />
+          </>
+        )}
 
         {/* + Project pill */}
         <Chip
@@ -316,42 +341,74 @@ const ExportHistoryFilters = ({
           ))}
         </Menu>
 
-        {/* + Status pill */}
-        <Chip
-          size="small"
-          icon={!statusLabel ? <AddIcon fontSize="small" /> : undefined}
-          label={statusLabel ? `Status: ${statusLabel}` : "Status"}
-          variant="outlined"
-          onClick={(e) => setStatusAnchor(e.currentTarget)}
-          onDelete={statusLabel ? () => setStatusFilter("") : undefined}
-          sx={{
-            borderRadius: 99,
-            fontWeight: statusLabel ? 600 : 500,
-            bgcolor: statusLabel ? "action.selected" : "background.paper",
-          }}
-        />
-        <Menu
-          anchorEl={statusAnchor}
-          open={Boolean(statusAnchor)}
-          onClose={() => setStatusAnchor(null)}
-          PaperProps={{ sx: { minWidth: 180 } }}
-        >
-          <MenuItem
-            selected={!statusValue}
-            onClick={() => setStatusFilter("")}
-          >
-            All statuses
-          </MenuItem>
-          {STATUS_OPTIONS.map((opt) => (
-            <MenuItem
-              key={opt.value}
-              selected={statusValue === opt.value}
-              onClick={() => setStatusFilter(opt.value)}
-            >
-              {opt.label}
-            </MenuItem>
-          ))}
-        </Menu>
+        {/* Configurable choice pills (Status, Source, etc.) */}
+        {choiceFilters.map((choiceConfig) => {
+          const currentValue = getFilterValue(choiceConfig.key);
+          const currentLabel = choiceConfig.options.find(
+            (opt) => opt.value === currentValue
+          )?.label;
+          const anchorEl = choiceAnchors[choiceConfig.key] || null;
+
+          return (
+            <Box key={choiceConfig.key} sx={{ display: "inline-flex" }}>
+              <Chip
+                size="small"
+                icon={!currentLabel ? <AddIcon fontSize="small" /> : undefined}
+                label={
+                  currentLabel
+                    ? `${choiceConfig.label}: ${currentLabel}`
+                    : choiceConfig.label
+                }
+                variant="outlined"
+                onClick={(e) =>
+                  setChoiceAnchors((prev) => ({
+                    ...prev,
+                    [choiceConfig.key]: e.currentTarget,
+                  }))
+                }
+                onDelete={
+                  currentLabel
+                    ? () => setChoiceFilter(choiceConfig, "")
+                    : undefined
+                }
+                sx={{
+                  borderRadius: 99,
+                  fontWeight: currentLabel ? 600 : 500,
+                  bgcolor: currentLabel
+                    ? "action.selected"
+                    : "background.paper",
+                }}
+              />
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={() =>
+                  setChoiceAnchors((prev) => ({
+                    ...prev,
+                    [choiceConfig.key]: null,
+                  }))
+                }
+                PaperProps={{ sx: { minWidth: 180 } }}
+              >
+                <MenuItem
+                  selected={!currentValue}
+                  onClick={() => setChoiceFilter(choiceConfig, "")}
+                >
+                  {choiceConfig.allLabel}
+                </MenuItem>
+                {choiceConfig.options.map((opt) => (
+                  <MenuItem
+                    key={opt.value}
+                    selected={currentValue === opt.value}
+                    onClick={() => setChoiceFilter(choiceConfig, opt.value)}
+                  >
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+          );
+        })}
 
         {/* + Date pill */}
         <Chip
@@ -443,12 +500,12 @@ const ExportHistoryFilters = ({
       {/* Search input */}
       <TextField
         size="small"
-        placeholder="Search file, record group, requester…"
+        placeholder={searchPlaceholder}
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
         inputProps={{
-          "aria-label": "Search exports",
-          "data-cy": "export-search-input",
+          "aria-label": searchAriaLabel,
+          "data-cy": searchDataCy,
         }}
         InputProps={{
           startAdornment: (
@@ -481,4 +538,4 @@ const ExportHistoryFilters = ({
   );
 };
 
-export default ExportHistoryFilters;
+export default JobHistoryFilters;

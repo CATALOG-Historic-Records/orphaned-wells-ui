@@ -148,6 +148,12 @@ test("renders in-progress cards and history table, downloads completed archive, 
   }
 
   fireEvent.click(screen.getByRole("button", { name: "Run again" }));
+  expect(rerunExportJob).not.toHaveBeenCalled();
+  expect(
+    await screen.findByText("Are you sure you want to run this export again?")
+  ).toBeInTheDocument();
+  const rerunButtons = screen.getAllByRole("button", { name: "Run again" });
+  fireEvent.click(rerunButtons[rerunButtons.length - 1]);
   await waitFor(() =>
     expect(rerunExportJob).toHaveBeenCalledWith("export-expired-1")
   );

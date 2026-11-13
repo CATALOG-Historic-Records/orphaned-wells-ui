@@ -160,14 +160,13 @@ describe("upload dialog layout and history", () => {
     cy.get('[role="dialog"]').contains("Historic surveys").should("be.visible");
     cy.contains("button", "Close").click();
     cy.location("search").should("eq", "?tab=uploads");
-    cy.findByRole("combobox", {name: "Project"}).click();
-    cy.findByRole("option", {name: "Illinois records"}).click();
+    cy.contains('[role="button"]', "Project").click();
+    cy.contains('[role="menuitem"]', "Illinois records").click();
     cy.wait("@history").its("request.body").should("include", {project_id: project, page: 0, active_page: 0});
-    cy.findByRole("combobox", {name: "Record group"}).click();
-    cy.findByRole("option", {name: "Well completion reports"}).click();
+    cy.contains('[role="button"]', "Record group").click();
+    cy.contains('[role="menuitem"]', "Well completion reports").click();
     cy.wait("@history").its("request.body").should("include", {project_id: project, record_group_id: group});
     cy.findByRole("textbox", {name: "Uploader"}).type("uploader@");
-    cy.contains("button", "Apply filters").click();
     cy.wait("@history").its("request.body.filter").should("deep.equal", {"request_user.email": {$regex: "uploader@"}});
     cy.get('[aria-label="View upload processing"]').should("exist");
     cy.getByCy("admin-roles-section").click();
@@ -179,11 +178,11 @@ describe("upload dialog layout and history", () => {
     cy.getByCy("admin-roles-section").should("have.attr", "aria-selected", "true");
     cy.go("back");
     cy.getByCy("admin-uploads-section").should("have.attr", "aria-selected", "true");
-    cy.findByRole("combobox", {name: "Record group"}).should("have.value", "Well completion reports");
+    cy.contains('[role="button"]', "Record group: Well completion reports").should("be.visible");
     cy.reload();
-    cy.findByRole("combobox", {name: "Project"}).should("have.value", "Illinois records");
+    cy.contains('[role="button"]', "Project: Illinois records").should("be.visible");
     cy.viewport(390, 844);
-    cy.findByRole("combobox", {name: "Record group"}).should("be.visible");
+    cy.contains('[role="button"]', "Record group: Well completion reports").should("be.visible");
     cy.getByCy("admin-uploads-section").should(($tab) => {
       const bounds = $tab[0].getBoundingClientRect();
       expect(bounds.left).to.be.at.least(0);
