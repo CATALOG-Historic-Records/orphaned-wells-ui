@@ -35,6 +35,8 @@ import {
   formatExportExpiration,
   formatExportFormats,
   formatRelativeExportTime,
+  isDirectApiExport,
+  isIncrementalReviewedExport,
   notifyExportJobsUpdated,
   triggerExportDownload,
 } from "./exportPresentation";
@@ -191,9 +193,7 @@ const ExportHistoryTable = ({
                 archiveMetaParts.push(job.request_user.email);
               }
 
-              const isDirectApiExport =
-                job.export_source === "reviewed_records_api" &&
-                job.status === "expired";
+              const directApiExport = isDirectApiExport(job);
               const dotColor = downloadable
                 ? "success.main"
                 : isFailed
@@ -203,7 +203,7 @@ const ExportHistoryTable = ({
                 ? "Ready"
                 : isFailed
                 ? "Failed"
-                : isDirectApiExport
+                : directApiExport
                 ? "Completed"
                 : "Expired";
 
@@ -310,8 +310,7 @@ const ExportHistoryTable = ({
                         borderRadius: 1.5,
                       }}
                     />
-                    {(job.export_source === "reviewed_records_api" ||
-                      job.options?.until != null) && (
+                    {isIncrementalReviewedExport(job) && (
                       <Typography
                         variant="caption"
                         color="text.secondary"

@@ -16,20 +16,17 @@ import {
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
+import {
+  createApiKey,
+  getApiKeys,
+  revokeApiKey,
+} from "../../services/app.service";
 import { ApiKeyInfo, CreatedApiKeyResponse } from "../../types";
-import { formatDate } from "../../util";
+import { callAPI, formatDate } from "../../util";
 
 interface ApiKeyDialogProps {
   open: boolean;
-  apiKeys: ApiKeyInfo[];
-  newlyCreatedKey: CreatedApiKeyResponse | null;
-  loading: boolean;
-  creating: boolean;
-  revokingKeyId: string | null;
-  error: string;
   onClose: () => void;
-  onCreateKey: (name: string, expiresInDays: number) => void;
-  onRevokeKey: (keyId: string) => void;
 }
 
 const EXPIRATION_OPTIONS = [
@@ -38,18 +35,19 @@ const EXPIRATION_OPTIONS = [
   { label: "1 year", value: 365 },
 ];
 
-const ApiKeyDialog = ({
-  open,
-  apiKeys,
-  newlyCreatedKey,
-  loading,
-  creating,
-  revokingKeyId,
-  error,
-  onClose,
-  onCreateKey,
-  onRevokeKey,
-}: ApiKeyDialogProps) => {
+const getApiErrorMessage = (error: any, fallback: string) => {
+  if (typeof error === "string") return error;
+  return error?.message || error?.detail || fallback;
+};
+
+const ApiKeyDialog = ({ open, onClose }: ApiKeyDialogProps) => {
+  const [apiKeys, setApiKeys] = useState<ApiKeyInfo[]>([]);
+  const [newlyCreatedKey, setNewlyCreatedKey] =
+    useState<CreatedApiKeyResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [revokingKeyId, setRevokingKeyId] = useState<string | null>(null);
+  const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [expiresInDays, setExpiresInDays] = useState(90);
   const [copied, setCopied] = useState(false);
@@ -59,22 +57,83 @@ const ApiKeyDialog = ({
       setName("");
       setExpiresInDays(90);
       setCopied(false);
+      setNewlyCreatedKey(null);
+      setError("");
+      return;
     }
+    setNewlyCreatedKey(null);
+    setError("");
+    setLoading(true);
+    callAPI(
+      getApiKeys,
+      [],
+      (data: { api_keys?: ApiKeyInfo[] }) => {
+        setApiKeys(data?.api_keys || []);
+        setLoading(false);
+      },
+      (err: any) => {
+        setLoading(false);
+        setError(getApiErrorMessage(err, "Unable to load API keys."));
+      }
+    );
   }, [open]);
-
-  useEffect(() => {
-    if (newlyCreatedKey) {
-      setName("");
-      setCopied(false);
-    }
-  }, [newlyCreatedKey]);
 
   const trimmedName = name.trim();
   const canCreate = Boolean(trimmedName) && !creating;
 
+  const handleClose = () => {
+    if (creating) return;
+    onClose();
+  };
+
   const handleSubmit = () => {
     if (!canCreate) return;
-    onCreateKey(trimmedName, expiresInDays);
+    setCreating(true);
+    setError("");
+    callAPI(
+      createApiKey,
+      [{ name: trimmedName, expires_in_days: expiresInDays }],
+      (created: CreatedApiKeyResponse) => {
+        setCreating(false);
+        setNewlyCreatedKey(created);
+        setName("");
+        setCopied(false);
+        setApiKeys((prev) => [
+          {
+            key_id: created.key_id,
+            name: created.name,
+            key_prefix: created.key_prefix,
+            created_at: created.created_at,
+            expires_at: created.expires_at,
+            last_used_at: created.last_used_at,
+            expired: false,
+          },
+          ...prev,
+        ]);
+      },
+      (err: any) => {
+        setCreating(false);
+        setError(getApiErrorMessage(err, "Unable to create API key."));
+      }
+    );
+  };
+
+  const handleRevokeKey = (keyId: string) => {
+    setRevokingKeyId(keyId);
+    setError("");
+    callAPI(
+      revokeApiKey,
+      [keyId],
+      () => {
+        setRevokingKeyId(null);
+        setApiKeys((prev) => prev.filter((item) => item.key_id !== keyId));
+        setNewlyCreatedKey((prev) => (prev?.key_id === keyId ? null : prev));
+      },
+      (err: any) => {
+        setRevokingKeyId(null);
+        setError(getApiErrorMessage(err, "Unable to revoke API key."));
+      }
+    );
   };
 
   const handleCopyKey = async () => {
@@ -88,7 +147,7 @@ const ApiKeyDialog = ({
   return (
     <Dialog
       open={open}
-      onClose={creating ? undefined : onClose}
+      onClose={creating ? undefined : handleClose}
       maxWidth="sm"
       fullWidth
       PaperProps={{
@@ -334,7 +393,7 @@ const ApiKeyDialog = ({
                     color="error"
                     variant="outlined"
                     disabled={isRevoking}
-                    onClick={() => onRevokeKey(keyItem.key_id)}
+                    onClick={() => handleRevokeKey(keyItem.key_id)}
                   >
                     {isRevoking ? "Revoking..." : "Revoke"}
                   </Button>
@@ -345,7 +404,7 @@ const ApiKeyDialog = ({
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2, borderTop: "1px solid #EEF2F7" }}>
-        <Button onClick={onClose} disabled={creating} color="inherit">
+        <Button onClick={handleClose} disabled={creating} color="inherit">
           Close
         </Button>
       </DialogActions>
