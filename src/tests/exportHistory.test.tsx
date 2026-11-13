@@ -156,3 +156,37 @@ test("renders in-progress cards and history table, downloads completed archive, 
   expect(await screen.findByText("Export details")).toBeInTheDocument();
   expect(await screen.findByText(/Raw \(uncleaned\) values/)).toBeInTheDocument();
 });
+
+test("renders TableLoading while loading and EmptyTable when no finished exports exist", async () => {
+  let resolveHistory: (value: unknown) => void = () => {};
+  (getExportHistoryProjects as jest.Mock).mockResolvedValue(response([]));
+  (getExportJobHistory as jest.Mock).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        resolveHistory = resolve;
+      })
+  );
+
+  const { container } = render(
+    <MemoryRouter initialEntries={["/exports"]}>
+      <ExportHistoryPanel />
+    </MemoryRouter>
+  );
+
+  expect(container.querySelector("#table-loading")).toBeInTheDocument();
+
+  resolveHistory(
+    response({
+      active_jobs: [],
+      active_count: 0,
+      jobs: [],
+      count: 0,
+    })
+  );
+
+  expect(await screen.findByText("No exports found.")).toBeInTheDocument();
+  expect(
+    screen.getByText("You don't have any finished exports yet.")
+  ).toBeInTheDocument();
+  expect(container.querySelector("#empty-table")).toBeInTheDocument();
+});

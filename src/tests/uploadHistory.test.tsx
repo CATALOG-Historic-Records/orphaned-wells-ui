@@ -1,6 +1,7 @@
 import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { useJobQuery } from "../components/JobHistoryScope/useJobQuery";
+import UploadHistoryTable from "../components/UploadHistory/UploadHistoryTable";
 import UploadJobDetails from "../components/UploadHistory/UploadJobDetails";
 import { getProcessingJobDetails, getProcessingJobHistory, retryProcessingJob } from "../services/app.service";
 
@@ -55,4 +56,40 @@ test("details show why retry is unavailable and load file pages on demand", asyn
   await waitFor(() => expect(getProcessingJobDetails).toHaveBeenLastCalledWith("group", "job", "records", 1));
   await screen.findByText("The upload has expired.");
   expect(retryProcessingJob).not.toHaveBeenCalled();
+});
+
+test("UploadHistoryTable renders TableLoading while loading and EmptyTable when empty", () => {
+  const { container, rerender } = render(
+    <MemoryRouter>
+      <UploadHistoryTable
+        title="Active uploads"
+        jobs={[]}
+        count={0}
+        loading={true}
+        page={0}
+        onPage={jest.fn()}
+        onOpen={jest.fn()}
+        emptyMessage="No active uploads in this selection."
+      />
+    </MemoryRouter>
+  );
+  expect(container.querySelector("#table-loading")).toBeInTheDocument();
+
+  rerender(
+    <MemoryRouter>
+      <UploadHistoryTable
+        title="Active uploads"
+        jobs={[]}
+        count={0}
+        loading={false}
+        page={0}
+        onPage={jest.fn()}
+        onOpen={jest.fn()}
+        emptyMessage="No active uploads in this selection."
+      />
+    </MemoryRouter>
+  );
+  expect(screen.getByText("No uploads found.")).toBeInTheDocument();
+  expect(screen.getByText("No active uploads in this selection.")).toBeInTheDocument();
+  expect(container.querySelector("#empty-table")).toBeInTheDocument();
 });
