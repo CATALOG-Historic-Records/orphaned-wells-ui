@@ -105,6 +105,9 @@ export const canDownloadExport = (job?: ExportJob | null): boolean => {
 };
 
 export const formatExportExpiration = (job: ExportJob): string => {
+  if (job.export_source === "reviewed_records_api" && job.status === "expired") {
+    return "Direct download";
+  }
   if (job.status === "expired") return "Archive removed";
   if (job.status === "error") return job.error || "Export failed";
   if (isActiveExportJob(job)) return "1h after completion";

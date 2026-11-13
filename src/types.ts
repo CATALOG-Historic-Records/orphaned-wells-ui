@@ -701,6 +701,7 @@ export type ExportJobStatus = "queued" | "dispatched" | "running" | "completed" 
 export interface ExportJob {
     job_id: string;
     job_type?: "export";
+    export_source?: "reviewed_records_api";
     status: ExportJobStatus;
     stage?: string;
     status_text?: string;
@@ -730,6 +731,8 @@ export interface ExportJob {
         document_types?: string[] | null;
         reconstruct_original_doc?: boolean;
         export_raw_values?: boolean;
+        since?: number | null;
+        until?: number | null;
     };
     column_count?: number;
     artifact?: {

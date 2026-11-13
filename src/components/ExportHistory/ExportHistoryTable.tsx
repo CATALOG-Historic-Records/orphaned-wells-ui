@@ -191,6 +191,9 @@ const ExportHistoryTable = ({
                 archiveMetaParts.push(job.request_user.email);
               }
 
+              const isDirectApiExport =
+                job.export_source === "reviewed_records_api" &&
+                job.status === "expired";
               const dotColor = downloadable
                 ? "success.main"
                 : isFailed
@@ -200,6 +203,8 @@ const ExportHistoryTable = ({
                 ? "Ready"
                 : isFailed
                 ? "Failed"
+                : isDirectApiExport
+                ? "Completed"
                 : "Expired";
 
               return (
@@ -305,6 +310,17 @@ const ExportHistoryTable = ({
                         borderRadius: 1.5,
                       }}
                     />
+                    {(job.export_source === "reviewed_records_api" ||
+                      job.options?.until != null) && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                        sx={{ mt: 0.25 }}
+                      >
+                        Incremental (Reviewed)
+                      </Typography>
+                    )}
                     {job.options?.export_raw_values && (
                       <Typography
                         variant="caption"
