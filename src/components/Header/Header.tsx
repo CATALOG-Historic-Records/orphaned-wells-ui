@@ -76,6 +76,8 @@ const Header = (props: any) => {
       setTabValue("projects");
     } else if (location.pathname.includes("records")) {
       setTabValue("records");
+    } else if (location.pathname.includes("exports")) {
+      setTabValue("exports");
     } else if (location.pathname.includes("admin") || location.pathname.includes("users")) {
       setTabValue("admin");
     } else if (location.pathname.includes("schema")) {
@@ -219,11 +221,12 @@ const Header = (props: any) => {
           >
             <Tab data-cy="header-tab-projects" label="Projects" value="projects" {...a11yProps(0)} />
             <Tab data-cy="header-tab-records" label="Records" value="records" {...a11yProps(1)} />
+            <Tab data-cy="header-tab-exports" label="Exports" value="exports" {...a11yProps(2)} />
             {hasPermission("manage_team") &&
-              <Tab data-cy="header-tab-admin" label="Admin" value="admin" {...a11yProps(2)} />
+              <Tab data-cy="header-tab-admin" label="Admin" value="admin" {...a11yProps(3)} />
             }
             {(hasPermission("manage_schema") || hasPermission("view_schema")) &&
-              <Tab data-cy="header-tab-schema" label="Schema" value="schema" {...a11yProps(3)} />
+              <Tab data-cy="header-tab-schema" label="Schema" value="schema" {...a11yProps(4)} />
             }
           </Tabs>
         </div>
@@ -247,7 +250,12 @@ const Header = (props: any) => {
           </Button>
             
           <IconButton data-cy="profile-menu-button" sx={styles.icon} onClick={handleShowProfileActions}>
-            <Avatar sx={styles.avatar} alt={displayName || displayEmail} src={userPhoto || undefined}>
+            <Avatar
+              sx={styles.avatar}
+              alt={displayName || displayEmail}
+              src={userPhoto || undefined}
+              imgProps={{ referrerPolicy: "no-referrer" }}
+            >
               {userInitials}
             </Avatar>
           </IconButton>
@@ -266,6 +274,7 @@ const Header = (props: any) => {
                   sx={styles.menuUserAvatar}
                   alt={displayName || displayEmail}
                   src={userPhoto || undefined}
+                  imgProps={{ referrerPolicy: "no-referrer" }}
                 >
                   {userInitials}
                 </Avatar>

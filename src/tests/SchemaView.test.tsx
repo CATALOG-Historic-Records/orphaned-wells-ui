@@ -3,13 +3,13 @@ import { MemoryRouter } from "react-router-dom";
 import SchemaView from "../views/SchemaView/SchemaView";
 import { createSchema, deleteProcessorSchema, getCleaningFunctions, getSchema, updateProcessorAttribute } from "../services/app.service";
 
-const mockHasPermission = jest.fn();
-jest.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: mockHasPermission }) }));
-jest.mock("../services/app.service", () => ({
-  getSchema: jest.fn(), getCleaningFunctions: jest.fn(), updateProcessorAttribute: jest.fn(),
-  uploadProcessorSchema: jest.fn(), deleteProcessorSchema: jest.fn(), updateProcessor: jest.fn(),
-  uploadSampleImage: jest.fn(),
-  createSchema: jest.fn(),
+const mockHasPermission = vi.hoisted(() => vi.fn());
+vi.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: mockHasPermission }) }));
+vi.mock("../services/app.service", () => ({
+  getSchema: vi.fn(), getCleaningFunctions: vi.fn(), updateProcessorAttribute: vi.fn(),
+  uploadProcessorSchema: vi.fn(), deleteProcessorSchema: vi.fn(), updateProcessor: vi.fn(),
+  uploadSampleImage: vi.fn(),
+  createSchema: vi.fn(),
 }));
 
 const processor = {

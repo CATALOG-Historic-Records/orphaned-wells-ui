@@ -22,12 +22,13 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import UnfoldLess from "@mui/icons-material/UnfoldLess";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
 import { callAPI, convertFiltersToMongoFormat } from "../../util";
-import { downloadRecords, getColumnData, getDownloadSize } from "../../services/app.service";
-import { ColumnSelectDialogProps, CheckboxesGroupProps, ExportTypeSelectionProps } from "../../types";
+import { createExportJob, getColumnData } from "../../services/app.service";
+import { ColumnSelectDialogProps, CheckboxesGroupProps, ExportJob, ExportTypeSelectionProps } from "../../types";
 import CircularProgress from "@mui/material/CircularProgress";
 import ErrorBar from "../ErrorBar/ErrorBar";
 import { useUserContext } from "../../usercontext";
-import { useDownload } from "../../context/DownloadContext";
+import CurrentExportStatus from "../ExportHistory/CurrentExportStatus";
+import { notifyExportJobsUpdated } from "../ExportHistory/exportPresentation";
 import {
   buildFieldTree,
   getNodeCheckState,
@@ -45,7 +46,8 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   const [columns, setColumns] = useState<string[]>([]);
   const [docTypeColumns, setDocTypeColumns] = useState<{ [key: string]: string[] }>({});
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [loadingFileSize, setLoadingFileSize] = useState(false);
+  const [submittingExport, setSubmittingExport] = useState(false);
+  const [submittedJob, setSubmittedJob] = useState<ExportJob | null>(null);
   const [objSettings, setObjSettings] = useState<any>();
   const [errorMsg, setErrorMsg] = useState<string | null>("");
   const [exportTypes, setExportTypes] = useState<{ [key: string]: boolean }>({
@@ -60,10 +62,10 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   const dialogHeight = "85vh";
   const dialogWidth = "60vw";
 
-  const { isDownloading, downloadWithProgress } = useDownload();
-
   useEffect(() => {
     if (open) {
+      setSubmittedJob(null);
+      setErrorMsg(null);
       callAPI(
         getColumnData,
         [location, _id, selectedRecordGroups],
@@ -174,56 +176,34 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
     return Array.from(new Set([...attributeRawCols, ...notesSelected]));
   };
 
-  const handleGetTotalBytes = () => {
+  const handleStartExport = () => {
     setErrorMsg(null);
-    const exportCols = getExportColumnsList();
-    if (exportTypes.image_files || exportTypes.embedded_pdf_files) {
-      const body = {
-        columns: exportCols,
-        sort: [sortBy, sortAscending],
-        filter: convertFiltersToMongoFormat(appliedFilters),
-        document_types: documentTypes || [],
-        reconstruct_original_doc: location === "project" ? reconstructOriginalDoc : false,
-        export_raw_values: exportRawValues,
-      };
-      setLoadingFileSize(true);
-      callAPI(
-        getDownloadSize,
-        [location, _id, body],
-        (totalBytes) => fetchedDownloadSize(totalBytes),
-        handleFailedExport
-      );
-    } else {
-      fetchedDownloadSize(0);
-    }
-  };
-
-  const fetchedDownloadSize = (totalBytes: number) => {
-    setLoadingFileSize(false);
-    handleExport(totalBytes);
-  };
-
-  const handleExport = async (totalBytes?: number) => {
     const exportCols = getExportColumnsList();
     const body = {
       columns: exportCols,
       sort: [sortBy, sortAscending],
       filter: convertFiltersToMongoFormat(appliedFilters),
-      document_types: documentTypes || [],
+      document_types: documentTypes && documentTypes.length > 0 ? documentTypes : null,
       reconstruct_original_doc: location === "project" ? reconstructOriginalDoc : false,
       export_raw_values: exportRawValues,
     };
-    try {
-      await downloadWithProgress(downloadRecords, [location, _id, exportTypes, name, body], `${name}.zip`, totalBytes);
-      handleClose();
-    } catch (error) {
-      handleFailedExport(error instanceof Error ? error.message : String(error));
-    }
+    setSubmittingExport(true);
+    callAPI(
+      createExportJob,
+      [location, _id, exportTypes, name, body],
+      (job: ExportJob) => {
+        setSubmittingExport(false);
+        setSubmittedJob(job);
+        notifyExportJobsUpdated();
+      },
+      handleFailedExport
+    );
   };
 
-  const handleFailedExport = (e: string) => {
-    setLoadingFileSize(false);
-    setErrorMsg("unable to export: " + e);
+  const handleFailedExport = (e: any) => {
+    setSubmittingExport(false);
+    const msg = typeof e === "string" ? e : e?.detail || e?.message || String(e);
+    setErrorMsg("unable to export: " + msg);
   };
 
   const handleFailedGetColumnData = (e: string) => {
@@ -237,7 +217,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   };
 
   const disableDownload = () => {
-    if (isDownloading || loadingFileSize || !columns?.length) return true;
+    if (submittingExport || !columns?.length) return true;
     for (let each of Object.keys(exportTypes)) {
       if (exportTypes[each]) return false;
     }
@@ -249,7 +229,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
   return (
     <Dialog
       open={open}
-      onClose={!loadingFileSize ? handleClose : undefined}
+      onClose={!submittingExport ? handleClose : undefined}
       data-cy="export-dialog"
       scroll={"paper"}
       aria-labelledby="export-dialog"
@@ -267,7 +247,7 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
         <CloseIcon />
       </IconButton>
       <DialogContent dividers={true} sx={styles.dialogContent}>
-        {(loadingFileSize || !columns?.length) && (
+        {(submittingExport || !columns?.length) && (
           <Box sx={styles.loader}>
             <CircularProgress />
           </Box>
@@ -286,45 +266,72 @@ const ColumnSelectDialog = (props: ColumnSelectDialogProps) => {
             color: "inherit",
           }}
         >
-          {location === "documentType" && (
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 1.5 }}>
-              Records from selected Record Groups will be exported into files based on{" "}
-              <b>{numDocTypesIdentified} Document Types identified.</b>
-            </Typography>
-          )}
+          {submittedJob ? (
+            <CurrentExportStatus
+              initialJob={submittedJob}
+              onCloseDialog={handleClose}
+            />
+          ) : (
+            <>
+              {location === "documentType" && (
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 1.5 }}>
+                  Records from selected Record Groups will be exported into files based on{" "}
+                  <b>{numDocTypesIdentified} Document Types identified.</b>
+                </Typography>
+              )}
 
-          <ExportTypeSelection
-            exportTypes={exportTypes}
-            updateExportTypes={handleChangeExportTypes}
-            disabled={loadingFileSize || isDownloading}
-            location={location}
-            reconstructOriginalDoc={reconstructOriginalDoc}
-            setReconstructOriginalDoc={setReconstructOriginalDoc}
-            exportRawValues={exportRawValues}
-            setExportRawValues={setExportRawValues}
-          />
-          <Divider sx={{ my: 1.5 }} />
-          <CheckboxesGroup
-            columns={columns}
-            docTypeColumns={docTypeColumns}
-            selected={selectedColumns}
-            setSelected={setSelectedColumns}
-            disabled={loadingFileSize || isDownloading}
-            location={location}
-          />
+              <ExportTypeSelection
+                exportTypes={exportTypes}
+                updateExportTypes={handleChangeExportTypes}
+                disabled={submittingExport}
+                location={location}
+                reconstructOriginalDoc={reconstructOriginalDoc}
+                setReconstructOriginalDoc={setReconstructOriginalDoc}
+                exportRawValues={exportRawValues}
+                setExportRawValues={setExportRawValues}
+              />
+              <Divider sx={{ my: 1.5 }} />
+              <CheckboxesGroup
+                columns={columns}
+                docTypeColumns={docTypeColumns}
+                selected={selectedColumns}
+                setSelected={setSelectedColumns}
+                disabled={submittingExport}
+                location={location}
+              />
+            </>
+          )}
         </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 1.5 }}>
-        <Button
-          variant="contained"
-          startIcon={<DownloadIcon />}
-          onClick={handleGetTotalBytes}
-          id="download-button"
-          data-cy="download-button"
-          disabled={disableDownload()}
-        >
-          Export Data
-        </Button>
+        {submittedJob ? (
+          <>
+            <Button
+              onClick={() => setSubmittedJob(null)}
+              sx={{ textTransform: "none" }}
+            >
+              Configure another export
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleClose}
+              data-cy="export-dialog-close-button"
+            >
+              Close
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            onClick={handleStartExport}
+            id="download-button"
+            data-cy="download-button"
+            disabled={disableDownload()}
+          >
+            Export Data
+          </Button>
+        )}
       </DialogActions>
       <ErrorBar errorMessage={errorMsg} setErrorMessage={setErrorMsg} />
     </Dialog>

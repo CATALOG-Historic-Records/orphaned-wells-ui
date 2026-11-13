@@ -32,7 +32,6 @@ import EmptyTable from "../EmptyTable/EmptyTable";
 import TableLoading from "../TableLoading/TableLoading";
 import RecordsTableOverlay from "./RecordsTableOverlay";
 import PopupModal from "../PopupModal/PopupModal";
-import { useDownload } from "../../context/DownloadContext";
 import { useUserContext } from "../../usercontext";
 
 const SORTABLE_COLUMNS = {
@@ -74,7 +73,6 @@ const RecordsTable = (props: RecordsTableProps) => {
     const pageSizeParam = searchParams.get('pageSize');
     return pageSizeParam ? parseInt(pageSizeParam, 10) : DEFAULT_RECORDS_TABLE_PAGE_SIZE;
   });
-  const [showDownloadMessage, setShowDownloadMessage] = useState(false);
   const [openDeleteRecordsModal, setOpenDeleteRecordsModal] = useState(false);
   const [deletingDisplayedRecords, setDeletingDisplayedRecords] = useState(false);
   const [showActions, setShowActions] = useState(false);
@@ -84,7 +82,6 @@ const RecordsTable = (props: RecordsTableProps) => {
   );
   const [sorted, _setSorted] = useState(JSON.parse(localStorage.getItem("sorted") || "{}")[params.id || ""] || ["dateCreated", 1]
   );
-  const { isDownloading, estimatedTotalBytes, progress } = useDownload();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const tableDisabled = disabled || deletingDisplayedRecords;
   const tableDisabledMessage = disabledMessage || "Deleting records...";
@@ -96,15 +93,6 @@ const RecordsTable = (props: RecordsTableProps) => {
   useEffect(() => {
     onFiltersChange?.(filterBy);
   }, [filterBy, onFiltersChange]);
-
-  useEffect(() => {
-    if (isDownloading) {
-      // If downloda is bigger than 10mb
-      if ((estimatedTotalBytes || 0) > 10000000 && (progress || 0) < 0.01) setShowDownloadMessage(true);
-    } else {
-      setShowDownloadMessage(false);
-    }
-  }, [isDownloading]);
 
   // Sync pagination state to URL query parameters
   useEffect(() => {
@@ -454,7 +442,7 @@ const RecordsTable = (props: RecordsTableProps) => {
           <Grid container>
             <Grid item sx={styles.topSectionLeft} xs={6}>
               <TableFilters applyFilters={handleApplyFilters} appliedFilters={filterBy} filter_options={filter_options} />
-              <Button data-cy="records-export-button" onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon />} disabled={isDownloading || tableDisabled}>
+              <Button data-cy="records-export-button" onClick={() => setOpenColumnSelect(true)} startIcon={<IosShareIcon />} disabled={tableDisabled}>
                 Export
               </Button>
             </Grid>
@@ -566,18 +554,6 @@ const RecordsTable = (props: RecordsTableProps) => {
               sortAscending={sorted[1]}
             /> 
           )}
-        {
-          <PopupModal
-            open={showDownloadMessage}
-            handleClose={() => setShowDownloadMessage(false)}
-            text="Your download is in progress — you can continue using the app while it completes. Please note: refreshing the page or closing this tab will cancel the download."
-            handleSave={() => setShowDownloadMessage(false)}
-            buttonText='Close'
-            buttonColor='primary'
-            buttonVariant='contained'
-            width={500}
-          />
-        }
 
         <PopupModal
           open={openDeleteRecordsModal}

@@ -3,8 +3,12 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
+import { vi } from "vitest";
 
-jest.mock("./usercontext", () => ({
+(globalThis as any).jest = vi;
+process.env.PUBLIC_URL ??= "";
+
+vi.mock("./usercontext", () => ({
   __esModule: true,
   useUserContext: () => ({
     user: { email: "test@example.com" },
@@ -15,7 +19,7 @@ jest.mock("./usercontext", () => ({
     databaseEnvironment: "test",
     isAuthenticated: true,
     authLoading: false,
-    handleSuccessfulAuthentication: jest.fn(),
+    handleSuccessfulAuthentication: vi.fn(),
   }),
   UserContextProvider: ({ children }: { children: any }) => children,
 }));
