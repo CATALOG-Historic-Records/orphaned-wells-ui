@@ -1,7 +1,7 @@
 import { strFromU8, unzipSync } from "fflate";
 
 const path = require("path");
-const exportUrl = () => `${Cypress.env("backendURL")}/download_records/**`;
+const exportUrl = () => `${Cypress.env("backendURL")}/export_jobs/**`;
 const records = [
   { filename: "export-alpha.pdf", depth: 120, operator: "Alpha Oil" },
   { filename: "export-bravo.pdf", depth: 240, operator: "Bravo Oil" },
@@ -48,9 +48,12 @@ const waitForExport = (format) => {
     expect(request.url).to.include("export_images=false");
     expect(request.url).to.include("export_embedded_pdfs=false");
     expect(response.statusCode).to.eq(200);
-    expect(response.headers["content-type"]).to.include("application/zip");
+    expect(response.body).to.have.property("job_id");
   });
-  cy.getByCy("export-dialog").should("not.exist");
+  cy.getByCy("export-ready-download-button", { timeout: 30000 })
+    .should("be.visible")
+    .and("be.enabled")
+    .click();
 };
 
 const readExport = (name, extension) => {
@@ -145,7 +148,7 @@ describe("real record exports", () => {
       cy.getByCy("download-button").click();
       cy.wait("@failedExport").its("response.statusCode").should("eq", 500);
       cy.getByCy("export-dialog").should("be.visible");
-      cy.findByRole("alert").should("contain.text", "Download failed with status 500");
+      cy.findByRole("alert").should("contain.text", "Export failed for this test");
       cy.getByCy("download-button").should("be.enabled").click();
       waitForExport("json");
       cy.findByRole("alert").should("not.exist");
