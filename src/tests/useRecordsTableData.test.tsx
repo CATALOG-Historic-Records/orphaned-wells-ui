@@ -3,7 +3,7 @@ import { useRecordsTableData } from "../components/RecordsTable/useRecordsTableD
 import { getRecords } from "../services/app.service";
 import { RecordData, RecordsResponse } from "../types";
 
-jest.mock("../services/app.service", () => ({getRecords: jest.fn()}));
+vi.mock("../services/app.service", () => ({getRecords: vi.fn()}));
 
 const query = {
   location: "record_group", scopeId: "group", currentPage: 3, pageSize: 25,

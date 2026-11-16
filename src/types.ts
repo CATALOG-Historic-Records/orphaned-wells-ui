@@ -683,7 +683,7 @@ export interface ProcessingJobHistory {
     count: number;
 }
 
-export interface ProcessingHistoryProject {
+export interface JobScopeProject {
     id: string;
     name: string;
     record_groups: {id: string; name: string}[];
@@ -694,6 +694,74 @@ export interface ProcessingJobDetails {
     files: {name: string; source_uri?: string; record_id?: string; status?: string}[];
     file_count: number;
     retry: {allowed: boolean; reason?: string};
+}
+
+export type ExportJobStatus = "queued" | "dispatched" | "running" | "completed" | "error" | "expired";
+
+export interface ExportJob {
+    job_id: string;
+    job_type?: "export";
+    export_source?: "reviewed_records_api";
+    status: ExportJobStatus;
+    stage?: string;
+    status_text?: string;
+    progress?: {
+        current: number;
+        total: number;
+        percent: number;
+    };
+    team?: string;
+    location: string;
+    target_id: string;
+    project_id?: string | null;
+    project_name?: string | null;
+    record_group_id?: string | null;
+    record_group_name?: string | null;
+    output_name?: string;
+    request_user: {
+        email: string;
+        name?: string;
+    };
+    options: {
+        export_csv?: boolean;
+        export_json?: boolean;
+        export_images?: boolean;
+        export_embedded_pdfs?: boolean;
+        columns?: string[];
+        document_types?: string[] | null;
+        reconstruct_original_doc?: boolean;
+        export_raw_values?: boolean;
+        since?: number | null;
+        until?: number | null;
+    };
+    column_count?: number;
+    artifact?: {
+        filename: string;
+        size_bytes?: number;
+        record_count?: number;
+    } | null;
+    created_at: number;
+    updated_at?: number;
+    started_at?: number | null;
+    last_progress_at?: number | null;
+    completed_at?: number | null;
+    expires_at?: number | null;
+    error?: string | null;
+    attempt?: number;
+}
+
+export interface ExportJobHistory {
+    active_jobs: ExportJob[];
+    active_count: number;
+    jobs: ExportJob[];
+    count: number;
+}
+
+export interface ExportDownloadResponse {
+    job_id: string;
+    download_url: string;
+    filename: string;
+    expires_at?: number | null;
 }
 
 export interface BottombarProps {
@@ -847,6 +915,20 @@ export interface deleteFieldSignature {
 export interface HotkeyInfoProps {
   anchorEl: HTMLElement | undefined;
   onClose: () => void;
+}
+
+export interface ApiKeyInfo {
+  key_id: string;
+  name: string;
+  key_prefix: string;
+  created_at: number;
+  expires_at: number;
+  last_used_at: number | null;
+  expired?: boolean;
+}
+
+export interface CreatedApiKeyResponse extends ApiKeyInfo {
+  api_key: string;
 }
 
 export type AttributesListUpdateTypes = "insertField" | "deleteField" | "updateFieldCoordinates"
