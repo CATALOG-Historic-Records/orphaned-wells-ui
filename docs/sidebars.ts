@@ -84,6 +84,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "usage/ui",
         "usage/import_records",
+        "usage/api_exports",
         "usage/add_users",
         "usage/updating_processor_schema",
       ],

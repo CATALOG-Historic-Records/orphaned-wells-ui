@@ -104,7 +104,24 @@ export const canDownloadExport = (job?: ExportJob | null): boolean => {
   return true;
 };
 
+export const isDirectApiExport = (job?: ExportJob | null): boolean =>
+  Boolean(
+    job &&
+      job.export_source === "reviewed_records_api" &&
+      job.status === "expired"
+  );
+
+export const isIncrementalReviewedExport = (job?: ExportJob | null): boolean =>
+  Boolean(
+    job &&
+      (job.export_source === "reviewed_records_api" ||
+        job.options?.until != null)
+  );
+
 export const formatExportExpiration = (job: ExportJob): string => {
+  if (isDirectApiExport(job)) {
+    return "Direct download";
+  }
   if (job.status === "expired") return "Archive removed";
   if (job.status === "error") return job.error || "Export failed";
   if (isActiveExportJob(job)) return "1h after completion";
