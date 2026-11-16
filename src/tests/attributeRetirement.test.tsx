@@ -4,7 +4,7 @@ import AttributesTable from "../components/RecordAttributesTable/RecordAttribute
 import { Attribute, RecordAttributesTableProps } from "../types";
 import { convertFiltersToMongoFormat, deriveAttribute, getActiveAttributeEntries } from "../util";
 
-jest.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: () => true }) }));
+vi.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: () => true }) }));
 
 const fields = [
   { key: "retired_parent", deleted: true, value: "hidden", subattributes: [{ key: "hidden_child", value: "hidden" }] },

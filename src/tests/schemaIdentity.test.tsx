@@ -5,11 +5,11 @@ import NewRecordGroupDialog from "../components/NewRecordGroupDialog/NewRecordGr
 import EditProcessorDialog from "../components/EditProcessorDialog/EditProcessorDialog";
 import { addRecordGroup, getProcessors, updateProcessor, updateRecordGroup } from "../services/app.service";
 
-const mockHasPermission = jest.fn();
-jest.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: mockHasPermission }) }));
-jest.mock("../services/app.service", () => ({
-  getProcessors: jest.fn(), updateRecordGroup: jest.fn(), connectRecordGroupProcessor: jest.fn(),
-  addRecordGroup: jest.fn(), updateProcessor: jest.fn(), uploadSampleImage: jest.fn(),
+const mockHasPermission = vi.hoisted(() => vi.fn());
+vi.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: mockHasPermission }) }));
+vi.mock("../services/app.service", () => ({
+  getProcessors: vi.fn(), updateRecordGroup: vi.fn(), connectRecordGroupProcessor: vi.fn(),
+  addRecordGroup: vi.fn(), updateProcessor: vi.fn(), uploadSampleImage: vi.fn(),
 }));
 const schemas = [
   { schema_id: "one", name: "Without processor", documentType: "Imported" },

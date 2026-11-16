@@ -3,8 +3,8 @@ import SchemaGenerationDialog from "../components/SchemaGenerationDialog/SchemaG
 import { applyRecordGroupSchema, getCleaningFunctions, previewRecordGroupSchema } from "../services/app.service";
 import { RecordGroup, SchemaGenerationPreview } from "../types";
 
-jest.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: (permission: string) => permission === "manage_schema" }) }));
-jest.mock("../services/app.service", () => ({ applyRecordGroupSchema: jest.fn(), previewRecordGroupSchema: jest.fn(), getCleaningFunctions: jest.fn() }));
+vi.mock("../usercontext", () => ({ useUserContext: () => ({ hasPermission: (permission: string) => permission === "manage_schema" }) }));
+vi.mock("../services/app.service", () => ({ applyRecordGroupSchema: vi.fn(), previewRecordGroupSchema: vi.fn(), getCleaningFunctions: vi.fn() }));
 
 const group: RecordGroup = { _id: "group", name: "Records", has_schema: false, has_records: true, schema_source: "database" };
 const field = { name: "depth", data_type: "Number", database_data_type: "int", page_order_sort: 1 };
