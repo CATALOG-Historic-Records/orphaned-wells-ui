@@ -1,0 +1,276 @@
+---
+title: API keys and scheduled exports
+description: Create personal API keys and fetch newly reviewed records on a schedule via the OGRRE API.
+---
+
+import React, {useEffect, useState} from 'react';
+import CodeBlock from '@theme/CodeBlock';
+
+export const BACKEND_HOST_EVENT = 'ogrre:api-export-backend-host-change';
+export const BACKEND_HOST_STORAGE_KEY = 'ogrre:api-export-backend-host';
+export const BACKEND_HOST_TOKEN = '__BACKEND_HOST__';
+
+export const COLLABORATOR_DEPLOYMENTS = [
+  {label: 'Select a collaborator or enter a custom host...', value: ''},
+  {label: 'ISGS', value: 'isgs-server.uow-carbon.org'},
+  {label: 'NEWTS', value: 'newts-server.uow-carbon.org'},
+  {label: 'Osage', value: 'osage-server.uow-carbon.org'},
+  {label: 'RRC', value: 'rrc-server.uow-carbon.org'},
+];
+
+export function normalizeBackendHost(value) {
+  return (value || '')
+    .trim()
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/+$/, '');
+}
+
+export function useBackendHost() {
+  const [rawHost, setRawHost] = useState('');
+
+  useEffect(() => {
+    const storedHost = window.sessionStorage.getItem(BACKEND_HOST_STORAGE_KEY) || '';
+    setRawHost(storedHost);
+
+    function handleHostChange(event) {
+      setRawHost(event.detail || '');
+    }
+
+    window.addEventListener(BACKEND_HOST_EVENT, handleHostChange);
+    return () => {
+      window.removeEventListener(BACKEND_HOST_EVENT, handleHostChange);
+    };
+  }, []);
+
+  const normalized = normalizeBackendHost(rawHost);
+  return {
+    rawHost,
+    backendHost: normalized || '<backend-host>',
+  };
+}
+
+export function BackendHostSelector() {
+  const [rawHost, setRawHost] = useState('');
+
+  useEffect(() => {
+    setRawHost(window.sessionStorage.getItem(BACKEND_HOST_STORAGE_KEY) || '');
+  }, []);
+
+  function updateHost(nextValue) {
+    setRawHost(nextValue);
+    window.sessionStorage.setItem(BACKEND_HOST_STORAGE_KEY, nextValue);
+    window.dispatchEvent(new CustomEvent(BACKEND_HOST_EVENT, {detail: nextValue}));
+  }
+
+  const normalized = normalizeBackendHost(rawHost);
+  const matchingOption = COLLABORATOR_DEPLOYMENTS.some(
+    (option) => option.value && option.value === normalized
+  )
+    ? normalized
+    : '';
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '0.75rem',
+        alignItems: 'center',
+        padding: '0.875rem 1rem',
+        marginBottom: '1rem',
+        borderRadius: '8px',
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        backgroundColor: 'var(--ifm-background-surface-color)',
+      }}
+    >
+      <label style={{display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: '1 1 240px'}}>
+        <span style={{fontSize: '0.8rem', fontWeight: 600}}>Collaborator</span>
+        <select
+          aria-label="Collaborator"
+          value={matchingOption}
+          onChange={(event) => updateHost(event.target.value)}
+          style={{padding: '0.45rem 0.6rem', borderRadius: '6px', border: '1px solid var(--ifm-color-emphasis-300)'}}
+        >
+          {COLLABORATOR_DEPLOYMENTS.map((option) => (
+            <option key={option.label} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label style={{display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: '1 1 240px'}}>
+        <span style={{fontSize: '0.8rem', fontWeight: 600}}>Backend host</span>
+        <input
+          aria-label="Backend host"
+          type="text"
+          placeholder="<backend-host>"
+          value={rawHost}
+          onChange={(event) => updateHost(event.target.value)}
+          style={{padding: '0.45rem 0.6rem', borderRadius: '6px', border: '1px solid var(--ifm-color-emphasis-300)'}}
+        />
+      </label>
+    </div>
+  );
+}
+
+export function BackendHostInline({prefix = '', suffix = ''}) {
+  const {backendHost} = useBackendHost();
+  return <code>{prefix}{backendHost}{suffix}</code>;
+}
+
+export function BackendHostCodeBlock({children, language}) {
+  const {backendHost} = useBackendHost();
+  const template = React.Children.toArray(children).join('').trim();
+
+  return (
+    <CodeBlock language={language}>
+      {template.replaceAll(BACKEND_HOST_TOKEN, backendHost)}
+    </CodeBlock>
+  );
+}
+
+# API keys and scheduled exports
+
+Use personal **API keys** and the `/reviewed_records` endpoint when you want an automated script or scheduled cron job to fetch newly reviewed records without signing in through a browser.
+
+For one-off interactive exports that include document images or searchable PDFs, use the **Export** button in the UI instead; see [Export records](./ui.mdx#export-records).
+
+## Create an API key
+
+1. Sign in to OGRRE.
+2. Click your profile avatar in the top-right corner and select **API Keys**.
+3. Under **Create New Key**, enter a descriptive **Key name** (such as `RRC nightly export`) and choose an **Expiration** (`30 days`, `90 days`, or `1 year`).
+4. Click **Create key**.
+5. Copy the generated `ogrre_...` key immediately and store it in your secret manager or cron environment. **The full key is shown only once.**
+
+To revoke a key at any time, open **API Keys** from the profile menu and click **Revoke** beside the key. Revoked and expired keys are rejected immediately.
+
+## Fetch the latest reviewed records
+
+Choose your collaborator deployment or enter a custom backend host below to populate the endpoint URLs and code examples on this page:
+
+<BackendHostSelector />
+
+Send a `GET` request to `/reviewed_records` on the backend URL (<BackendHostInline prefix="https://" suffix="/reviewed_records" />) with your API key in the `Authorization: Bearer <key>` header:
+
+<BackendHostCodeBlock language="bash">{`
+curl -fsSL \\
+  -H "Authorization: Bearer ogrre_your_api_key_here" \\
+  "https://__BACKEND_HOST__/reviewed_records"
+`}</BackendHostCodeBlock>
+
+### How incremental watermark tracking works
+
+Every time a record is edited or its review status changes in OGRRE, its `lastUpdated` timestamp is updated. The `/reviewed_records` endpoint returns records whose `review_status` is `reviewed` and whose effective update timestamp (`lastUpdated`, falling back to `dateCreated` for older records) falls within `(since, until]`:
+
+- **First run (when `since` is omitted)**: OGRRE returns all reviewed records in scope up to the current request time (`until = now`) and records a watermark for your user and scope.
+- **Subsequent runs (when `since` is omitted)**: OGRRE automatically looks up the `until` timestamp of your most recent watermark run for that same scope and returns only reviewed records updated after that timestamp (`lastUpdated > since` and `lastUpdated <= now`).
+- **Custom time windows**: If you pass an explicit `until` timestamp (for example, to replay a historical window), OGRRE returns records in `(since, until]` without overwriting your live watermark.
+
+### Query parameters
+
+| Parameter | Default | Description |
+| --- | --- | --- |
+| `since` | Last watermark `until` (or `0` on first run) | Exclusive lower bound (`> since`). Accepts a Unix epoch timestamp in seconds (e.g., `1700000000`) or an ISO-8601 string (e.g., `2026-01-15T00:00:00Z`). |
+| `until` | Request time (`now`) | Inclusive upper bound (`<= until`). Accepts a Unix epoch timestamp or ISO-8601 string. Omit `until` on scheduled runs so the watermark advances automatically. |
+| `project_id` | All accessible projects in current team | Optional project ID to scope the query and watermark to one project. |
+| `record_group_id` | All accessible record groups in scope | Optional record group ID to scope the query and watermark to one record group. |
+| `document_type` | All document types | Optional document type name (for example, `W-2`) to filter record groups and track a watermark specific to that document type. |
+| `format` | `json` | Output format: `json` (`application/json`) or `csv` (`text/csv`). |
+| `page` | `0` | Zero-based page number. |
+| `page_size` | `100` | Number of records per page (`1`–`1000`). |
+
+### JSON response format
+
+When `format=json` (the default), the endpoint returns pagination metadata, the effective `[since, until]` window, the `job_id` recorded in export history, and the `records` array:
+
+```json
+{
+  "job_id": "8f1d4b92-3c7e-4b0a-9f12-6e1a2b3c4d5e",
+  "since": 1731500000.0,
+  "until": 1731586400.42,
+  "page": 0,
+  "page_size": 100,
+  "total_count": 2,
+  "has_more": false,
+  "records": [
+    {
+      "file": "well-completion-001.pdf",
+      "api_number": {
+        "key": "api_number",
+        "value": "42-123-45678",
+        "normalized_vertices": null,
+        "page": 0,
+        "subattributes": null,
+        "parentAttribute": null,
+        "topLevelAttribute": true,
+        "user_provided_coordinates": null
+      }
+    }
+  ]
+}
+```
+
+### CSV response format
+
+Pass `format=csv` to download a CSV directly:
+
+<BackendHostCodeBlock language="bash">{`
+curl -fsSL \\
+  -H "Authorization: Bearer ogrre_your_api_key_here" \\
+  "https://__BACKEND_HOST__/reviewed_records?format=csv&page_size=1000" \\
+  -o reviewed_records.csv
+`}</BackendHostCodeBlock>
+
+CSV responses also include watermarks and pagination metadata in response headers:
+
+- `X-OGRRE-Since` and `X-OGRRE-Until`
+- `X-OGRRE-Total-Count`, `X-OGRRE-Page`, `X-OGRRE-Page-Size`, and `X-OGRRE-Has-More`
+- `X-OGRRE-Job-Id` (on `page=0`)
+
+### Paginating through large runs
+
+Only `page=0` advances the saved watermark. If a run returns `"has_more": true` (more than `page_size` records matched), pass the `since` and `until` values returned from `page=0` on subsequent page requests (`page=1`, `page=2`, ...) so every page reads from the exact same time window:
+
+<BackendHostCodeBlock language="python">{`
+import os
+import requests
+
+BASE_URL = "https://__BACKEND_HOST__"
+API_KEY = os.environ["OGRRE_API_KEY"]
+
+headers = {"Authorization": f"Bearer {API_KEY}"}
+all_records = []
+page = 0
+window_params = {"page_size": 500}
+
+while True:
+    response = requests.get(
+        f"{BASE_URL}/reviewed_records",
+        headers=headers,
+        params={**window_params, "page": page},
+        timeout=60,
+    )
+    response.raise_for_status()
+    payload = response.json()
+
+    all_records.extend(payload["records"])
+    if not payload["has_more"]:
+        break
+
+    # Lock subsequent pages to the exact [since, until] window from page 0
+    window_params["since"] = payload["since"]
+    window_params["until"] = payload["until"]
+    page += 1
+
+print(f"Fetched {len(all_records)} reviewed records")
+`}</BackendHostCodeBlock>
+
+## View and re-run API exports in the UI
+
+Each `page=0` call to `/reviewed_records` is logged in the **Exports** tab in the OGRRE UI:
+
+- **Format column**: Labeled `Incremental (Reviewed)` beneath the `JSON` or `CSV` badge.
+- **Availability column**: Shows `Completed` (`Direct download`), because the data was returned directly in the HTTP response rather than stored as a temporary ZIP archive.
+- **Details dialog**: Shows the exact **Updated window** (`since → until`) and record count for that run.
+- **Run again**: Clicking **Run again** on an incremental API export queues a standard background export for the **exact same set of records** returned by that API call, packaging them into a downloadable ZIP archive in the UI without altering your API watermark.
