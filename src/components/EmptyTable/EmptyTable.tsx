@@ -19,6 +19,7 @@ export default function EmptyTable(props: EmptyTableProps) {
         width: "100%",
         display: "flex",
         justifyContent: "center",
+        flexWrap: "wrap",
         paddingTop: 2,
       }}
       id="empty-table"
@@ -35,6 +36,7 @@ export default function EmptyTable(props: EmptyTableProps) {
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
+          minWidth: 0,
         }}
       >
         <Typography

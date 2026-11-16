@@ -12,7 +12,6 @@ import WarningIcon from "@mui/icons-material/Warning";
 import TableLoading from "../TableLoading/TableLoading";
 import EmptyTable from "../EmptyTable/EmptyTable";
 import ColumnSelectDialog from "../ColumnSelectDialog/ColumnSelectDialog";
-import { useDownload } from "../../context/DownloadContext";
 
 interface RecordGroupsTableProps {
   record_groups: RecordGroup[];
@@ -55,7 +54,6 @@ const RecordGroupsTable = ({ record_groups, sortRecordGroups, projectId, handleU
   const [sortAscending, setSortAscending] = useState(1);
   const [openColumnSelect, setOpenColumnSelect] = useState(false);
   const [selectedRecordGroupIds, setSelectedRecordGroupIds] = useState<string[]>([]);
-  const { isDownloading } = useDownload();
 
   useEffect(() => {
     sortRecordGroups(sortBy, sortAscending);
@@ -152,7 +150,7 @@ const RecordGroupsTable = ({ record_groups, sortRecordGroups, projectId, handleU
                 data-cy="record-groups-export-button"
                 onClick={() => setOpenColumnSelect(true)}
                 startIcon={<IosShareIcon />}
-                disabled={selectedRecordGroupIds.length === 0 || isDownloading || !projectId}
+                disabled={selectedRecordGroupIds.length === 0 || !projectId}
               >
                 Export
               </Button>

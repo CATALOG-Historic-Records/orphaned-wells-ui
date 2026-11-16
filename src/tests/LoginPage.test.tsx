@@ -5,7 +5,7 @@ import { authLogin, getAuthProviders } from "../services/app.service";
 let mockGoogleOnSuccess: ((res: { code: string }) => void) | null = null;
 let mockGoogleLoginOptions: Record<string, unknown> | null = null;
 
-jest.mock("@react-oauth/google", () => ({
+vi.mock("@react-oauth/google", () => ({
   useGoogleLogin: (options: {
     onSuccess: (res: { code: string }) => void;
     [key: string]: unknown;
@@ -20,9 +20,9 @@ jest.mock("@react-oauth/google", () => ({
   },
 }));
 
-jest.mock("../services/app.service", () => ({
-  authLogin: jest.fn(),
-  getAuthProviders: jest.fn(),
+vi.mock("../services/app.service", () => ({
+  authLogin: vi.fn(),
+  getAuthProviders: vi.fn(),
 }));
 
 const MOCK_DEFAULT_IDP_OPTIONS = [

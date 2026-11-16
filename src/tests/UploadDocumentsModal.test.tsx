@@ -3,8 +3,8 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import UploadDocumentsModal from "../components/UploadDocumentsModal/UploadDocumentsModal";
 import { checkForDuplicateRecords, checkProcessorStatus, getDirectoryUploadConfig } from "../services/app.service";
 
-jest.mock("../services/app.service", () => ({checkForDuplicateRecords: jest.fn(), checkProcessorStatus: jest.fn(), getDirectoryUploadConfig: jest.fn()}));
-jest.mock("../usercontext", () => ({useUserContext: () => ({hasPermission: () => true, userEmail: "user"})}));
+vi.mock("../services/app.service", () => ({checkForDuplicateRecords: vi.fn(), checkProcessorStatus: vi.fn(), getDirectoryUploadConfig: vi.fn()}));
+vi.mock("../usercontext", () => ({useUserContext: () => ({hasPermission: () => true, userEmail: "user"})}));
 const response = (body: unknown) => ({status: 200, json: async () => body});
 
 beforeEach(() => {

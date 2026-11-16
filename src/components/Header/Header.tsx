@@ -3,8 +3,14 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HeaderStyles as styles } from "../../styles";
 import { useUserContext } from "../../usercontext";
-import { changeCollaborator, changeTeam, fetchTeams, getOgrreVersion } from "../../services/app.service";
+import {
+  changeCollaborator,
+  changeTeam,
+  fetchTeams,
+  getOgrreVersion,
+} from "../../services/app.service";
 import { ChangeTeamResponse } from "../../types";
+import ApiKeyDialog from "./ApiKeyDialog";
 import ChangeCollaboratorDialog from "./ChangeCollaboratorDialog";
 import ChangeTeamDialog from "./ChangeTeamDialog";
 import OgrreVersionDialog, { OgrreVersionInfo } from "./OgrreVersionDialog";
@@ -27,6 +33,7 @@ import Logout from "@mui/icons-material/Logout";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 
 const getApiErrorMessage = (error: any, fallback: string) => {
   if (typeof error === "string") return error;
@@ -70,12 +77,15 @@ const Header = (props: any) => {
   const [versionInfo, setVersionInfo] = useState<OgrreVersionInfo | null>(null);
   const [versionLoading, setVersionLoading] = useState(false);
   const [versionError, setVersionError] = useState("");
+  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
 
   useEffect(() => {
     if (location.pathname.includes("project")) {
       setTabValue("projects");
     } else if (location.pathname.includes("records")) {
       setTabValue("records");
+    } else if (location.pathname.includes("exports")) {
+      setTabValue("exports");
     } else if (location.pathname.includes("admin") || location.pathname.includes("users")) {
       setTabValue("admin");
     } else if (location.pathname.includes("schema")) {
@@ -205,6 +215,11 @@ const Header = (props: any) => {
     setVersionError(getApiErrorMessage(error, "Unable to load OGRRE version."));
   };
 
+  const handleOpenApiKeyDialog = () => {
+    setProfileActions(false);
+    setApiKeyDialogOpen(true);
+  };
+
   return (
     <div id="Header">
       <div className="titlebar">
@@ -219,11 +234,12 @@ const Header = (props: any) => {
           >
             <Tab data-cy="header-tab-projects" label="Projects" value="projects" {...a11yProps(0)} />
             <Tab data-cy="header-tab-records" label="Records" value="records" {...a11yProps(1)} />
+            <Tab data-cy="header-tab-exports" label="Exports" value="exports" {...a11yProps(2)} />
             {hasPermission("manage_team") &&
-              <Tab data-cy="header-tab-admin" label="Admin" value="admin" {...a11yProps(2)} />
+              <Tab data-cy="header-tab-admin" label="Admin" value="admin" {...a11yProps(3)} />
             }
             {(hasPermission("manage_schema") || hasPermission("view_schema")) &&
-              <Tab data-cy="header-tab-schema" label="Schema" value="schema" {...a11yProps(3)} />
+              <Tab data-cy="header-tab-schema" label="Schema" value="schema" {...a11yProps(4)} />
             }
           </Tabs>
         </div>
@@ -247,7 +263,12 @@ const Header = (props: any) => {
           </Button>
             
           <IconButton data-cy="profile-menu-button" sx={styles.icon} onClick={handleShowProfileActions}>
-            <Avatar sx={styles.avatar} alt={displayName || displayEmail} src={userPhoto || undefined}>
+            <Avatar
+              sx={styles.avatar}
+              alt={displayName || displayEmail}
+              src={userPhoto || undefined}
+              imgProps={{ referrerPolicy: "no-referrer" }}
+            >
               {userInitials}
             </Avatar>
           </IconButton>
@@ -266,6 +287,7 @@ const Header = (props: any) => {
                   sx={styles.menuUserAvatar}
                   alt={displayName || displayEmail}
                   src={userPhoto || undefined}
+                  imgProps={{ referrerPolicy: "no-referrer" }}
                 >
                   {userInitials}
                 </Avatar>
@@ -286,7 +308,7 @@ const Header = (props: any) => {
                 </Box>
               </Box>
             )}
-            {(displayName || displayEmail) && <Divider />}
+            {(displayName || displayEmail) && <Divider sx={{ mb: 1 }} />}
             {(hasPermission("manage_system") || hasPermission("system_administration")) && (
               <span>
                 {hasPermission("manage_system") && (
@@ -315,6 +337,14 @@ const Header = (props: any) => {
                   <InfoOutlinedIcon fontSize="small" />
                 </ListItemIcon>
                 OGRRE Version
+              </MenuItem>
+            )}
+            {!user?.anonymous && (
+              <MenuItem data-cy="api-keys-menu-item" onClick={handleOpenApiKeyDialog}>
+                <ListItemIcon>
+                  <VpnKeyOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                API Keys
               </MenuItem>
             )}
             <MenuItem onClick={logout}>
@@ -350,6 +380,10 @@ const Header = (props: any) => {
         loading={versionLoading}
         error={versionError}
         onClose={() => setVersionDialogOpen(false)}
+      />
+      <ApiKeyDialog
+        open={apiKeyDialogOpen}
+        onClose={() => setApiKeyDialogOpen(false)}
       />
     </div>
   );
