@@ -9,6 +9,7 @@ import CodeBlock from '@theme/CodeBlock';
 export const BACKEND_HOST_EVENT = 'ogrre:api-export-backend-host-change';
 export const BACKEND_HOST_STORAGE_KEY = 'ogrre:api-export-backend-host';
 export const BACKEND_HOST_TOKEN = '__BACKEND_HOST__';
+export const BACKEND_BASE_URL_TOKEN = '__BACKEND_BASE_URL__';
 
 export const COLLABORATOR_DEPLOYMENTS = [
   {label: 'Select a collaborator or enter a custom host...', value: ''},
@@ -23,6 +24,20 @@ export function normalizeBackendHost(value) {
     .trim()
     .replace(/^https?:\/\//i, '')
     .replace(/\/+$/, '');
+}
+
+export function resolveBackendScheme(rawValue, normalizedHost) {
+  const trimmed = (rawValue || '').trim();
+  if (/^http:\/\//i.test(trimmed)) {
+    return 'http://';
+  }
+  if (/^https:\/\//i.test(trimmed)) {
+    return 'https://';
+  }
+  if (/^(localhost|127\.0\.0\.1)(:|\/|$)/i.test(normalizedHost)) {
+    return 'http://';
+  }
+  return 'https://';
 }
 
 export function useBackendHost() {
@@ -43,9 +58,12 @@ export function useBackendHost() {
   }, []);
 
   const normalized = normalizeBackendHost(rawHost);
+  const backendHost = normalized || '<backend-host>';
+  const scheme = resolveBackendScheme(rawHost, normalized);
   return {
     rawHost,
-    backendHost: normalized || '<backend-host>',
+    backendHost,
+    backendBaseUrl: `${scheme}${backendHost}`,
   };
 }
 
@@ -113,18 +131,20 @@ export function BackendHostSelector() {
   );
 }
 
-export function BackendHostInline({prefix = '', suffix = ''}) {
-  const {backendHost} = useBackendHost();
-  return <code>{prefix}{backendHost}{suffix}</code>;
+export function BackendHostInline({suffix = ''}) {
+  const {backendBaseUrl} = useBackendHost();
+  return <code>{backendBaseUrl}{suffix}</code>;
 }
 
 export function BackendHostCodeBlock({children, language}) {
-  const {backendHost} = useBackendHost();
+  const {backendHost, backendBaseUrl} = useBackendHost();
   const template = React.Children.toArray(children).join('').trim();
 
   return (
     <CodeBlock language={language}>
-      {template.replaceAll(BACKEND_HOST_TOKEN, backendHost)}
+      {template
+        .replaceAll(BACKEND_BASE_URL_TOKEN, backendBaseUrl)
+        .replaceAll(BACKEND_HOST_TOKEN, backendHost)}
     </CodeBlock>
   );
 }
@@ -151,12 +171,12 @@ Choose your collaborator deployment or enter a custom backend host below to popu
 
 <BackendHostSelector />
 
-Send a `GET` request to `/reviewed_records` on the backend URL (<BackendHostInline prefix="https://" suffix="/reviewed_records" />) with your API key in the `Authorization: Bearer <key>` header:
+Send a `GET` request to `/reviewed_records` on the backend URL (<BackendHostInline suffix="/reviewed_records" />) with your API key in the `Authorization: Bearer <key>` header:
 
 <BackendHostCodeBlock language="bash">{`
 curl -fsSL \\
   -H "Authorization: Bearer ogrre_your_api_key_here" \\
-  "https://__BACKEND_HOST__/reviewed_records"
+  "__BACKEND_BASE_URL__/reviewed_records"
 `}</BackendHostCodeBlock>
 
 ### How incremental watermark tracking works
@@ -218,15 +238,15 @@ Pass `format=csv` to download a CSV directly:
 <BackendHostCodeBlock language="bash">{`
 curl -fsSL \\
   -H "Authorization: Bearer ogrre_your_api_key_here" \\
-  "https://__BACKEND_HOST__/reviewed_records?format=csv&page_size=1000" \\
+  "__BACKEND_BASE_URL__/reviewed_records?format=csv&page_size=1000" \\
   -o reviewed_records.csv
 `}</BackendHostCodeBlock>
 
 CSV responses also include watermarks and pagination metadata in response headers:
 
-- `X-OGRRE-Since` and `X-OGRRE-Until`
-- `X-OGRRE-Total-Count`, `X-OGRRE-Page`, `X-OGRRE-Page-Size`, and `X-OGRRE-Has-More`
-- `X-OGRRE-Job-Id` (on `page=0`)
+- `X-Export-Since` and `X-Export-Until`
+- `X-Total-Count`, `X-Page`, `X-Page-Size`, and `X-Has-More`
+- `X-Export-Job-Id` (on `page=0`)
 
 ### Paginating through large runs
 
@@ -236,7 +256,7 @@ Only `page=0` advances the saved watermark. If a run returns `"has_more": true` 
 import os
 import requests
 
-BASE_URL = "https://__BACKEND_HOST__"
+BASE_URL = "__BACKEND_BASE_URL__"
 API_KEY = os.environ["OGRRE_API_KEY"]
 
 headers = {"Authorization": f"Bearer {API_KEY}"}
