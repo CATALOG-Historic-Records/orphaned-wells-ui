@@ -155,4 +155,88 @@ describe("real record exports", () => {
       readExport(location === "project" ? projectName : groupName, "json").then(expectJsonRecords);
     });
   });
+
+  it("creates an API key, fetches incremental reviewed records, and logs runs in Exports", () => {
+    const keyName = `Cypress-key-${Date.now()}`;
+    const [firstRecordId, secondRecordId] = group.created_record_ids;
+
+    cy.api("POST", `/update_record/${firstRecordId}`, {
+      data: { review_status: "reviewed" },
+      type: "review_status",
+    });
+
+    cy.visitApp("/projects");
+    cy.getByCy("profile-menu-button").click();
+    cy.getByCy("api-keys-menu-item").click();
+    cy.getByCy("api-key-name-input").type(keyName);
+    cy.getByCy("create-api-key-button").click();
+
+    cy.getByCy("created-api-key-value")
+      .should("be.visible")
+      .invoke("text")
+      .then((rawKey) => {
+        const apiKey = rawKey.trim();
+        expect(apiKey).to.match(/^ogrre_/);
+
+        cy.findByRole("button", { name: "Close" }).click();
+
+        const authHeaders = { Authorization: `Bearer ${apiKey}` };
+        const endpoint = `/reviewed_records?record_group_id=${group.record_group_id}`;
+
+        return cy
+          .api("GET", endpoint, undefined, { headers: authHeaders })
+          .then(({ status, body: firstRun }) => {
+            expect(status).to.eq(200);
+            expect(firstRun.total_count).to.eq(1);
+            expect(firstRun.records).to.have.length(1);
+            expect(firstRun.records[0].file).to.eq("export-alpha.pdf");
+            expect(firstRun.records[0].Depth.value).to.eq(120);
+            expect(firstRun.job_id).to.be.a("string").and.not.be.empty;
+
+            return cy
+              .api("GET", endpoint, undefined, { headers: authHeaders })
+              .then(({ body: secondRun }) => {
+                expect(secondRun.total_count).to.eq(0);
+                expect(secondRun.records).to.deep.eq([]);
+
+                return cy.api("POST", `/update_record/${secondRecordId}`, {
+                  data: { review_status: "reviewed" },
+                  type: "review_status",
+                });
+              })
+              .then(() => cy.api("GET", endpoint, undefined, { headers: authHeaders }))
+              .then(({ body: thirdRun }) => {
+                expect(thirdRun.total_count).to.eq(1);
+                expect(thirdRun.records).to.have.length(1);
+                expect(thirdRun.records[0].file).to.eq("export-bravo.pdf");
+                expect(thirdRun.records[0].Operator.value).to.eq("Bravo Oil");
+
+                cy.getByCy("header-tab-exports").click();
+                cy.getByCy(`export-job-row-${firstRun.job_id}`, { timeout: 30000 })
+                  .should("be.visible")
+                  .and("contain.text", "Incremental (Reviewed)")
+                  .and("contain.text", "Completed")
+                  .and("contain.text", "Direct download")
+                  .and("contain.text", "Run again");
+              })
+              .then(() => {
+                cy.getByCy("profile-menu-button").click();
+                cy.getByCy("api-keys-menu-item").click();
+                cy.contains('[data-cy^="api-key-row-"]', keyName)
+                  .find('[data-cy^="revoke-api-key-"]')
+                  .click();
+                cy.contains('[data-cy^="api-key-row-"]', keyName).should("not.exist");
+                cy.findByRole("button", { name: "Close" }).click();
+
+                return cy.api("GET", endpoint, undefined, {
+                  headers: authHeaders,
+                  failOnStatusCode: false,
+                });
+              })
+              .then(({ status: revokedStatus }) => {
+                expect(revokedStatus).to.eq(401);
+              });
+          });
+      });
+  });
 });
