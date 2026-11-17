@@ -225,12 +225,7 @@ Use the host portion of the connection string (without the `mongodb+srv://` pref
    `}</CollaboratorCodeBlock>
    Merging to `main` triggers **Deploy Staging Server to GKE**, which detects the updated `PROD_TERRAFORM_TFVARS` secret and plans the new infrastructure. Open the workflow run in GitHub Actions, review the plan summary, and approve the `terraform-apply` environment gate.
 
-4. **Grant GCS bucket access to runtime service accounts**:
-   Once `terraform-apply` completes and creates <CollaboratorInline suffix="_uploads" />:
-   - Grant `ogrre-storage-runtime` **Storage Object User** (`roles/storage.objectUser`) on <CollaboratorInline suffix="_uploads" />.
-   - Grant `ogrre-document-ai` access to the collaborator's Document AI processors, plus batch input/output access on <CollaboratorInline suffix="_uploads" /> if using batch Document AI processing (see [Create Google service-account keys](/docs/install/gcp_setup#create-google-service-account-keys)).
-
-5. **Create and push the collaborator branch**:
+4. **Create and push the collaborator branch**:
    Create the <CollaboratorInline /> branch from `main` and push it to trigger `.github/workflows/deploy-k8s-collaborator.yml`:
    <CollaboratorCodeBlock language="bash">{`
    git checkout main && git pull
@@ -323,6 +318,10 @@ gke_backends = {
 `}</CollaboratorCodeBlock>
 
 For GKE deployments, the workflow overwrites `ENVIRONMENT`, `BACKEND_URL`, and `STORAGE_BUCKET_NAME` from the Terraform deployment target; always configure custom bucket names in `terraform.tfvars` rather than `RUNTIME_ENV`.
+
+### GCS bucket IAM and external batch buckets
+
+Terraform automatically grants `roles/storage.objectUser` on <CollaboratorInline suffix="_uploads" /> to both `ogrre-storage-runtime` and `ogrre-document-ai` (`storage.tf`). If a collaborator runs GCS batch uploads from an external bucket not managed by `gke_backends` (or in another GCP project), grant `roles/storage.objectUser` on that external bucket to both `ogrre-storage-runtime` and `ogrre-document-ai`.
 
 ### Manual dispatch dropdown in `deploy-k8s-dispatch.yml`
 
