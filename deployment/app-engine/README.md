@@ -101,7 +101,6 @@ missing role is App Engine Service Admin.
 In [Google OAuth credentials](https://console.cloud.google.com/apis/credentials?project=tidy-outlet-412020),
 add both frontend URLs:
 
-- the App Engine generated service URL
 - `https://<collaborator>.uow-carbon.org`
 
 Add them anywhere the frontend origin is required, including authorized

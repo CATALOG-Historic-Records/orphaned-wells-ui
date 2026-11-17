@@ -295,7 +295,6 @@ After the frontend App Engine service is deployed, complete these one-time GCP c
    In the Google Cloud Console, open **App Engine → Settings → Custom domains** (or **Domain mappings**) and map <CollaboratorInline suffix=".uow-carbon.org" /> to the <CollaboratorInline suffix="-uow" /> service.
 4. **Update Google OAuth Credentials**:
    In **APIs & Services → Credentials**, add both frontend URLs to the OAuth client's Authorized JavaScript Origins and Authorized Redirect URIs:
-   - The App Engine generated `*.appspot.com` service URL
    - <CollaboratorInline prefix="https://" suffix=".uow-carbon.org" />
 
 ---
