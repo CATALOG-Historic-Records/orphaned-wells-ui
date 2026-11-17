@@ -310,11 +310,7 @@ gh workflow run deploy-k8s-dispatch.yml \
   -f DEPLOY_ENV=<collaborator>
 ```
 
-The exact set of deployable collaborators is controlled by both
-`kubernetes_deploy_targets` and `.github/workflows/deploy-k8s-dispatch.yml`.
-Confirm that the collaborator has an output entry, is present in
-`workflow_dispatch.inputs.DEPLOY_ENV.options`, and has a runtime-env secret
-mapping before dispatching it.
+The exact set of deployable collaborators for manual dispatch via `deploy-k8s-dispatch.yml` is controlled by `kubernetes_deploy_targets` and `workflow_dispatch.inputs.DEPLOY_ENV.options` in `.github/workflows/deploy-k8s-dispatch.yml`. Confirm that the collaborator has a Terraform output entry, is listed in `DEPLOY_ENV.options` (if triggering `deploy-k8s-dispatch.yml` directly), and has a `RUNTIME_ENV` secret configured in its GitHub Environment before dispatching it.
 
 Merging source changes into a collaborator branch only changes the live backend when that branch's deployment workflow runs. If automatic deployments are enabled for the branch, the merge can trigger the rollout. Otherwise, manually dispatch the collaborator workflow after the merge.
 

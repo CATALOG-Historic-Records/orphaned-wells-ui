@@ -62,13 +62,18 @@ the GCP setup guide.
 
 ## Add the backend URL secret
 
-Configure `BACKEND_URL` as a secret in the `<collaborator>` GitHub Environment (recommended) or as a repository-level fallback secret `<COLLABORATOR>_BACKEND_URL`:
+Create the `<collaborator>` GitHub Environment and configure `BACKEND_URL` as an environment secret:
 
-```text
-https://<collaborator>-server.uow-carbon.org
+```bash
+gh api --method PUT repos/CATALOG-Historic-Records/orphaned-wells-ui/environments/<collaborator>
+
+gh secret set BACKEND_URL \
+  -R CATALOG-Historic-Records/orphaned-wells-ui \
+  --env <collaborator> \
+  --body "https://<collaborator>-server.uow-carbon.org"
 ```
 
-The value should be the public backend URL and must not include a trailing slash.
+The value should be the public backend URL and must not include a trailing slash. Configuring `BACKEND_URL` in the `<collaborator>` GitHub Environment works dynamically without modifying `.github/workflows/deploy-dispatch.yml`.
 
 ## Deploy the frontend
 
