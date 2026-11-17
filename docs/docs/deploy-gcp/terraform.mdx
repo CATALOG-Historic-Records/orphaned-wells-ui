@@ -295,7 +295,7 @@ Keep the backend repository deployment docs and these frontend docs in sync when
 
 Each GKE backend gets a Cloud Storage upload bucket. The default bucket name is `<collaborator>_uploads`; use `upload_bucket_name` only for existing exceptions or explicit custom names. Staging uses `uploaded_documents_v0`.
 
-Terraform keys bucket resources by bucket name, so collaborators can intentionally share a bucket without creating duplicate resources. Buckets use `force_destroy=false` and `prevent_destroy=true` to protect uploaded files. Terraform also grants `roles/storage.objectUser` on each managed upload bucket to `ogrre-storage-runtime` and `ogrre-document-ai` (configurable via `storage_runtime_service_account` and `document_ai_runtime_service_account`).
+Terraform keys bucket resources by bucket name, so collaborators can intentionally share a bucket without creating duplicate resources. Buckets use `force_destroy=false` and `prevent_destroy=true` to protect uploaded files.
 
 ## GKE resource sizing
 

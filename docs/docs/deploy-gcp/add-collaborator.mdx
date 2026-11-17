@@ -321,7 +321,7 @@ For GKE deployments, the workflow overwrites `ENVIRONMENT`, `BACKEND_URL`, and `
 
 ### GCS bucket IAM and external batch buckets
 
-Terraform automatically grants `roles/storage.objectUser` on <CollaboratorInline suffix="_uploads" /> to both `ogrre-storage-runtime` and `ogrre-document-ai` (`storage.tf`). If a collaborator runs GCS batch uploads from an external bucket not managed by `gke_backends` (or in another GCP project), grant `roles/storage.objectUser` on that external bucket to both `ogrre-storage-runtime` and `ogrre-document-ai`.
+Because `ogrre-storage-runtime` and `ogrre-document-ai` have project-level `roles/storage.objectUser` (and `ogrre-document-ai` has project-level Document AI roles), newly created <CollaboratorInline suffix="_uploads" /> buckets and any arbitrary buckets in the same GCP project inherit access automatically. You only need to grant `roles/storage.objectUser` manually if a collaborator runs GCS batch uploads from an external bucket in a different GCP project.
 
 ### Manual dispatch dropdown in `deploy-k8s-dispatch.yml`
 
