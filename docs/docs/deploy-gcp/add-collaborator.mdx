@@ -243,8 +243,8 @@ Use the host portion of the connection string (without the `mongodb+srv://` pref
      --env __COLLABORATOR__ < path/to/__COLLABORATOR__.env
    `}</CollaboratorCodeBlock>
 
-3. **Register the collaborator in `collaborators.json` and approve Terraform in CI**:
-   Add <CollaboratorInline /> to `collaborators.json` at the root of `orphaned-wells-ui-server` and merge to `main`:
+3. **Register the collaborator in `collaborators.json`**:
+   Add <CollaboratorInline /> to `collaborators.json` at the root of `orphaned-wells-ui-server`:
    <CollaboratorCodeBlock language="json">{`
    [
      "osage",
@@ -254,9 +254,14 @@ Use the host portion of the connection string (without the `mongodb+srv://` pref
      "__COLLABORATOR__"
    ]
    `}</CollaboratorCodeBlock>
-   Merging to `main` triggers **Deploy Staging Server to GKE**, which detects the updated `PROD_TERRAFORM_TFVARS` secret and plans the new infrastructure. Open the workflow run in GitHub Actions, review the plan summary, and approve the `terraform-apply` environment gate.
 
-4. **Create and push the collaborator branch**:
+4. **Merge to `main` and approve Terraform in GitHub Actions**:
+   Commit the `collaborators.json` update and merge it to `main`. Merging to `main` triggers the **Deploy Staging Server to GKE** workflow, which generates a Terraform plan for the new collaborator's bucket, namespace, static IP, and DNS records:
+   1. In GitHub Actions (`CATALOG-Historic-Records/orphaned-wells-ui-server`), open the **Deploy Staging Server to GKE** run.
+   2. Review the **Terraform plan** summary on the workflow run page.
+   3. **If everything looks correct**, click **Review deployments → `terraform-apply` → Approve and deploy** and wait for the infrastructure apply job to finish before proceeding. *(Note: The `terraform-apply` GitHub Environment is restricted to required reviewers; if you do not have permission to approve it, ask a repository owner to review and approve the plan.)*
+
+5. **Create and push the collaborator branch**:
    Create the <CollaboratorInline /> branch from `main` and push it to trigger `.github/workflows/deploy-k8s-collaborator.yml`:
    <CollaboratorCodeBlock language="bash">{`
    git checkout main && git pull
