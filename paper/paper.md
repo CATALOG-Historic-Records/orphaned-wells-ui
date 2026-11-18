@@ -90,6 +90,6 @@ Generative AI **[ChatGPT 5.4-mini]** was used to assist with the preparation of 
 
 # Acknowledgements
 
-This work was supported as part of the Consortium Advancing Technology for Assessment of Lost Oil & Gas Wells, funded by the Undocumented Orphan Well Program in the Office of Oil and Natural Gas within the Hydrocarbon and Geothermal Energy Office of the U.S. Department of Energy. Parts of this work were performed under the auspices of the U.S. Department of Energy by Lawrence Berkeley National Laboratory under Contract DE-AC02-05CH11231.
+This work was supported as part of the Consortium Advancing Technology for Assessment of Lost Oil & Gas Wells, funded by the Undocumented Orphan Well Program U.S. Department of Energy Hydrocarbon and Geothermal Energy Office. Parts of this work were performed under the auspices of the U.S. Department of Energy by Lawrence Berkeley National Laboratory under Contract DE-AC02-05CH11231.
 
 # References
