@@ -203,7 +203,38 @@ Use the host portion of the connection string (without the `mongodb+srv://` pref
    ```
 
 2. **Create the GitHub Environment and `RUNTIME_ENV` secret**:
-   Prepare a local `.env` file for <CollaboratorInline /> (using `ogrre/.env.example` as a template, with `COLLABORATOR=`<CollaboratorInline /> and the MongoDB credentials from Step 2), then upload it to the <CollaboratorInline /> GitHub Environment:
+   Prepare a local <CollaboratorInline suffix=".env" /> file with the required runtime settings (the GKE deployment workflow automatically sets `ENVIRONMENT`, `BACKEND_URL`, `STORAGE_BUCKET_NAME`, service-account key paths, and worker sizing):
+   <CollaboratorCodeBlock language="dotenv">{`
+   COLLABORATOR=__COLLABORATOR__
+   ALLOWED_ORIGINS=https://__COLLABORATOR__.uow-carbon.org
+
+   DB_NAME=<DB_NAME>
+   DB_CONNECTION=<DB_CONNECTION>
+   DB_USERNAME=<DB_USERNAME>
+   DB_PASSWORD=<DB_PASSWORD>
+
+   REQUIRE_AUTH=true
+   AUTH_PROVIDER=google
+   token_uri=https://oauth2.googleapis.com/token
+   client_id=<GOOGLE_OAUTH_CLIENT_ID>
+   client_secret=<GOOGLE_OAUTH_CLIENT_SECRET>
+
+   SESSION_COOKIE_DOMAIN=.uow-carbon.org
+   SESSION_COOKIE_SECURE=true
+   SESSION_COOKIE_SAMESITE=lax
+
+   PROJECT_ID=tidy-outlet-412020
+   LOCATION=us
+   STORAGE_BACKEND=google
+   DOCUMENT_AI_BACKEND=google
+   USE_DB_SCHEMAS=true
+   `}</CollaboratorCodeBlock>
+   Because Google Cloud Console masks `client_secret` after creation and GitHub Actions secrets are write-only, you can copy the shared `client_id` and `client_secret` from another local `.env` file or read them from an existing GKE namespace such as `uow-staging` (see [Inspecting Kubernetes resources with `kubectl`](#inspecting-kubernetes-resources-with-kubectl) for one-time `kubectl` cluster authentication):
+   ```bash
+   kubectl -n uow-staging get secret backend-runtime-env -o json | \
+     jq -r '.data | "client_id=\(.client_id | @base64d)\nclient_secret=\(.client_secret | @base64d)"'
+   ```
+   Create the <CollaboratorInline /> GitHub Environment and upload the `.env` file as `RUNTIME_ENV`:
    <CollaboratorCodeBlock language="bash">{`
    gh api --method PUT repos/CATALOG-Historic-Records/orphaned-wells-ui-server/environments/__COLLABORATOR__
 
@@ -212,8 +243,8 @@ Use the host portion of the connection string (without the `mongodb+srv://` pref
      --env __COLLABORATOR__ < path/to/__COLLABORATOR__.env
    `}</CollaboratorCodeBlock>
 
-3. **Register the collaborator in `collaborators.json` and approve Terraform in CI**:
-   Add <CollaboratorInline /> to `collaborators.json` at the root of `orphaned-wells-ui-server` and merge to `main`:
+3. **Register the collaborator in `collaborators.json`**:
+   Add <CollaboratorInline /> to `collaborators.json` at the root of `orphaned-wells-ui-server`:
    <CollaboratorCodeBlock language="json">{`
    [
      "osage",
@@ -223,9 +254,14 @@ Use the host portion of the connection string (without the `mongodb+srv://` pref
      "__COLLABORATOR__"
    ]
    `}</CollaboratorCodeBlock>
-   Merging to `main` triggers **Deploy Staging Server to GKE**, which detects the updated `PROD_TERRAFORM_TFVARS` secret and plans the new infrastructure. Open the workflow run in GitHub Actions, review the plan summary, and approve the `terraform-apply` environment gate.
 
-4. **Create and push the collaborator branch**:
+4. **Merge to `main` and approve Terraform in GitHub Actions**:
+   Commit the `collaborators.json` update and merge it to `main`. Merging to `main` triggers the **Deploy Staging Server to GKE** workflow, which generates a Terraform plan for the new collaborator's bucket, namespace, static IP, and DNS records:
+   1. In GitHub Actions (`CATALOG-Historic-Records/orphaned-wells-ui-server`), open the **Deploy Staging Server to GKE** run.
+   2. Review the **Terraform plan** summary on the workflow run page.
+   3. **If everything looks correct**, click **Review deployments → `terraform-apply` → Approve and deploy** and wait for the infrastructure apply job to finish before proceeding. *(Note: The `terraform-apply` GitHub Environment is restricted to required reviewers; if you do not have permission to approve it, ask a repository owner to review and approve the plan.)*
+
+5. **Create and push the collaborator branch**:
    Create the <CollaboratorInline /> branch from `main` and push it to trigger `.github/workflows/deploy-k8s-collaborator.yml`:
    <CollaboratorCodeBlock language="bash">{`
    git checkout main && git pull
@@ -329,12 +365,14 @@ Because `ogrre-storage-runtime` and `ogrre-document-ai` have project-level `role
 
 ### Inspecting Kubernetes resources with `kubectl`
 
-To inspect the deployed GKE resources directly from your terminal:
+To run `kubectl` commands against the GKE cluster (see [Backend on GKE — Check rollout status](./backend-gke#check-rollout-status)), install the GKE auth plugin and fetch cluster credentials once using a Google account with GKE access in GCP IAM (such as `OGRRE_Dev`, `roles/container.developer`, or `roles/container.admin`):
 
 <CollaboratorCodeBlock language="bash">{`
+gcloud auth login
+gcloud components install gke-gcloud-auth-plugin
 gcloud container clusters get-credentials uow-backend-gke \
   --region us-central1 \
-  --project <PROJECT_ID>
+  --project tidy-outlet-412020
 
 kubectl -n uow-__COLLABORATOR__ get deployment backend
 kubectl -n uow-__COLLABORATOR__ get pods -l app.kubernetes.io/name=orphaned-wells-ui-server -o wide
