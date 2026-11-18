@@ -453,7 +453,7 @@ If an external partner or collaborator wants to host an independent instance of 
    In the collaborator's GitHub repository settings, create the secret `PROD_TERRAFORM_TFVARS` containing the entire contents of their `terraform.tfvars`. This enables GitHub Actions (`terraform-apply.yml`) to hydrate infrastructure variables securely without committing them to source control.
 
 4. **Runtime Environment Secret (`RUNTIME_ENV`)**:
-   Set `RUNTIME_ENV` in GitHub Secrets with the backend runtime environment variables (e.g., MongoDB credentials, storage credentials, Auth0 / GCP configuration). The deployment workflow `.github/workflows/deploy-k8s-dispatch.yml` will automatically fall back to `RUNTIME_ENV` if an environment-specific secret like `<ORG>_ENV` is not found.
+   Set `RUNTIME_ENV` in the target GitHub Environment (or as a repository-level secret for single-instance forks) with the backend runtime environment variables (e.g., MongoDB credentials, storage credentials, OAuth / GCP configuration). `.github/workflows/deploy-k8s-dispatch.yml` reads `RUNTIME_ENV` directly from the deployment environment or repository secrets.
 
 5. **Collaborator Registry (`collaborators.json`)**:
    In `orphaned-wells-ui-server/collaborators.json`, set the list of active deployment branches (e.g. `["myorg"]` or `[]` if deploying directly from `main` or manual dispatch).

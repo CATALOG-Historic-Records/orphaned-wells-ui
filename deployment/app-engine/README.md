@@ -31,13 +31,16 @@ Use `<collaborator>` below as the short collaborator key, such as `isgs`,
 
 2. Configure the backend URL secret:
 
-   Configure `BACKEND_URL` in the `<collaborator>` GitHub environment (or as a repository-level fallback secret `<COLLABORATOR>_BACKEND_URL`):
+   Create the `<collaborator>` GitHub environment and set `BACKEND_URL` (no trailing slash):
 
-   ```text
-   https://<collaborator>-server.uow-carbon.org
+   ```sh
+   gh api --method PUT repos/CATALOG-Historic-Records/orphaned-wells-ui/environments/<collaborator>
+
+   gh secret set BACKEND_URL \
+     -R CATALOG-Historic-Records/orphaned-wells-ui \
+     --env <collaborator> \
+     --body "https://<collaborator>-server.uow-carbon.org"
    ```
-
-   Do not include a trailing slash.
 
 3. App Engine service config:
 
@@ -98,7 +101,6 @@ missing role is App Engine Service Admin.
 In [Google OAuth credentials](https://console.cloud.google.com/apis/credentials?project=tidy-outlet-412020),
 add both frontend URLs:
 
-- the App Engine generated service URL
 - `https://<collaborator>.uow-carbon.org`
 
 Add them anywhere the frontend origin is required, including authorized
