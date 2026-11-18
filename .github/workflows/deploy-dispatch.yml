@@ -95,9 +95,6 @@ jobs:
             esac
           fi
           if [ -z "$resolved_backend_url" ]; then
-            resolved_backend_url="${DEV_BACKEND_URL:-}"
-          fi
-          if [ -z "$resolved_backend_url" ]; then
             echo "::error::Could not resolve BACKEND_URL for collaborator '$COLLABORATOR'. Please configure BACKEND_URL in the '$TARGET_ENV' environment or repository secrets."
             exit 1
           fi
