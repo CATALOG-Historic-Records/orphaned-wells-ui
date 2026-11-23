@@ -117,8 +117,8 @@ Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osag
 
 ## 0. Prerequisites
 
-- Local CLI tools: `gh`, `gcloud`, `jq`, and `python`.
-- Access to the target GCP project, MongoDB cluster, and GitHub repository settings (`CATALOG-Historic-Records`).
+- Local CLI tools: `gh` and `gcloud`.
+- Access to the target GCP project and GitHub repository settings (`CATALOG-Historic-Records`).
 - See [Backend on GKE — Prerequisites](./backend-gke#prerequisites) for full GCP API and service-account permission details.
 
 ## 1. Choose Collaborator Key
@@ -156,6 +156,14 @@ Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osag
       <td><CollaboratorInline suffix="_uploads" /></td>
     </tr>
     <tr>
+      <td>MongoDB database &amp; user</td>
+      <td><CollaboratorInline prefix="ogrre-" /></td>
+    </tr>
+    <tr>
+      <td>Active `.env` snapshot in GCS</td>
+      <td><CollaboratorInline prefix="gs://tidy-outlet-412020-ogrre-terraform-state/secrets/" suffix=".env" /></td>
+    </tr>
+    <tr>
       <td>Frontend host</td>
       <td><CollaboratorInline suffix=".uow-carbon.org" /></td>
     </tr>
@@ -166,26 +174,9 @@ Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osag
   </tbody>
 </table>
 
-## 2. Initialize MongoDB
+## 2. Configure and Deploy the Backend (`orphaned-wells-ui-server`)
 
-1. Create a MongoDB database and user for the collaborator (e.g., <CollaboratorInline prefix="ogrre-" />), granting it read/write privileges on the new database.
-2. Download <a href="/orphaned-wells-ui/downloads/InitializeMongoDB.py" download>InitializeMongoDB.py</a> (see [Create and connect MongoDB database](/docs/install/database_setup#initialize-database-for-ogrre)) and run it once to seed the required `roles`, `teams`, and initial admin `users` collections:
-
-```bash
-python InitializeMongoDB.py \
-  --team_name "<team name>" \
-  --email "<initial-admin-email>" \
-  --database_username "<DB_USERNAME>" \
-  --database_password "<DB_PASSWORD>" \
-  --database_hostname "<DB_CONNECTION>" \
-  --database_name "<DB_NAME>"
-```
-
-Use the host portion of the connection string (without the `mongodb+srv://` prefix) for `--database_hostname`. Save these `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, and `DB_CONNECTION` values for the backend `RUNTIME_ENV` secret in the next step.
-
-## 3. Configure and Deploy the Backend (`orphaned-wells-ui-server`)
-
-1. **Add the collaborator to `terraform.tfvars` and sync to CI**:
+1. **Add the collaborator to `terraform.tfvars` and push to GCS**:
    Pull the shared `terraform.tfvars` configuration from GCS:
    ```bash
    ./deployment/terraform/scripts/sync_tfvars.sh pull
@@ -197,53 +188,12 @@ Use the host portion of the connection string (without the `mongodb+srv://` pref
      "__COLLABORATOR__" = {}
    }
    `}</CollaboratorCodeBlock>
-   Upload the updated file to GCS and sync the `PROD_TERRAFORM_TFVARS` GitHub secret:
+   Upload the updated file back to GCS (CI reads `gs://tidy-outlet-412020-ogrre-terraform-state/config/terraform.tfvars` directly):
    ```bash
-   ./deployment/terraform/scripts/sync_tfvars.sh push --secret
+   ./deployment/terraform/scripts/sync_tfvars.sh push
    ```
 
-2. **Create the GitHub Environment and `RUNTIME_ENV` secret**:
-   Prepare a local <CollaboratorInline suffix=".env" /> file with the required runtime settings (the GKE deployment workflow automatically sets `ENVIRONMENT`, `BACKEND_URL`, `STORAGE_BUCKET_NAME`, service-account key paths, and worker sizing):
-   <CollaboratorCodeBlock language="dotenv">{`
-   COLLABORATOR=__COLLABORATOR__
-   ALLOWED_ORIGINS=https://__COLLABORATOR__.uow-carbon.org
-
-   DB_NAME=<DB_NAME>
-   DB_CONNECTION=<DB_CONNECTION>
-   DB_USERNAME=<DB_USERNAME>
-   DB_PASSWORD=<DB_PASSWORD>
-
-   REQUIRE_AUTH=true
-   AUTH_PROVIDER=google
-   token_uri=https://oauth2.googleapis.com/token
-   client_id=<GOOGLE_OAUTH_CLIENT_ID>
-   client_secret=<GOOGLE_OAUTH_CLIENT_SECRET>
-
-   SESSION_COOKIE_DOMAIN=.uow-carbon.org
-   SESSION_COOKIE_SECURE=true
-   SESSION_COOKIE_SAMESITE=lax
-
-   PROJECT_ID=tidy-outlet-412020
-   LOCATION=us
-   STORAGE_BACKEND=google
-   DOCUMENT_AI_BACKEND=google
-   USE_DB_SCHEMAS=true
-   `}</CollaboratorCodeBlock>
-   Because Google Cloud Console masks `client_secret` after creation and GitHub Actions secrets are write-only, you can copy the shared `client_id` and `client_secret` from another local `.env` file or read them from an existing GKE namespace such as `uow-staging` (see [Inspecting Kubernetes resources with `kubectl`](#inspecting-kubernetes-resources-with-kubectl) for one-time `kubectl` cluster authentication):
-   ```bash
-   kubectl -n uow-staging get secret backend-runtime-env -o json | \
-     jq -r '.data | "client_id=\(.client_id | @base64d)\nclient_secret=\(.client_secret | @base64d)"'
-   ```
-   Create the <CollaboratorInline /> GitHub Environment and upload the `.env` file as `RUNTIME_ENV`:
-   <CollaboratorCodeBlock language="bash">{`
-   gh api --method PUT repos/CATALOG-Historic-Records/orphaned-wells-ui-server/environments/__COLLABORATOR__
-
-   gh secret set RUNTIME_ENV \\
-     -R CATALOG-Historic-Records/orphaned-wells-ui-server \\
-     --env __COLLABORATOR__ < path/to/__COLLABORATOR__.env
-   `}</CollaboratorCodeBlock>
-
-3. **Register the collaborator in `collaborators.json`**:
+2. **Register the collaborator in `collaborators.json`**:
    Add <CollaboratorInline /> to `collaborators.json` at the root of `orphaned-wells-ui-server`:
    <CollaboratorCodeBlock language="json">{`
    [
@@ -255,37 +205,28 @@ Use the host portion of the connection string (without the `mongodb+srv://` pref
    ]
    `}</CollaboratorCodeBlock>
 
-4. **Merge to `main` and approve Terraform in GitHub Actions**:
+3. **Merge to `main` and approve Terraform in GitHub Actions**:
    Commit the `collaborators.json` update and merge it to `main`. Merging to `main` triggers the **Deploy Staging Server to GKE** workflow, which generates a Terraform plan for the new collaborator's bucket, namespace, static IP, and DNS records:
    1. In GitHub Actions (`CATALOG-Historic-Records/orphaned-wells-ui-server`), open the **Deploy Staging Server to GKE** run.
    2. Review the **Terraform plan** summary on the workflow run page.
    3. **If everything looks correct**, click **Review deployments → `terraform-apply` → Approve and deploy** and wait for the infrastructure apply job to finish before proceeding. *(Note: The `terraform-apply` GitHub Environment is restricted to required reviewers; if you do not have permission to approve it, ask a repository owner to review and approve the plan.)*
 
-5. **Create and push the collaborator branch**:
+4. **Create and push the collaborator branch**:
    Create the <CollaboratorInline /> branch from `main` and push it to trigger `.github/workflows/deploy-k8s-collaborator.yml`:
    <CollaboratorCodeBlock language="bash">{`
    git checkout main && git pull
    git checkout -b __COLLABORATOR__ && git push -u origin __COLLABORATOR__
    `}</CollaboratorCodeBlock>
+   The workflow automatically provisions the <CollaboratorInline prefix="ogrre-" /> MongoDB database and user (on first deploy), injects all shared runtime/OAuth/service-account credentials, and deploys the backend to GKE (see [What the backend workflow configures automatically](#what-the-backend-workflow-configures-automatically) below).
+
    Once the workflow finishes and the Google-managed TLS certificate activates, verify the health endpoint:
    <CollaboratorCodeBlock language="bash">{`
    curl -f https://__COLLABORATOR__-server.uow-carbon.org/health
    `}</CollaboratorCodeBlock>
 
-## 4. Configure and Deploy the Frontend (`orphaned-wells-ui`)
+## 3. Configure and Deploy the Frontend (`orphaned-wells-ui`)
 
-1. **Create the GitHub Environment and `BACKEND_URL` secret**:
-   Configure `BACKEND_URL` (with no trailing slash) in the <CollaboratorInline /> GitHub Environment:
-   <CollaboratorCodeBlock language="bash">{`
-   gh api --method PUT repos/CATALOG-Historic-Records/orphaned-wells-ui/environments/__COLLABORATOR__
-
-   gh secret set BACKEND_URL \\
-     -R CATALOG-Historic-Records/orphaned-wells-ui \\
-     --env __COLLABORATOR__ \\
-     --body "https://__COLLABORATOR__-server.uow-carbon.org"
-   `}</CollaboratorCodeBlock>
-
-2. **Update `collaborators.json` and `dispatch.yaml`**:
+1. **Update `collaborators.json` and `dispatch.yaml`**:
    Add <CollaboratorInline /> to `collaborators.json` at the root of `orphaned-wells-ui`:
    <CollaboratorCodeBlock language="json">{`
    [
@@ -303,15 +244,15 @@ Use the host portion of the connection string (without the `mongodb+srv://` pref
    `}</CollaboratorCodeBlock>
    Merge both changes to `main`.
 
-3. **Create and push the collaborator branch**:
+2. **Create and push the collaborator branch**:
    Create the <CollaboratorInline /> branch from `main` and push it to trigger `.github/workflows/deploy-collaborator.yml`:
    <CollaboratorCodeBlock language="bash">{`
    git checkout main && git pull
    git checkout -b __COLLABORATOR__ && git push -u origin __COLLABORATOR__
    `}</CollaboratorCodeBlock>
-   The workflow automatically renders `service: `<CollaboratorInline suffix="-uow" /> using `deployment/app-engine/app.yaml`, builds the React bundle, and deploys the App Engine service.
+   The workflow automatically sets `REACT_APP_BACKEND_URL=https://`<CollaboratorInline suffix="-server.uow-carbon.org" />, renders `service: `<CollaboratorInline suffix="-uow" /> using `deployment/app-engine/app.yaml`, builds the React bundle, and deploys the App Engine service.
 
-## 5. Complete GCP Routing, DNS, and OAuth
+## 4. Complete GCP Routing, Custom Domain, and OAuth
 
 After the frontend App Engine service is deployed, complete these one-time GCP configuration steps:
 
@@ -320,17 +261,55 @@ After the frontend App Engine service is deployed, complete these one-time GCP c
    cd orphaned-wells-ui/deployment/app-engine
    gcloud app deploy dispatch.yaml
    ```
-2. **Add Frontend Cloud DNS Records**:
-   In Google Cloud DNS, add `A` (IPv4) and `AAAA` (IPv6) records for <CollaboratorInline suffix=".uow-carbon.org" /> using the same App Engine addresses as the existing frontend instances.
-3. **Add the App Engine Custom Domain**:
-   In the Google Cloud Console, open **App Engine → Settings → Custom domains** (or **Domain mappings**) and map <CollaboratorInline suffix=".uow-carbon.org" /> to the <CollaboratorInline suffix="-uow" /> service.
-4. **Update Google OAuth Credentials**:
-   In **APIs & Services → Credentials**, add both frontend URLs to the OAuth client's Authorized JavaScript Origins and Authorized Redirect URIs:
-   - <CollaboratorInline prefix="https://" suffix=".uow-carbon.org" />
+2. **Add the App Engine Custom Domain**:
+   In the Google Cloud Console, open **App Engine → Settings → Custom domains** (or **Domain mappings**) and map <CollaboratorInline suffix=".uow-carbon.org" /> to the <CollaboratorInline suffix="-uow" /> service. *(Terraform already created the <CollaboratorInline suffix=".uow-carbon.org" /> `A` and `AAAA` records in Cloud DNS during Step 2.3.)*
+3. **Update Google OAuth Credentials**:
+   In **APIs & Services → Credentials**, add <CollaboratorInline prefix="https://" suffix=".uow-carbon.org" /> to the OAuth client's **Authorized JavaScript Origins** and **Authorized Redirect URIs**.
 
 ---
 
 ## Optional Customizations and Manual Fallbacks
+
+### What the backend workflow configures automatically
+
+When `.github/workflows/deploy-k8s-collaborator.yml` (via `deploy-k8s-dispatch.yml`) runs for <CollaboratorInline />, it automatically handles:
+- **First-time MongoDB provisioning**: On the first deployment (when no `DB_*` credentials exist in `RUNTIME_ENV`, GCS, or GKE), the workflow uses the repository's MongoDB Atlas API secrets to create a scoped database user (<CollaboratorInline prefix="ogrre-" />) with `readWrite` access only on database <CollaboratorInline prefix="ogrre-" />, verifies the database has zero existing collections, and seeds `roles`, initial team <CollaboratorInline uppercase />, and admin users (`DEFAULT_ADMIN_EMAILS`). On subsequent deployments, it reuses those existing database credentials automatically.
+- **Service account `.json` files & Google OAuth**: Mounts `STORAGE_SERVICE_KEY_JSON` and `DOCUMENT_AI_SERVICE_KEY_JSON` into `/code/ogrre/` and populates `client_id` / `client_secret` from `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (no `.json` key files or backend `RUNTIME_ENV` secret need to be uploaded unless overriding defaults).
+- **Host, CORS, session cookies, and `.env` snapshot**: Sets `ALLOWED_ORIGINS`, `SESSION_COOKIE_*`, `STORAGE_BUCKET_NAME`, `USE_DB_SCHEMAS=false`, and worker sizing from the Terraform target, applies `Secret/backend-runtime-env` to GKE, and saves the complete active `.env` file to <CollaboratorInline prefix="gs://tidy-outlet-412020-ogrre-terraform-state/secrets/" suffix=".env" />.
+
+### Inspecting active runtime `.env` snapshots in GCS
+
+Every backend deployment saves the complete active `.env` configuration rendered for that instance to Google Cloud Storage. To inspect or download the active `.env` for <CollaboratorInline />:
+
+<CollaboratorCodeBlock language="bash">{`
+gcloud storage cat gs://tidy-outlet-412020-ogrre-terraform-state/secrets/__COLLABORATOR__.env
+`}</CollaboratorCodeBlock>
+
+### Custom `RUNTIME_ENV` overrides or manual MongoDB setup
+
+If you need to override default backend runtime variables (for example, setting `USE_DB_SCHEMAS=true`, configuring CILogon credentials, or supplying custom MongoDB credentials when not using automatic MongoDB Atlas provisioning), configure a `RUNTIME_ENV` secret in the <CollaboratorInline /> GitHub Environment before deploying the branch:
+
+1. **(Only when not using automatic Atlas provisioning)** Create a MongoDB database and user, then download <a href="/orphaned-wells-ui/downloads/InitializeMongoDB.py" download>InitializeMongoDB.py</a> (see [Create and connect MongoDB database](/docs/install/database_setup#initialize-database-for-ogrre)) and run it once to seed `roles`, `teams`, and `users` (the script refuses to overwrite any database that already contains collections unless `--force` is passed):
+   ```bash
+   python InitializeMongoDB.py \
+     --team_name "<team name>" \
+     --email "<initial-admin-email>" \
+     --database_username "<DB_USERNAME>" \
+     --database_password "<DB_PASSWORD>" \
+     --database_hostname "<DB_CONNECTION>" \
+     --database_name "<DB_NAME>"
+   ```
+   *(For self-hosted or non-Atlas MongoDB deployments, `--database_hostname` and `DB_CONNECTION` also accept a full `mongodb://` or `mongodb+srv://` URI without separate `--database_username` / `--database_password` flags.)*
+
+2. Create a local <CollaboratorInline suffix=".env" /> file with your overrides or manual database credentials and upload it to the <CollaboratorInline /> GitHub Environment:
+   <CollaboratorCodeBlock language="bash">{`
+   gh api --method PUT repos/CATALOG-Historic-Records/orphaned-wells-ui-server/environments/__COLLABORATOR__
+
+   gh secret set RUNTIME_ENV \\
+     -R CATALOG-Historic-Records/orphaned-wells-ui-server \\
+     --env __COLLABORATOR__ < path/to/__COLLABORATOR__.env
+   `}</CollaboratorCodeBlock>
+   Explicit values in `RUNTIME_ENV` always take precedence over the workflow's defaults and over any previously saved GCS/GKE snapshot.
 
 ### Custom Terraform resource sizing or bucket names
 

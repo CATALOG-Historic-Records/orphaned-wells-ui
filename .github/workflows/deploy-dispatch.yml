@@ -95,8 +95,12 @@ jobs:
             esac
           fi
           if [ -z "$resolved_backend_url" ]; then
-            echo "::error::Could not resolve BACKEND_URL for collaborator '$COLLABORATOR'. Please configure BACKEND_URL in the '$TARGET_ENV' environment or repository secrets."
-            exit 1
+            if [ "$TARGET_ENV" = "staging" ] || [ "$COLLABORATOR" = "staging" ] || [ "$COLLABORATOR" = "default" ]; then
+              resolved_backend_url="https://staging-server.uow-carbon.org"
+            else
+              resolved_backend_url="https://${COLLABORATOR}-server.uow-carbon.org"
+            fi
+            echo "Defaulting BACKEND_URL for '${COLLABORATOR}' to ${resolved_backend_url}"
           fi
           resolved_backend_url="${resolved_backend_url%/}"
 
