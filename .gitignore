@@ -29,6 +29,10 @@
 *-service-key.json
 *service-key*.json
 
+# Python bytecode (e.g. docs/static/downloads/)
+__pycache__/
+*.py[cod]
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
