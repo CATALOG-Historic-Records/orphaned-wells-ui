@@ -117,8 +117,8 @@ Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osag
 
 ## 0. Prerequisites
 
-- Local CLI tools: `gh`, `gcloud`, `jq`, and `python`.
-- Access to the target GCP project, MongoDB cluster, and GitHub repository settings (`CATALOG-Historic-Records`).
+- Local CLI tools: `gh` and `gcloud`.
+- Access to the target GCP project and GitHub repository settings (`CATALOG-Historic-Records`).
 - See [Backend on GKE — Prerequisites](./backend-gke#prerequisites) for full GCP API and service-account permission details.
 
 ## 1. Choose Collaborator Key
@@ -217,12 +217,8 @@ Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osag
    git checkout main && git pull
    git checkout -b __COLLABORATOR__ && git push -u origin __COLLABORATOR__
    `}</CollaboratorCodeBlock>
-   :::note What happens automatically on deploy
-   `.github/workflows/deploy-k8s-dispatch.yml` automatically handles runtime configuration and first-time database provisioning:
-   - **First-time MongoDB provisioning**: When <CollaboratorInline /> is deployed for the first time (no `DB_*` credentials in `RUNTIME_ENV`, GCS, or GKE), the workflow uses the repository's MongoDB Atlas API secrets to create a scoped database user (<CollaboratorInline prefix="ogrre-" />) with `readWrite` access only on database <CollaboratorInline prefix="ogrre-" />, verifies the database has zero existing collections, and seeds `roles`, initial team <CollaboratorInline uppercase />, and admin users (`DEFAULT_ADMIN_EMAILS`). On all subsequent deployments, it reuses the existing database credentials automatically. *(If Atlas API secrets are not configured, the workflow logs a warning and requires manual setup—see [Custom `RUNTIME_ENV` overrides or manual MongoDB setup](#custom-runtime_env-overrides-or-manual-mongodb-setup) below.)*
-   - **Service account `.json` files & Google OAuth**: Automatically mounts `STORAGE_SERVICE_KEY_JSON` and `DOCUMENT_AI_SERVICE_KEY_JSON` into `/code/ogrre/` and populates `client_id` / `client_secret` from `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (you do **not** need to upload `.json` key files or create a backend `RUNTIME_ENV` secret unless overriding defaults).
-   - **Host, CORS, session cookies, and `.env` snapshot**: Automatically configures `ALLOWED_ORIGINS`, `SESSION_COOKIE_*`, `STORAGE_BUCKET_NAME`, `USE_DB_SCHEMAS=false`, and worker sizing, applies `Secret/backend-runtime-env` to GKE, and saves the complete active `.env` file to <CollaboratorInline prefix="gs://tidy-outlet-412020-ogrre-terraform-state/secrets/" suffix=".env" />.
-   :::
+   The workflow automatically provisions the <CollaboratorInline prefix="ogrre-" /> MongoDB database and user (on first deploy), injects all shared runtime/OAuth/service-account credentials, and deploys the backend to GKE (see [What the backend workflow configures automatically](#what-the-backend-workflow-configures-automatically) below).
+
    Once the workflow finishes and the Google-managed TLS certificate activates, verify the health endpoint:
    <CollaboratorCodeBlock language="bash">{`
    curl -f https://__COLLABORATOR__-server.uow-carbon.org/health
@@ -281,12 +277,18 @@ After the frontend App Engine service is deployed, complete these one-time GCP c
 3. **Add the App Engine Custom Domain**:
    In the Google Cloud Console, open **App Engine → Settings → Custom domains** (or **Domain mappings**) and map <CollaboratorInline suffix=".uow-carbon.org" /> to the <CollaboratorInline suffix="-uow" /> service.
 4. **Update Google OAuth Credentials**:
-   In **APIs & Services → Credentials**, add both frontend URLs to the OAuth client's Authorized JavaScript Origins and Authorized Redirect URIs:
-   - <CollaboratorInline prefix="https://" suffix=".uow-carbon.org" />
+   In **APIs & Services → Credentials**, add <CollaboratorInline prefix="https://" suffix=".uow-carbon.org" /> to the OAuth client's **Authorized JavaScript Origins** and **Authorized Redirect URIs**.
 
 ---
 
 ## Optional Customizations and Manual Fallbacks
+
+### What the backend workflow configures automatically
+
+When `.github/workflows/deploy-k8s-collaborator.yml` (via `deploy-k8s-dispatch.yml`) runs for <CollaboratorInline />, it automatically handles:
+- **First-time MongoDB provisioning**: On the first deployment (when no `DB_*` credentials exist in `RUNTIME_ENV`, GCS, or GKE), the workflow uses the repository's MongoDB Atlas API secrets to create a scoped database user (<CollaboratorInline prefix="ogrre-" />) with `readWrite` access only on database <CollaboratorInline prefix="ogrre-" />, verifies the database has zero existing collections, and seeds `roles`, initial team <CollaboratorInline uppercase />, and admin users (`DEFAULT_ADMIN_EMAILS`). On subsequent deployments, it reuses those existing database credentials automatically.
+- **Service account `.json` files & Google OAuth**: Mounts `STORAGE_SERVICE_KEY_JSON` and `DOCUMENT_AI_SERVICE_KEY_JSON` into `/code/ogrre/` and populates `client_id` / `client_secret` from `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (no `.json` key files or backend `RUNTIME_ENV` secret need to be uploaded unless overriding defaults).
+- **Host, CORS, session cookies, and `.env` snapshot**: Sets `ALLOWED_ORIGINS`, `SESSION_COOKIE_*`, `STORAGE_BUCKET_NAME`, `USE_DB_SCHEMAS=false`, and worker sizing from the Terraform target, applies `Secret/backend-runtime-env` to GKE, and saves the complete active `.env` file to <CollaboratorInline prefix="gs://tidy-outlet-412020-ogrre-terraform-state/secrets/" suffix=".env" />.
 
 ### Inspecting active runtime `.env` snapshots in GCS
 
