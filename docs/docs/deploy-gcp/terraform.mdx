@@ -17,6 +17,7 @@ It manages the current GKE deployment infrastructure, upload buckets, DNS, names
 - One global static IP per backend collaborator for Kubernetes Ingress.
 - Optional `<collaborator>-k8s-server.uow-carbon.org` test DNS records.
 - Primary backend DNS records, such as `staging-server.uow-carbon.org`, pointing to the GKE static IP.
+- Frontend DNS `A` and `AAAA` records (`<collaborator>.uow-carbon.org`) pointing to Google App Engine for new collaborators.
 - One Kubernetes namespace plus the `backend-api`/`processing-worker` ServiceAccounts and worker-dispatch Role/RoleBinding per backend.
 - `kubernetes_deploy_targets`, the output consumed by backend GitHub Actions.
 

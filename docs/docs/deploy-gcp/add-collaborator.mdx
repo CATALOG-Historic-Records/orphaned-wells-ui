@@ -176,7 +176,7 @@ Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osag
 
 ## 2. Configure and Deploy the Backend (`orphaned-wells-ui-server`)
 
-1. **Add the collaborator to `terraform.tfvars` and sync to CI**:
+1. **Add the collaborator to `terraform.tfvars` and push to GCS**:
    Pull the shared `terraform.tfvars` configuration from GCS:
    ```bash
    ./deployment/terraform/scripts/sync_tfvars.sh pull
@@ -188,9 +188,9 @@ Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osag
      "__COLLABORATOR__" = {}
    }
    `}</CollaboratorCodeBlock>
-   Upload the updated file to GCS and sync the `PROD_TERRAFORM_TFVARS` GitHub secret:
+   Upload the updated file back to GCS (CI reads `gs://tidy-outlet-412020-ogrre-terraform-state/config/terraform.tfvars` directly):
    ```bash
-   ./deployment/terraform/scripts/sync_tfvars.sh push --secret
+   ./deployment/terraform/scripts/sync_tfvars.sh push
    ```
 
 2. **Register the collaborator in `collaborators.json`**:
@@ -226,18 +226,7 @@ Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osag
 
 ## 3. Configure and Deploy the Frontend (`orphaned-wells-ui`)
 
-1. **Create the GitHub Environment and `BACKEND_URL` secret**:
-   Configure `BACKEND_URL` (with no trailing slash) in the <CollaboratorInline /> GitHub Environment:
-   <CollaboratorCodeBlock language="bash">{`
-   gh api --method PUT repos/CATALOG-Historic-Records/orphaned-wells-ui/environments/__COLLABORATOR__
-
-   gh secret set BACKEND_URL \\
-     -R CATALOG-Historic-Records/orphaned-wells-ui \\
-     --env __COLLABORATOR__ \\
-     --body "https://__COLLABORATOR__-server.uow-carbon.org"
-   `}</CollaboratorCodeBlock>
-
-2. **Update `collaborators.json` and `dispatch.yaml`**:
+1. **Update `collaborators.json` and `dispatch.yaml`**:
    Add <CollaboratorInline /> to `collaborators.json` at the root of `orphaned-wells-ui`:
    <CollaboratorCodeBlock language="json">{`
    [
@@ -255,15 +244,15 @@ Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osag
    `}</CollaboratorCodeBlock>
    Merge both changes to `main`.
 
-3. **Create and push the collaborator branch**:
+2. **Create and push the collaborator branch**:
    Create the <CollaboratorInline /> branch from `main` and push it to trigger `.github/workflows/deploy-collaborator.yml`:
    <CollaboratorCodeBlock language="bash">{`
    git checkout main && git pull
    git checkout -b __COLLABORATOR__ && git push -u origin __COLLABORATOR__
    `}</CollaboratorCodeBlock>
-   The workflow automatically renders `service: `<CollaboratorInline suffix="-uow" /> using `deployment/app-engine/app.yaml`, builds the React bundle, and deploys the App Engine service.
+   The workflow automatically sets `REACT_APP_BACKEND_URL=https://`<CollaboratorInline suffix="-server.uow-carbon.org" />, renders `service: `<CollaboratorInline suffix="-uow" /> using `deployment/app-engine/app.yaml`, builds the React bundle, and deploys the App Engine service.
 
-## 4. Complete GCP Routing, DNS, and OAuth
+## 4. Complete GCP Routing, Custom Domain, and OAuth
 
 After the frontend App Engine service is deployed, complete these one-time GCP configuration steps:
 
@@ -272,11 +261,9 @@ After the frontend App Engine service is deployed, complete these one-time GCP c
    cd orphaned-wells-ui/deployment/app-engine
    gcloud app deploy dispatch.yaml
    ```
-2. **Add Frontend Cloud DNS Records**:
-   In Google Cloud DNS, add `A` (IPv4) and `AAAA` (IPv6) records for <CollaboratorInline suffix=".uow-carbon.org" /> using the same App Engine addresses as the existing frontend instances.
-3. **Add the App Engine Custom Domain**:
-   In the Google Cloud Console, open **App Engine → Settings → Custom domains** (or **Domain mappings**) and map <CollaboratorInline suffix=".uow-carbon.org" /> to the <CollaboratorInline suffix="-uow" /> service.
-4. **Update Google OAuth Credentials**:
+2. **Add the App Engine Custom Domain**:
+   In the Google Cloud Console, open **App Engine → Settings → Custom domains** (or **Domain mappings**) and map <CollaboratorInline suffix=".uow-carbon.org" /> to the <CollaboratorInline suffix="-uow" /> service. *(Terraform already created the <CollaboratorInline suffix=".uow-carbon.org" /> `A` and `AAAA` records in Cloud DNS during Step 2.3.)*
+3. **Update Google OAuth Credentials**:
    In **APIs & Services → Credentials**, add <CollaboratorInline prefix="https://" suffix=".uow-carbon.org" /> to the OAuth client's **Authorized JavaScript Origins** and **Authorized Redirect URIs**.
 
 ---
