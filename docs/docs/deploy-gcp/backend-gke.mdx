@@ -247,13 +247,16 @@ The GKE deployment workflows require:
 - `DEPLOYMENT_SERVICE_KEY_JSON`
 - `STORAGE_SERVICE_KEY_JSON`
 - `DOCUMENT_AI_SERVICE_KEY_JSON`
+- `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (default Google OAuth credentials when not overridden in `RUNTIME_ENV`)
+- `DB_CONNECTION`, `ATLAS_PROJECT_ID`, and `ATLAS_PUBLIC_KEY` / `ATLAS_PRIVATE_KEY` (or `ATLAS_CLIENT_ID` / `ATLAS_CLIENT_SECRET`) for optional first-time MongoDB Atlas database/user provisioning
 - `K8S_DEPLOY_TARGETS` only for the disabled Terraform CI rollout fallback
-- `RUNTIME_ENV` stored inside each GitHub Environment (`staging`, `isgs`, `newts`, `osage`, and `rrc`), or as a repository-level secret for single-tenant environments.
+- `RUNTIME_ENV` stored inside each GitHub Environment (`staging`, `isgs`, `newts`, `osage`, and `rrc`), or as a repository-level secret for single-tenant environments. Optional for new collaborators when Atlas auto-provisioning or an existing `gs://<state_bucket>/secrets/<collaborator>.env` snapshot is used.
 
 `DEPLOYMENT_SERVICE_KEY_JSON` is used only by GitHub Actions to authenticate to
 Google Cloud and apply the deployment. `STORAGE_SERVICE_KEY_JSON` and
 `DOCUMENT_AI_SERVICE_KEY_JSON` are written into the Kubernetes
 `backend-runtime-files` secret and mounted into backend pods as runtime keys.
+Every deployment also uploads the complete rendered `runtime.k8s.env` snapshot to `gs://<state_bucket>/secrets/<collaborator>.env` for inspection and persistence across deployments.
 
 The environment-file secret should contain the same key/value pairs used by the VM `.env` file. The workflow overrides these Kubernetes-owned values:
 
