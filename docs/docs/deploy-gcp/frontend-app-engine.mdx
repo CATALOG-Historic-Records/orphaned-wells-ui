@@ -60,12 +60,19 @@ so `roles/appengine.deployer` alone is not enough. It also needs
 plus the Cloud Build, Cloud Storage, and Service Account User roles listed in
 the GCP setup guide.
 
-## Add the backend URL secret
+## Custom backend URL override (optional)
 
-Configure `BACKEND_URL` as a secret in the `<collaborator>` GitHub Environment (recommended) or as a repository-level fallback secret `<COLLABORATOR>_BACKEND_URL`:
+By default, `.github/workflows/deploy-dispatch.yml` automatically sets `REACT_APP_BACKEND_URL` to `https://<collaborator>-server.uow-carbon.org` (or `https://staging-server.uow-carbon.org` for `staging`).
 
-```text
-https://<collaborator>-server.uow-carbon.org
+If a collaborator uses a custom backend hostname, create the `<collaborator>` GitHub Environment and configure `BACKEND_URL` as an environment secret to override the default:
+
+```bash
+gh api --method PUT repos/CATALOG-Historic-Records/orphaned-wells-ui/environments/<collaborator>
+
+gh secret set BACKEND_URL \
+  -R CATALOG-Historic-Records/orphaned-wells-ui \
+  --env <collaborator> \
+  --body "https://<collaborator>-server.uow-carbon.org"
 ```
 
 The value should be the public backend URL and must not include a trailing slash.
@@ -103,26 +110,16 @@ cd orphaned-wells-ui/deployment/app-engine
 gcloud app deploy dispatch.yaml
 ```
 
-## Configure DNS and custom domain
+## Configure custom domain
 
-In Google Cloud DNS, add records for:
+For new collaborators added to `gke_backends` in Terraform, `google_dns_record_set.frontend_a` and `google_dns_record_set.frontend_aaaa` automatically create the `<collaborator>.uow-carbon.org` IPv4 (`A`) and IPv6 (`AAAA`) records in Cloud DNS.
 
-```text
-<collaborator>.uow-carbon.org
-```
-
-Use the same frontend IPv4 and IPv6 addresses as the other frontend instances:
-
-- `A` record for IPv4.
-- `AAAA` record for IPv6.
-
-Then add `<collaborator>.uow-carbon.org` in App Engine custom domains.
+Once the App Engine service is deployed, add `<collaborator>.uow-carbon.org` in **App Engine → Settings → Custom domains**.
 
 ## Update OAuth
 
 In Google OAuth credentials, add both frontend URLs wherever frontend origins are required:
 
-- The App Engine generated service URL.
 - `https://<collaborator>.uow-carbon.org`.
 
 Use the exact URL format required by the OAuth client. Avoid trailing slashes unless the existing entries use them.

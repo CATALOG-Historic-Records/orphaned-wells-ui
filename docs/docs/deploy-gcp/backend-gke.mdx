@@ -247,13 +247,16 @@ The GKE deployment workflows require:
 - `DEPLOYMENT_SERVICE_KEY_JSON`
 - `STORAGE_SERVICE_KEY_JSON`
 - `DOCUMENT_AI_SERVICE_KEY_JSON`
+- `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (default Google OAuth credentials when not overridden in `RUNTIME_ENV`)
+- `DB_CONNECTION`, `ATLAS_PROJECT_ID`, and `ATLAS_PUBLIC_KEY` / `ATLAS_PRIVATE_KEY` (or `ATLAS_CLIENT_ID` / `ATLAS_CLIENT_SECRET`) for optional first-time MongoDB Atlas database/user provisioning
 - `K8S_DEPLOY_TARGETS` only for the disabled Terraform CI rollout fallback
-- `RUNTIME_ENV` stored inside each GitHub Environment (`staging`, `isgs`, `newts`, `osage`, and `rrc`), or as a repository-level secret for single-tenant environments.
+- `RUNTIME_ENV` stored inside each GitHub Environment (`staging`, `isgs`, `newts`, `osage`, and `rrc`), or as a repository-level secret for single-tenant environments. Optional for new collaborators when Atlas auto-provisioning or an existing `gs://<state_bucket>/secrets/<collaborator>.env` snapshot is used.
 
 `DEPLOYMENT_SERVICE_KEY_JSON` is used only by GitHub Actions to authenticate to
 Google Cloud and apply the deployment. `STORAGE_SERVICE_KEY_JSON` and
 `DOCUMENT_AI_SERVICE_KEY_JSON` are written into the Kubernetes
 `backend-runtime-files` secret and mounted into backend pods as runtime keys.
+Every deployment also uploads the complete rendered `runtime.k8s.env` snapshot to `gs://<state_bucket>/secrets/<collaborator>.env` for inspection and persistence across deployments.
 
 The environment-file secret should contain the same key/value pairs used by the VM `.env` file. The workflow overrides these Kubernetes-owned values:
 
@@ -310,11 +313,7 @@ gh workflow run deploy-k8s-dispatch.yml \
   -f DEPLOY_ENV=<collaborator>
 ```
 
-The exact set of deployable collaborators is controlled by both
-`kubernetes_deploy_targets` and `.github/workflows/deploy-k8s-dispatch.yml`.
-Confirm that the collaborator has an output entry, is present in
-`workflow_dispatch.inputs.DEPLOY_ENV.options`, and has a runtime-env secret
-mapping before dispatching it.
+The exact set of deployable collaborators for manual dispatch via `deploy-k8s-dispatch.yml` is controlled by `kubernetes_deploy_targets` and `workflow_dispatch.inputs.DEPLOY_ENV.options` in `.github/workflows/deploy-k8s-dispatch.yml`. Confirm that the collaborator has a Terraform output entry, is listed in `DEPLOY_ENV.options` (if triggering `deploy-k8s-dispatch.yml` directly), and has a `RUNTIME_ENV` secret configured in its GitHub Environment before dispatching it.
 
 Merging source changes into a collaborator branch only changes the live backend when that branch's deployment workflow runs. If automatic deployments are enabled for the branch, the merge can trigger the rollout. Otherwise, manually dispatch the collaborator workflow after the merge.
 
