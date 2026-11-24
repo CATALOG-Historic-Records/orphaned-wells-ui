@@ -18,13 +18,12 @@ The backend deployment path is GKE Autopilot. Legacy Compute Engine VM modules a
 
 ## Standard deployment order
 
-1. Confirm the [Google Cloud service accounts](/docs/install/gcp_setup#create-google-service-account-keys), [MongoDB](/docs/install/database_setup), and [GitHub secrets](/docs/deploy-gcp/github-secrets) prerequisites.
-2. Open a fork PR for [Terraform infrastructure](/docs/deploy-gcp/terraform) changes and pass credential-free checks and normal review. After merge to upstream `main`, enabled CI plans the shared `ogrre` workspace; plans with changes require approval, while no-change plans finish automatically.
-3. Updated backend workflows read `kubernetes_deploy_targets` live after successful reconciliation. While automation is disabled for rollout, apply locally and refresh the fallback `K8S_DEPLOY_TARGETS` secret.
-4. Deploy or update the [backend on GKE](/docs/deploy-gcp/backend-gke).
-5. Deploy or update the [frontend on App Engine](/docs/deploy-gcp/frontend-app-engine).
-6. Configure DNS, App Engine custom domains, and OAuth entries for the frontend host.
-7. Verify the backend health endpoint, Kubernetes rollout, frontend App Engine service, and OAuth sign-in flow.
+1. Confirm the [Google Cloud service accounts](/docs/install/gcp_setup#create-google-service-account-keys) and [GitHub secrets](/docs/deploy-gcp/github-secrets) prerequisites.
+2. Add the collaborator to `terraform.tfvars` (`./deployment/terraform/scripts/sync_tfvars.sh push --secret`) and `collaborators.json`, then merge to `main` and approve the `terraform-apply` gate in GitHub Actions (see [Terraform Infrastructure](/docs/deploy-gcp/terraform)).
+3. Push the collaborator branch to deploy the [backend on GKE](/docs/deploy-gcp/backend-gke) (which automatically provisions the collaborator's MongoDB Atlas database/user on first deploy and saves the active `.env` snapshot to GCS).
+4. Configure `BACKEND_URL`, `collaborators.json`, and `dispatch.yaml` in the frontend repo and push the collaborator branch to deploy the [frontend on App Engine](/docs/deploy-gcp/frontend-app-engine).
+5. Configure frontend Cloud DNS records, the App Engine custom domain, and the Google OAuth origin/redirect URI.
+6. Verify the backend `/health` endpoint, frontend App Engine service, and OAuth sign-in flow.
 
 ## Common tasks
 
