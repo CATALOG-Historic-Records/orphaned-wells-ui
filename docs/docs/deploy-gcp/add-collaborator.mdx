@@ -113,66 +113,19 @@ terraform output -json kubernetes_deploy_targets | jq --arg collaborator "${coll
 
 Use this checklist when adding a new public OGRRE collaborator deployment using the standard GitHub Actions workflow and default settings.
 
-Enter the short lowercase collaborator key below (such as `isgs`, `newts`, `osage`, or `rrc`) to populate all commands and resource names on this page.
-
 ## 0. Prerequisites
 
 - Local CLI tools: `gh` and `gcloud`.
 - Access to the target GCP project and GitHub repository settings (`CATALOG-Historic-Records`).
 - See [Backend on GKE — Prerequisites](./backend-gke#prerequisites) for full GCP API and service-account permission details.
 
-## 1. Choose Collaborator Key
+## 1. Enter Collaborator Key
 
-<table>
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Pattern</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Collaborator key</td>
-      <td><CollaboratorKeyInput /></td>
-    </tr>
-    <tr>
-      <td>Backend namespace</td>
-      <td><CollaboratorInline prefix="uow-" /></td>
-    </tr>
-    <tr>
-      <td>Backend primary host</td>
-      <td><CollaboratorInline suffix="-server.uow-carbon.org" /></td>
-    </tr>
-    <tr>
-      <td>Backend test host</td>
-      <td><CollaboratorInline suffix="-k8s-server.uow-carbon.org" /></td>
-    </tr>
-    <tr>
-      <td>GKE static IP name</td>
-      <td><CollaboratorInline suffix="-uow-gke-ip" /></td>
-    </tr>
-    <tr>
-      <td>Upload bucket</td>
-      <td><CollaboratorInline suffix="_uploads" /></td>
-    </tr>
-    <tr>
-      <td>MongoDB database &amp; user</td>
-      <td><CollaboratorInline prefix="ogrre-" /></td>
-    </tr>
-    <tr>
-      <td>Active `.env` snapshot in GCS</td>
-      <td><CollaboratorInline prefix="gs://tidy-outlet-412020-ogrre-terraform-state/secrets/" suffix=".env" /></td>
-    </tr>
-    <tr>
-      <td>Frontend host</td>
-      <td><CollaboratorInline suffix=".uow-carbon.org" /></td>
-    </tr>
-    <tr>
-      <td>App Engine service</td>
-      <td><CollaboratorInline suffix="-uow" /></td>
-    </tr>
-  </tbody>
-</table>
+Enter the short lowercase collaborator key (such as `isgs`, `newts`, `osage`, or `rrc`) to populate all commands and values below:
+
+<p>
+  <strong>Collaborator key:</strong> <CollaboratorKeyInput />
+</p>
 
 ## 2. Configure and Deploy the Backend (`orphaned-wells-ui-server`)
 
@@ -269,6 +222,57 @@ After the frontend App Engine service is deployed, complete these one-time GCP c
 ---
 
 ## Optional Customizations and Manual Fallbacks
+
+### Reference: Provisioned resource names
+
+Terraform and GitHub Actions automatically provision the following resources for <CollaboratorInline /> using standard naming conventions:
+
+<table>
+  <thead>
+    <tr>
+      <th>Resource</th>
+      <th>Name / Host</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Backend GKE namespace</td>
+      <td><CollaboratorInline prefix="uow-" /></td>
+    </tr>
+    <tr>
+      <td>Backend primary host</td>
+      <td><CollaboratorInline suffix="-server.uow-carbon.org" /></td>
+    </tr>
+    <tr>
+      <td>Backend test host</td>
+      <td><CollaboratorInline suffix="-k8s-server.uow-carbon.org" /></td>
+    </tr>
+    <tr>
+      <td>GKE static IP name</td>
+      <td><CollaboratorInline suffix="-uow-gke-ip" /></td>
+    </tr>
+    <tr>
+      <td>Upload bucket</td>
+      <td><CollaboratorInline suffix="_uploads" /></td>
+    </tr>
+    <tr>
+      <td>MongoDB database &amp; user</td>
+      <td><CollaboratorInline prefix="ogrre-" /></td>
+    </tr>
+    <tr>
+      <td>Active `.env` snapshot in GCS</td>
+      <td><CollaboratorInline prefix="gs://tidy-outlet-412020-ogrre-terraform-state/secrets/" suffix=".env" /></td>
+    </tr>
+    <tr>
+      <td>Frontend host</td>
+      <td><CollaboratorInline suffix=".uow-carbon.org" /></td>
+    </tr>
+    <tr>
+      <td>App Engine service</td>
+      <td><CollaboratorInline suffix="-uow" /></td>
+    </tr>
+  </tbody>
+</table>
 
 ### What the backend workflow configures automatically
 
