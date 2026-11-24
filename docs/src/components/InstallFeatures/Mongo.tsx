@@ -33,11 +33,14 @@ export function InitializeDatabase() {
         <li><b>team_name</b> (<b>-t</b>): the initial team name [<i>required</i>]</li>
         <li><b>email</b> (<b>-e</b>): email of the initial user [<i>required</i>]</li>
         <li><b>assigned_role</b> (<b>-a</b>): The role for the user you are creating. If not provided, the user will be assigned the role of <code>sys_admin</code> which contains all system and team permissions [<i>optional</i>]</li>
-        <li><b>database_username</b> (<b>-dbu</b>): Database username [<i>required</i>]</li>
-        <li><b>database_password</b> (<b>-dbp</b>): Database user password [<i>required</i>]</li>
-        <li><b>database_connection</b> (<b>-dbh</b>): Database connection string [<i>required</i>]</li>
+        <li><b>database_username</b> (<b>-dbu</b>): Database username (optional when <code>database_hostname</code> is a full <code>mongodb://</code> or <code>mongodb+srv://</code> URI)</li>
+        <li><b>database_password</b> (<b>-dbp</b>): Database user password (optional when <code>database_hostname</code> is a full <code>mongodb://</code> or <code>mongodb+srv://</code> URI)</li>
+        <li><b>database_hostname</b> (<b>-dbh</b>): Database cluster host name or full <code>mongodb://</code> / <code>mongodb+srv://</code> URI [<i>required</i>]</li>
         <li><b>database_name</b> (<b>-dbn</b>): Database name [<i>required</i>]</li>
       </ul>
+      <p>
+        By default, <code>InitializeMongoDB.py</code> checks whether the target database already contains collections and skips initialization to prevent accidentally overwriting existing data (pass <code>--force</code> to override). On GKE collaborator deployments with MongoDB Atlas API secrets configured, first-time database user creation and collection initialization run automatically during deployment.
+      </p>
     </div>
   );
 }

@@ -123,13 +123,16 @@ ROLES = [
 ]
 
 def connectToDatabase(DB_USERNAME, DB_PASSWORD, DB_CONNECTION):
-    ca = certifi.where()
-    username = urllib.parse.quote_plus(DB_USERNAME)
-    password = urllib.parse.quote_plus(DB_PASSWORD)
-    db_connection = urllib.parse.quote_plus(DB_CONNECTION)
-
-    uri = f"mongodb+srv://{username}:{password}@{db_connection}.mongodb.net/?retryWrites=true&w=majority"
-    client = MongoClient(uri, server_api=ServerApi("1"), tlsCAFile=ca)
+    if DB_CONNECTION.startswith("mongodb://") or DB_CONNECTION.startswith("mongodb+srv://"):
+        uri = DB_CONNECTION
+        client = MongoClient(uri, server_api=ServerApi("1"))
+    else:
+        ca = certifi.where()
+        username = urllib.parse.quote_plus(DB_USERNAME or "")
+        password = urllib.parse.quote_plus(DB_PASSWORD or "")
+        db_connection = urllib.parse.quote_plus(DB_CONNECTION)
+        uri = f"mongodb+srv://{username}:{password}@{db_connection}.mongodb.net/?retryWrites=true&w=majority"
+        client = MongoClient(uri, server_api=ServerApi("1"), tlsCAFile=ca)
     # Send a ping to confirm a successful connection
     try:
         client.admin.command("ping")
@@ -140,7 +143,16 @@ def connectToDatabase(DB_USERNAME, DB_PASSWORD, DB_CONNECTION):
     return client
 
 
-def initializeDatabaseCollections(team_name, email, assigned_role, db):
+def initializeDatabaseCollections(team_name, email, assigned_role, db, force=False):
+    existing_collections = [
+        name for name in db.list_collection_names() if not name.startswith("system.")
+    ]
+    if existing_collections and not force:
+        print(
+            f"Database '{db.name}' already contains collections ({', '.join(sorted(existing_collections))}); "
+            "skipping initialization to prevent overwriting existing data. Pass --force to override."
+        )
+        return
     print(f"initializing database with team name: {team_name} and email: {email} with assigned role: {assigned_role}")
     new_team = {
         "name": team_name,
@@ -172,27 +184,33 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--team_name", help="Initial team name")
     parser.add_argument("-e", "--email", help="Email of initial user")
     parser.add_argument("-a", "--assigned_role", help="Assigned role of user. Optional, must be one of sys_admin, team_lead, or team_member. If not provided, or provided incorrectly, will default to sys_admin.")
-    parser.add_argument("-dbu", "--database_username", help="Database username")
-    parser.add_argument("-dbp", "--database_password", help="Database user password")
-    parser.add_argument("-dbh", "--database_hostname", help="Database host name")
+    parser.add_argument("-dbu", "--database_username", help="Database username (optional when --database_hostname is a full mongodb:// or mongodb+srv:// URI)")
+    parser.add_argument("-dbp", "--database_password", help="Database user password (optional when --database_hostname is a full mongodb:// or mongodb+srv:// URI)")
+    parser.add_argument("-dbh", "--database_hostname", help="Database cluster host name or full mongodb:// / mongodb+srv:// URI")
     parser.add_argument("-dbn", "--database_name", help="Database name")
-    
-    required_args = ["team_name", "email", "database_username", "database_password", "database_hostname", "database_name"]
+    parser.add_argument("--force", action="store_true", help="Proceed even if the target database already has collections")
 
     args = parser.parse_args()
+    required_args = ["team_name", "email", "database_hostname", "database_name"]
+    if args.database_hostname and not (
+        args.database_hostname.startswith("mongodb://")
+        or args.database_hostname.startswith("mongodb+srv://")
+    ):
+        required_args.extend(["database_username", "database_password"])
+
     for required_arg in required_args:
         if args.__dict__[required_arg] is None:
             print(f"{required_arg} is required")
             sys.exit()
-    
+
     try:
         client = connectToDatabase(args.database_username, args.database_password, args.database_hostname)
         db = client[args.database_name]
     except Exception as e:
         print(f"unable to connect to database: {e}")
         sys.exit()
-    
+
     assigned_role = args.assigned_role
     if assigned_role is None:
         assigned_role = "sys_admin"
-    initializeDatabaseCollections(args.team_name, args.email, assigned_role, db)
+    initializeDatabaseCollections(args.team_name, args.email, assigned_role, db, force=args.force)
