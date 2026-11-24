@@ -55,22 +55,67 @@ export function CollaboratorKeyInput() {
     setRawCollaborator(window.sessionStorage.getItem(COLLABORATOR_STORAGE_KEY) || '');
   }, []);
 
-  function handleChange(event) {
-    const nextValue = event.target.value;
-
+  function updateValue(nextValue) {
     setRawCollaborator(nextValue);
     window.sessionStorage.setItem(COLLABORATOR_STORAGE_KEY, nextValue);
     window.dispatchEvent(new CustomEvent(COLLABORATOR_EVENT, {detail: nextValue}));
   }
 
+  function handleChange(event) {
+    updateValue(event.target.value);
+  }
+
+  const normalized = normalizeCollaborator(rawCollaborator);
+
   return (
-    <input
-      aria-label="Collaborator key"
-      onChange={handleChange}
-      placeholder="<collaborator>"
-      type="text"
-      value={rawCollaborator}
-    />
+    <div className="ogrre-collaborator-card">
+      <div className="ogrre-collaborator-card__header">
+        <span className="ogrre-collaborator-card__badge">
+          Auto-Fill Commands
+        </span>
+        <span className="ogrre-collaborator-card__status">
+          <span
+            className={`ogrre-collaborator-card__dot ${
+              normalized ? 'ogrre-collaborator-card__dot--active' : ''
+            }`}
+          />
+          {normalized ? (
+            <span>
+              Populating commands for <code>{normalized}</code>
+            </span>
+          ) : (
+            <span>Waiting for collaborator key</span>
+          )}
+        </span>
+      </div>
+      <p className="ogrre-collaborator-card__description">
+        Enter the short lowercase collaborator key (such as <code>isgs</code>,{' '}
+        <code>newts</code>, <code>osage</code>, or <code>rrc</code>) to
+        automatically fill in every command, branch name, and URL on this page:
+      </p>
+      <div className="ogrre-collaborator-input-group">
+        <span className="ogrre-collaborator-input__label">Collaborator Key</span>
+        <input
+          aria-label="Collaborator key"
+          className="ogrre-collaborator-input"
+          onChange={handleChange}
+          placeholder="e.g. boots"
+          spellCheck={false}
+          type="text"
+          value={rawCollaborator}
+        />
+        {rawCollaborator && (
+          <button
+            aria-label="Clear collaborator key"
+            className="ogrre-collaborator-input__clear"
+            onClick={() => updateValue('')}
+            type="button"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -121,11 +166,7 @@ Use this checklist when adding a new public OGRRE collaborator deployment using 
 
 ## 1. Enter Collaborator Key
 
-Enter the short lowercase collaborator key (such as `isgs`, `newts`, `osage`, or `rrc`) to populate all commands and values below:
-
-<p>
-  <strong>Collaborator key:</strong> <CollaboratorKeyInput />
-</p>
+<CollaboratorKeyInput />
 
 ## 2. Configure and Deploy the Backend (`orphaned-wells-ui-server`)
 
